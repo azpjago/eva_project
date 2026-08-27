@@ -303,151 +303,174 @@
     </footer>
 
     <!-- JavaScript Integrasi Backend FastAPI -->
-    <script>
-        const API_BASE_URL = "http://127.0.0.1:8000";
-        let currentEvaContext = null;
-        let chatHistory = [];
+     <script>
+    // State Management
+let chatHistory = [];
+let currentEvaContext = null; 
+const MAX_FREE_MESSAGES = 3;
 
-        async function handleCalculate(e) {
+// Ambil jumlah pesan yang tersimpan di browser
+function getGuestMessageCount() {
+    return parseInt(localStorage.getItem('eva_guest_chat_count') || '0', 10);
+}
+
+function incrementGuestMessageCount() {
+    const current = getGuestMessageCount() + 1;
+    localStorage.setItem('eva_guest_chat_count', current.toString());
+    return current;
+}
+
+// Inisialisasi tampilan input saat halaman dimuat
+document.addEventListener("DOMContentLoaded", () => {
+    checkGuestLimit();
+});
+
+function checkGuestLimit() {
+    const count = getGuestMessageCount();
+    const chatInput = document.getElementById('chatInput');
+    const btnSendChat = document.getElementById('btnSendChat');
+    const limitBar = document.getElementById('limitWarningBar');
+
+    if (count >= MAX_FREE_MESSAGES) {
+        chatInput.disabled = true;
+        chatInput.placeholder = "Batas percakapan gratis habis. Silakan login.";
+        btnSendChat.disabled = true;
+        limitBar.classList.remove('hidden');
+        return true;
+    }
+    return false;
+}
+
+// Handler Kirim Pesan
+async function handleSendMessage(e) {
     e.preventDefault();
-    const btn = document.getElementById('btnSubmit');
-    const resultContent = document.getElementById('resultContent');
+    if (checkGuestLimit()) return;
 
-    btn.disabled = true;
-    btn.innerHTML = `Memproses...`;
+    const input = document.getElementById('chatInput');
+    const message = input.value.trim();
+    if (!message) return;
 
-    // Sesuai dengan schema FinancialInput backend
-    const payload = {
-        company_name: document.getElementById('company_name').value,
-        period: document.getElementById('period').value,
-        ebit: parseFloat(document.getElementById('ebit').value),
-        tax_rate: parseFloat(document.getElementById('tax_rate').value),
-        invested_capital: parseFloat(document.getElementById('invested_capital').value),
-        wacc: parseFloat(document.getElementById('wacc').value)
-    };
+    // 1. Render Pesan User
+    appendMessage('user', message);
+    input.value = '';
+
+    // 2. Render Loading Indicator (Animasi 3 Titik)
+    const loadingId = appendLoadingIndicator();
+
+    // 3. Increment counter pesan & disable tombol
+    const updatedCount = incrementGuestMessageCount();
+    const btnSendChat = document.getElementById('btnSendChat');
+    btnSendChat.disabled = true;
 
     try {
-        const response = await fetch(`/api/ai/recommend`, {
+        const payload = {
+            message: message,
+            history: chatHistory,
+            eva_context: currentEvaContext
+        };
+
+        const response = await fetch('/api/ai/chat', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload)
         });
 
-        if (!response.ok) throw new Error(`Status HTTP: ${response.status}`);
+        removeLoadingIndicator(loadingId);
+
+        if (!response.ok) throw new Error(`HTTP Error: ${response.status}`);
         const data = await response.json();
-        currentEvaContext = data.eva_result;
 
-        const formattedEva = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(data.eva_result.eva);
+        // 4. Update History & Render Balasan AI
+        chatHistory = data.history;
+        appendMessage('model', data.reply);
 
-        resultContent.innerHTML = `
-            <div class="p-4 bg-slate-800 rounded-xl space-y-3">
-                <div class="flex justify-between items-center">
-                    <span class="text-xs text-slate-400">Nilai EVA</span>
-                    <span class="font-bold text-lg text-emerald-400">${formattedEva} (${data.eva_result.status})</span>
-                </div>
-                <div>
-                    <span class="text-xs text-teal-400 font-bold uppercase">Fokus Strategis</span>
-                    <p class="text-sm font-semibold">${data.fokus_rekomendasi}</p>
-                </div>
-                <div>
-                    <span class="text-xs text-teal-400 font-bold uppercase">Aksi Produktivitas</span>
-                    <p class="text-sm text-slate-300">${data.aksi_produktivitas}</p>
-                </div>
-                <div class="pt-2 border-t border-slate-700">
-                    <span class="text-xs text-teal-400 font-bold uppercase">Narasi AI Gemini</span>
-                    <p class="text-sm text-slate-200 mt-1 leading-relaxed">${data.narasi_ai}</p>
-                </div>
-            </div>
-        `;
     } catch (err) {
-        resultContent.innerHTML = `<p class="text-rose-400 text-sm">Gagal memproses data: ${err.message}</p>`;
+        removeLoadingIndicator(loadingId);
+        appendMessage('model', `Maaf, terjadi masalah koneksi: ${err.message}`);
     } finally {
-        btn.disabled = false;
-        btn.innerHTML = `Hitung & Minta Rekomendasi AI`;
+        // Cek kembali apakah limit sudah habis setelah pesan dikirim
+        if (!checkGuestLimit()) {
+            btnSendChat.disabled = false;
+        }
     }
 }
 
-        async function handleSendChat(e) {
-            e.preventDefault();
-            const chatInput = document.getElementById('chatInput');
-            const chatMessages = document.getElementById('chatMessages');
-            const btnSend = document.getElementById('btnSendChat');
+// Function Render UI Pesan
+function appendMessage(role, content) {
+    const container = document.getElementById('chatMessages');
+    const isUser = role === 'user';
+    
+    const wrapper = document.createElement('div');
+    wrapper.className = `flex items-start space-x-3 ${isUser ? 'justify-end' : ''} max-w-[88%] sm:max-w-[78%] ${isUser ? 'ml-auto' : ''}`;
 
-            const message = chatInput.value.trim();
-            if (!message) return;
+    const avatar = isUser ? '' : `
+        <div class="w-8 h-8 rounded-full bg-teal-600/30 text-teal-400 flex items-center justify-center font-bold text-xs flex-shrink-0">
+            AI
+        </div>
+    `;
 
-            // Render User Message
-            chatMessages.innerHTML += `
-                <div class="flex gap-3 justify-end">
-                    <div class="bg-brand-600 text-white p-3.5 rounded-2xl rounded-tr-none max-w-lg">
-                        ${escapeHtml(message)}
-                    </div>
-                </div>
-            `;
-            chatInput.value = '';
-            chatMessages.scrollTop = chatMessages.scrollHeight;
+    const bubbleClass = isUser 
+        ? 'bg-teal-600 text-white rounded-2xl rounded-tr-none' 
+        : 'bg-slate-800 border border-slate-700/60 text-slate-200 rounded-2xl rounded-tl-none';
 
-            btnSend.disabled = true;
+    wrapper.innerHTML = `
+        ${avatar}
+        <div class="${bubbleClass} p-3.5 sm:p-4 text-xs sm:text-sm leading-relaxed shadow-sm">
+            ${escapeHtml(content)}
+        </div>
+    `;
 
-            try {
-                const response = await fetch(`${API_BASE_URL}/api/ai/chat`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        message: message,
-                        history: chatHistory,
-                        eva_context: currentEvaContext
-                    })
-                });
+    container.appendChild(wrapper);
+    container.scrollTop = container.scrollHeight;
+}
 
-                if (!response.ok) throw new Error(`HTTP ${response.status}`);
-                const data = await response.json();
+// Function Indikator Loading (Bouncing Dots)
+function appendLoadingIndicator() {
+    const container = document.getElementById('chatMessages');
+    const loadingId = 'loading-' + Date.now();
 
-                chatHistory = data.history;
+    const wrapper = document.createElement('div');
+    wrapper.id = loadingId;
+    wrapper.className = 'flex items-start space-x-3 max-w-[85%] sm:max-w-[75%]';
+    wrapper.innerHTML = `
+        <div class="w-8 h-8 rounded-full bg-teal-600/30 text-teal-400 flex items-center justify-center font-bold text-xs flex-shrink-0">
+            AI
+        </div>
+        <div class="bg-slate-800 border border-slate-700/60 rounded-2xl rounded-tl-none px-4 py-3 text-slate-400 flex items-center space-x-1.5">
+            <span class="w-2 h-2 bg-teal-400 rounded-full animate-bounce" style="animation-delay: 0ms;"></span>
+            <span class="w-2 h-2 bg-teal-400 rounded-full animate-bounce" style="animation-delay: 150ms;"></span>
+            <span class="w-2 h-2 bg-teal-400 rounded-full animate-bounce" style="animation-delay: 300ms;"></span>
+        </div>
+    `;
 
-                // Render AI Response
-                chatMessages.innerHTML += `
-                    <div class="flex gap-3">
-                        <div class="w-8 h-8 rounded-full bg-brand-100 text-brand-700 flex items-center justify-center text-xs font-bold shrink-0">
-                            AI
-                        </div>
-                        <div class="bg-slate-100 p-3.5 rounded-2xl rounded-tl-none text-slate-700 max-w-lg whitespace-pre-line">
-                            ${escapeHtml(data.reply)}
-                        </div>
-                    </div>
-                `;
-            } catch (err) {
-                chatMessages.innerHTML += `
-                    <div class="flex gap-3">
-                        <div class="w-8 h-8 rounded-full bg-rose-100 text-rose-700 flex items-center justify-center text-xs font-bold shrink-0">!</div>
-                        <div class="bg-rose-50 text-rose-600 p-3 rounded-xl text-xs border border-rose-200">
-                            Gagal terhubung ke server chat AI (${err.message}).
-                        </div>
-                    </div>
-                `;
-            } finally {
-                btnSend.disabled = false;
-                chatMessages.scrollTop = chatMessages.scrollHeight;
-            }
-        }
+    container.appendChild(wrapper);
+    container.scrollTop = container.scrollHeight;
+    return loadingId;
+}
 
-        function clearChat() {
-            chatHistory = [];
-            document.getElementById('chatMessages').innerHTML = `
-                <div class="flex gap-3">
-                    <div class="w-8 h-8 rounded-full bg-brand-100 text-brand-700 flex items-center justify-center text-xs font-bold shrink-0">AI</div>
-                    <div class="bg-slate-100 p-3.5 rounded-2xl rounded-tl-none text-slate-700 max-w-lg">
-                        Riwayat chat telah dibersihkan. Silakan tanyakan hal baru!
-                    </div>
-                </div>
-            `;
-        }
+function removeLoadingIndicator(id) {
+    const elem = document.getElementById(id);
+    if (elem) elem.remove();
+}
 
-        function escapeHtml(text) {
-            return text.replace(/[&<>"']/g, function(m) {
-                return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[m];
-            });
-        }
-    </script>
+function clearChatHistory() {
+    chatHistory = [];
+    const container = document.getElementById('chatMessages');
+    container.innerHTML = `
+        <div class="flex items-start space-x-3 max-w-[85%] sm:max-w-[75%]">
+            <div class="w-8 h-8 rounded-full bg-teal-600/30 text-teal-400 flex items-center justify-center font-bold text-xs flex-shrink-0">AI</div>
+            <div class="bg-slate-800 border border-slate-700/60 rounded-2xl rounded-tl-none p-3.5 sm:p-4 text-slate-200 text-xs sm:text-sm leading-relaxed shadow-sm">
+                Riwayat obrolan dibersihkan. Ada yang ingin Anda konsultasikan kembali?
+            </div>
+        </div>
+    `;
+}
+
+function escapeHtml(str) {
+    return str.replace(/[&<>"']/g, (m) => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;'
+    })[m]);
+}
+</script>
 </body>
 </html>
