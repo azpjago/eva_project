@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EVA Analytics & AI Recommendation Platform</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Plus Jakarta Sans -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- FontAwesome CDN for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Plus Jakarta Sans', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#f0fdfa',
+                            100: '#ccfbf1',
+                            500: '#14b8a6',
+                            600: '#0d9488',
+                            700: '#0f766e',
+                            800: '#115e59',
+                            900: '#134e4a',
+                        },
+                        navy: {
+                            800: '#1e293b',
+                            900: '#0f172a',
+                            950: '#020617',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .gradient-text {
+            background: linear-gradient(135deg, #0d9488 0%, #2563eb 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(226, 232, 240, 0.8);
+        }
+    </style>
+</head>
+<body class="bg-slate-50 font-sans text-slate-800 antialiased flex flex-col min-h-screen">
+
+    <!-- Header / Navbar -->
+    <header class="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b border-slate-200/80">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+            <!-- Brand Logo -->
+            <a href="index.html" class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-600 to-blue-600 flex items-center justify-center text-white shadow-md shadow-brand-500/20">
+                    <i class="fa-solid fa-chart-line text-lg"></i>
+                </div>
+                <div>
+                    <span class="font-bold text-xl tracking-tight text-slate-900">EVA<span class="text-brand-600">AI</span></span>
+                    <span class="hidden sm:inline-block text-xs font-medium text-slate-400 border-l border-slate-300 ml-2 pl-2">Kemnaker Productivity Platform</span>
+                </div>
+            </a>
+
+            <!-- Navigation Links -->
+            <nav class="hidden md:flex items-center gap-8">
+                <a href="#features" class="text-sm font-semibold text-slate-600 hover:text-brand-600 transition">Fitur Utama</a>
+                <a href="#demo" class="text-sm font-semibold text-slate-600 hover:text-brand-600 transition">Simulasi EVA</a>
+                <a href="#chat-section" class="text-sm font-semibold text-slate-600 hover:text-brand-600 transition">Asisten AI</a>
+                <a href="http://127.0.0.1:8000/docs" target="_blank" class="text-sm font-semibold text-slate-600 hover:text-brand-600 transition flex items-center gap-1">
+                    API Docs <i class="fa-solid fa-arrow-up-right-from-square text-xs opacity-70"></i>
+                </a>
+            </nav>
+
+            <!-- Action Buttons -->
+            <div class="flex items-center gap-3">
+                <a href="login.html" class="px-4 py-2 text-sm font-semibold text-slate-700 hover:text-brand-600 transition">
+                    Masuk
+                </a>
+                <a href="#demo" class="px-5 py-2.5 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-brand-600 to-blue-600 hover:from-brand-700 hover:to-blue-700 shadow-lg shadow-brand-500/25 transition transform active:scale-95">
+                    Mulai Analisis
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Area -->
+    <main class="flex-grow">
+        <!-- Hero Section -->
+        <section class="relative py-20 lg:py-28 overflow-hidden bg-gradient-to-b from-slate-100/80 via-white to-slate-50">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+                <div class="max-w-3xl mx-auto text-center">
+                    <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-brand-50 border border-brand-200 text-brand-700 text-xs font-semibold mb-6 shadow-sm">
+                        <span class="w-2 h-2 rounded-full bg-brand-500 animate-pulse"></span>
+                        Platform Terintegrasi AI Gemini & FastAPI
+                    </div>
+                    <h1 class="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-slate-900 tracking-tight leading-[1.15] mb-6">
+                        Analisis EVA & Rekomendasi <span class="gradient-text">Produktivitas Tenaga Kerja</span>
+                    </h1>
+                    <p class="text-lg sm:text-xl text-slate-600 mb-8 leading-relaxed">
+                        Ukur nilai tambah ekonomi (Economic Value Added) perusahaan Anda secara akurat dan dapatkan rekomendasi strategis preskriptif berbasis kecerdasan buatan.
+                    </p>
+                    <div class="flex flex-col sm:flex-row justify-center items-center gap-4">
+                        <a href="#demo" class="w-full sm:w-auto px-7 py-3.5 rounded-xl font-bold text-white bg-slate-900 hover:bg-slate-800 shadow-xl transition flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-calculator"></i> Coba Kalkulator EVA
+                        </a>
+                        <a href="#chat-section" class="w-full sm:w-auto px-7 py-3.5 rounded-xl font-bold text-slate-700 bg-white border border-slate-300 hover:bg-slate-50 transition flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-comments text-brand-600"></i> Konsultasi AI
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Highlight Metrics Banner -->
+                <div class="mt-16 grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
+                    <div class="glass-card p-6 rounded-2xl shadow-sm text-center">
+                        <div class="w-12 h-12 rounded-xl bg-teal-100 text-teal-600 flex items-center justify-center mx-auto mb-3 text-xl">
+                            <i class="fa-solid fa-bolt"></i>
+                        </div>
+                        <h3 class="font-bold text-slate-900 text-lg">Kalkulasi Instan</h3>
+                        <p class="text-xs text-slate-500 mt-1">Perhitungan NOPAT & Capital Charge secara real-time</p>
+                    </div>
+                    <div class="glass-card p-6 rounded-2xl shadow-sm text-center">
+                        <div class="w-12 h-12 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center mx-auto mb-3 text-xl">
+                            <i class="fa-solid fa-brain"></i>
+                        </div>
+                        <h3 class="font-bold text-slate-900 text-lg">Rekomendasi Preskriptif</h3>
+                        <p class="text-xs text-slate-500 mt-1">Solusi efisiensi & pelatihan kerja spesifik matriks EVA</p>
+                    </div>
+                    <div class="glass-card p-6 rounded-2xl shadow-sm text-center">
+                        <div class="w-12 h-12 rounded-xl bg-indigo-100 text-indigo-600 flex items-center justify-center mx-auto mb-3 text-xl">
+                            <i class="fa-solid fa-robot"></i>
+                        </div>
+                        <h3 class="font-bold text-slate-900 text-lg">Chat Contextual AI</h3>
+                        <p class="text-xs text-slate-500 mt-1">Diskusi interaktif berkonteks data keuangan perusahaan</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Live Demo / Interactive Calculator Section -->
+        <section id="demo" class="py-16 bg-white border-y border-slate-200">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="mb-12 text-center">
+                    <h2 class="text-3xl font-bold text-slate-900">Uji Coba Endpoint Backend (Live Interactive)</h2>
+                    <p class="text-slate-600 mt-2">Masukan data finansial perusahaan Anda untuk menguji integrasi API FastAPI secara langsung.</p>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+                    <!-- Form Input Card -->
+                    <div class="lg:col-span-5 bg-slate-50 p-6 sm:p-8 rounded-2xl border border-slate-200 shadow-sm">
+                        <h3 class="text-lg font-bold text-slate-900 mb-6 flex items-center gap-2">
+                            <i class="fa-solid fa-file-invoice-dollar text-brand-600"></i> Form Input Finansial
+                        </h3>
+                        
+                        <!-- Form Input Finansial -->
+<form id="evaForm" onsubmit="handleCalculate(event)" class="space-y-4">
+    <div>
+        <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">Nama Perusahaan</label>
+        <input type="text" id="company_name" value="PT Mitra Produktif Kemnaker" required class="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-sm">
+    </div>
+
+    <div>
+        <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">Periode Laporan</label>
+        <input type="text" id="period" value="Q1 2026" required class="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-sm">
+    </div>
+
+    <div class="grid grid-cols-2 gap-4">
+        <div>
+            <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">EBIT (Rp)</label>
+            <input type="number" id="ebit" value="2000000000" required class="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-sm">
+        </div>
+        <div>
+            <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">Tarif Pajak (0.22 = 22%)</label>
+            <input type="number" step="0.01" id="tax_rate" value="0.22" min="0" max="1" required class="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-sm">
+        </div>
+    </div>
+
+    <div class="grid grid-cols-2 gap-4">
+        <div>
+            <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">Invested Capital (Rp)</label>
+            <input type="number" id="invested_capital" value="10000000000" required class="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-sm">
+        </div>
+        <div>
+            <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">WACC (0.10 = 10%)</label>
+            <input type="number" step="0.01" id="wacc" value="0.10" min="0" max="1" required class="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-sm">
+        </div>
+    </div>
+
+    <button type="submit" id="btnSubmit" class="w-full py-3 px-4 mt-2 rounded-xl text-sm font-bold text-white bg-teal-600 hover:bg-teal-700 transition">
+        Hitung & Minta Rekomendasi AI
+    </button>
+</form>
+                    </div>
+
+                    <!-- Output / Result Card -->
+                    <div class="lg:col-span-7 bg-slate-900 text-white p-6 sm:p-8 rounded-2xl shadow-xl min-h-[420px] flex flex-col justify-between">
+                        <div>
+                            <div class="flex items-center justify-between pb-4 border-b border-slate-800">
+                                <span class="text-xs font-bold uppercase tracking-widest text-slate-400">Hasil Analisis & Narasi AI</span>
+                                <span id="statusBadge" class="px-3 py-1 rounded-full text-xs font-bold bg-slate-800 text-slate-400">Belum dihitung</span>
+                            </div>
+
+                            <div id="resultContent" class="mt-6 space-y-4 text-slate-300">
+                                <p class="text-slate-400 text-sm italic">Klik tombol "Hitung & Minta Rekomendasi AI" di sebelah kiri untuk melihat hasil kalkulasi EVA dan narasi preskriptif dari backend FastAPI.</p>
+                            </div>
+                        </div>
+
+                        <div class="pt-6 border-t border-slate-800 flex justify-between items-center text-xs text-slate-400">
+                            <span>Endpoint: <code class="bg-slate-800 px-2 py-1 rounded text-teal-400">POST /api/ai/recommend</code></span>
+                            <span id="responseStatus">Status: Idle</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+<!-- Chat Section Container -->
+<section id="chat-section" class="w-full max-w-4xl mx-auto px-4 py-8">
+    <div class="bg-slate-900 text-white rounded-2xl shadow-xl overflow-hidden border border-slate-800 flex flex-col h-[520px] sm:h-[600px]">
+        
+        <!-- Header Chat -->
+        <div class="px-4 py-3 sm:px-6 sm:py-4 bg-slate-800/80 border-b border-slate-700/60 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-teal-600 flex items-center justify-center font-bold text-white text-sm sm:text-base shadow-md">
+                    AI
+                </div>
+                <div>
+                    <h3 class="font-semibold text-sm sm:text-base text-slate-100 leading-tight">Gemini Productivity Assistant</h3>
+                    <div class="flex items-center space-x-1.5 mt-0.5">
+                        <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                        <span class="text-xs text-slate-400" id="chatStatusText">Online / Ready</span>
+                    </div>
+                </div>
+            </div>
+            <button onclick="clearChatHistory()" class="text-xs text-slate-400 hover:text-rose-400 transition flex items-center space-x-1">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                <span class="hidden sm:inline">Bersihkan Chat</span>
+            </button>
+        </div>
+
+        <!-- Chat Area Scrollable -->
+        <div id="chatMessages" class="flex-1 p-4 sm:p-6 overflow-y-auto space-y-4 scroll-smooth">
+            <!-- Pesan Pembuka AI -->
+            <div class="flex items-start space-x-3 max-w-[85%] sm:max-w-[75%]">
+                <div class="w-8 h-8 rounded-full bg-teal-600/30 text-teal-400 flex items-center justify-center font-bold text-xs flex-shrink-0">
+                    AI
+                </div>
+                <div class="bg-slate-800 border border-slate-700/60 rounded-2xl rounded-tl-none p-3.5 sm:p-4 text-slate-200 text-xs sm:text-sm leading-relaxed shadow-sm">
+                    Halo! Saya asisten virtual produktivitas Kemnaker. Ada yang bisa saya bantu terkait simulasi EVA atau strategi produktivitas perusahaan Anda?
+                </div>
+            </div>
+        </div>
+
+        <!-- Warning Limit Bar (Hidden by default) -->
+        <div id="limitWarningBar" class="hidden bg-amber-500/10 border-t border-amber-500/20 px-4 py-2.5 text-center text-xs text-amber-300 flex items-center justify-between">
+            <span>Batas chat gratis tercapai (3/3 pesan).</span>
+            <a href="/login" class="font-bold underline hover:text-amber-200 ml-2">Login untuk Lanjut Chat →</a>
+        </div>
+
+        <!-- Form Input Chat -->
+        <form id="chatForm" onsubmit="handleSendMessage(event)" class="p-3 sm:p-4 bg-slate-800/50 border-t border-slate-700/60">
+            <div class="flex items-center space-x-2">
+                <input 
+                    type="text" 
+                    id="chatInput" 
+                    placeholder="Ketik pertanyaan Anda di sini..." 
+                    autocomplete="off"
+                    class="flex-1 bg-slate-900 border border-slate-700 text-slate-100 rounded-xl px-4 py-2.5 sm:py-3 text-xs sm:text-sm focus:outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                <button 
+                    type="submit" 
+                    id="btnSendChat"
+                    class="bg-teal-600 hover:bg-teal-500 text-white font-semibold px-4 py-2.5 sm:py-3 rounded-xl text-xs sm:text-sm transition flex items-center space-x-1.5 disabled:opacity-50 disabled:cursor-not-allowed flex-shrink-0"
+                >
+                    <span>Kirim</span>
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9-7-9-7-9 7 9 7zm0 0v-8"/></svg>
+                </button>
+            </div>
+        </form>
+
+    </div>
+</section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-slate-950 text-slate-400 py-8 border-t border-slate-800 text-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row justify-between items-center gap-4">
+            <div class="flex items-center gap-2">
+                <span class="font-bold text-white">EVA AI Service</span>
+                <span>— Platform Kemitraan Produktivitas Ketenagakerjaan</span>
+            </div>
+            <div>
+                © 2026 Kemnaker RI Partner Platform. All rights reserved.
+            </div>
+        </div>
+    </footer>
+
+    <!-- JavaScript Integrasi Backend FastAPI -->
+    <script>
+        const API_BASE_URL = "http://127.0.0.1:8000";
+        let currentEvaContext = null;
+        let chatHistory = [];
+
+        async function handleCalculate(e) {
+    e.preventDefault();
+    const btn = document.getElementById('btnSubmit');
+    const resultContent = document.getElementById('resultContent');
+
+    btn.disabled = true;
+    btn.innerHTML = `Memproses...`;
+
+    // Sesuai dengan schema FinancialInput backend
+    const payload = {
+        company_name: document.getElementById('company_name').value,
+        period: document.getElementById('period').value,
+        ebit: parseFloat(document.getElementById('ebit').value),
+        tax_rate: parseFloat(document.getElementById('tax_rate').value),
+        invested_capital: parseFloat(document.getElementById('invested_capital').value),
+        wacc: parseFloat(document.getElementById('wacc').value)
+    };
+
+    try {
+        const response = await fetch(`/api/ai/recommend`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+
+        if (!response.ok) throw new Error(`Status HTTP: ${response.status}`);
+        const data = await response.json();
+        currentEvaContext = data.eva_result;
+
+        const formattedEva = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(data.eva_result.eva);
+
+        resultContent.innerHTML = `
+            <div class="p-4 bg-slate-800 rounded-xl space-y-3">
+                <div class="flex justify-between items-center">
+                    <span class="text-xs text-slate-400">Nilai EVA</span>
+                    <span class="font-bold text-lg text-emerald-400">${formattedEva} (${data.eva_result.status})</span>
+                </div>
+                <div>
+                    <span class="text-xs text-teal-400 font-bold uppercase">Fokus Strategis</span>
+                    <p class="text-sm font-semibold">${data.fokus_rekomendasi}</p>
+                </div>
+                <div>
+                    <span class="text-xs text-teal-400 font-bold uppercase">Aksi Produktivitas</span>
+                    <p class="text-sm text-slate-300">${data.aksi_produktivitas}</p>
+                </div>
+                <div class="pt-2 border-t border-slate-700">
+                    <span class="text-xs text-teal-400 font-bold uppercase">Narasi AI Gemini</span>
+                    <p class="text-sm text-slate-200 mt-1 leading-relaxed">${data.narasi_ai}</p>
+                </div>
+            </div>
+        `;
+    } catch (err) {
+        resultContent.innerHTML = `<p class="text-rose-400 text-sm">Gagal memproses data: ${err.message}</p>`;
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = `Hitung & Minta Rekomendasi AI`;
+    }
+}
+
+        async function handleSendChat(e) {
+            e.preventDefault();
+            const chatInput = document.getElementById('chatInput');
+            const chatMessages = document.getElementById('chatMessages');
+            const btnSend = document.getElementById('btnSendChat');
+
+            const message = chatInput.value.trim();
+            if (!message) return;
+
+            // Render User Message
+            chatMessages.innerHTML += `
+                <div class="flex gap-3 justify-end">
+                    <div class="bg-brand-600 text-white p-3.5 rounded-2xl rounded-tr-none max-w-lg">
+                        ${escapeHtml(message)}
+                    </div>
+                </div>
+            `;
+            chatInput.value = '';
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+
+            btnSend.disabled = true;
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/ai/chat`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        message: message,
+                        history: chatHistory,
+                        eva_context: currentEvaContext
+                    })
+                });
+
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                const data = await response.json();
+
+                chatHistory = data.history;
+
+                // Render AI Response
+                chatMessages.innerHTML += `
+                    <div class="flex gap-3">
+                        <div class="w-8 h-8 rounded-full bg-brand-100 text-brand-700 flex items-center justify-center text-xs font-bold shrink-0">
+                            AI
+                        </div>
+                        <div class="bg-slate-100 p-3.5 rounded-2xl rounded-tl-none text-slate-700 max-w-lg whitespace-pre-line">
+                            ${escapeHtml(data.reply)}
+                        </div>
+                    </div>
+                `;
+            } catch (err) {
+                chatMessages.innerHTML += `
+                    <div class="flex gap-3">
+                        <div class="w-8 h-8 rounded-full bg-rose-100 text-rose-700 flex items-center justify-center text-xs font-bold shrink-0">!</div>
+                        <div class="bg-rose-50 text-rose-600 p-3 rounded-xl text-xs border border-rose-200">
+                            Gagal terhubung ke server chat AI (${err.message}).
+                        </div>
+                    </div>
+                `;
+            } finally {
+                btnSend.disabled = false;
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            }
+        }
+
+        function clearChat() {
+            chatHistory = [];
+            document.getElementById('chatMessages').innerHTML = `
+                <div class="flex gap-3">
+                    <div class="w-8 h-8 rounded-full bg-brand-100 text-brand-700 flex items-center justify-center text-xs font-bold shrink-0">AI</div>
+                    <div class="bg-slate-100 p-3.5 rounded-2xl rounded-tl-none text-slate-700 max-w-lg">
+                        Riwayat chat telah dibersihkan. Silakan tanyakan hal baru!
+                    </div>
+                </div>
+            `;
+        }
+
+        function escapeHtml(text) {
+            return text.replace(/[&<>"']/g, function(m) {
+                return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[m];
+            });
+        }
+    </script>
+</body>
+</html>
