@@ -1,10 +1,13 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import Depends, FastAPI, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
+from sqlalchemy.orm import Session
 
 from app.ai_service import chat_reply, generate_recommendation_narrative
+from app.database import Base, engine, get_db
 from app.eva_calculator import calculate_eva
+from app.models import User
 from app.prompts import RECOMMENDATION_MATRIX
 from app.schemas import (
     ChatMessage,
@@ -13,7 +16,11 @@ from app.schemas import (
     EvaResult,
     FinancialInput,
     RecommendationResponse,
+    TokenResponse,
+    UserLogin,
+    UserRegister,
 )
+from app.security import create_access_token, hash_password, verify_password
 
 app = FastAPI(
     title="EVA Analysis & AI Recommendation API",
@@ -28,12 +35,15 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Route untuk menyajikan halaman HTML langsung dari root project
+# Buat tabel database otomatis saat aplikasi pertama kali berjalan
+Base.metadata.create_all(bind=engine)
+
 @app.get("/", include_in_schema=False)
 def read_index():
     return FileResponse("index.html")
 
 @app.get("/login", include_in_schema=False)
+@app.get("/login.html", include_in_schema=False)
 def read_login():
     return FileResponse("login.html")
 
@@ -74,3 +84,30 @@ def chat(req: ChatRequest) -> ChatResponse:
         ChatMessage(role="model", content=reply),
     ]
     return ChatResponse(reply=reply, history=updated_history)
+
+@app.post("/api/auth/register", response_model=TokenResponse)
+def register(user_data: UserRegister, db: Session = Depends(get_db)):
+    existing_user = db.query(User).filter(User.email == user_data.email).first()
+    if existing_user:
+        raise HTTPException(status_code=400, detail="Email sudah terdaftar.")
+    
+    new_user = User(
+        email=user_data.email,
+        hashed_password=hash_password(user_data.password),
+        full_name=user_data.full_name or user_data.email.split('@')[0]
+    )
+    db.add(new_user)
+    db.commit()
+    db.refresh(new_user)
+
+    token = create_access_token({"sub": str(new_user.id), "email": new_user.email})
+    return TokenResponse(access_token=token, user_name=new_user.full_name)
+
+@app.post("/api/auth/login", response_model=TokenResponse)
+def login(credentials: UserLogin, db: Session = Depends(get_db)):
+    user = db.query(User).filter(User.email == credentials.email).first()
+    if not user or not verify_password(credentials.password, user.hashed_password):
+        raise HTTPException(status_code=401, detail="Email atau password salah.")
+    
+    token = create_access_token({"sub": str(user.id), "email": user.email})
+    return TokenResponse(access_token=token, user_name=user.full_name)
