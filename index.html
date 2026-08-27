@@ -12,6 +12,8 @@
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <!-- FontAwesome CDN for Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- CDN Marked.js untuk render Markdown ke HTML -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     
     <script>
         tailwind.config = {
@@ -307,8 +309,8 @@
      <script>
     // State Management
 let chatHistory = [];
-let currentEvaContext = null; 
-const MAX_FREE_MESSAGES = 3;
+let currentEvaContext = null;
+const MAX_FREE_MESSAGES = 100;
 const BASE_URL = 'http://127.0.0.1:8000';
 
 // Ambil jumlah pesan yang tersimpan di browser
@@ -397,33 +399,83 @@ async function handleSendMessage(e) {
     }
 }
 
-// Function Render UI Pesan
+// Function Render UI Pesan dengan Formatting Markdown, Tombol Copy, dan Edit Prompt
 function appendMessage(role, content) {
     const container = document.getElementById('chatMessages');
     const isUser = role === 'user';
+    const messageId = 'msg-' + Date.now() + '-' + Math.floor(Math.random() * 1000);
     
     const wrapper = document.createElement('div');
-    wrapper.className = `flex items-start space-x-3 ${isUser ? 'justify-end' : ''} max-w-[88%] sm:max-w-[78%] ${isUser ? 'ml-auto' : ''}`;
+    wrapper.className = `group flex items-start space-x-2.5 ${isUser ? 'justify-end' : ''} max-w-[92%] sm:max-w-[85%] ${isUser ? 'ml-auto' : ''}`;
+
+    // Render Markdown untuk AI, atau escape HTML untuk User
+    const formattedContent = isUser 
+        ? escapeHtml(content) 
+        : marked.parse(content);
 
     const avatar = isUser ? '' : `
-        <div class="w-8 h-8 rounded-full bg-teal-600/30 text-teal-400 flex items-center justify-center font-bold text-xs flex-shrink-0">
+        <div class="w-8 h-8 rounded-full bg-teal-600/30 text-teal-400 flex items-center justify-center font-bold text-xs flex-shrink-0 mt-1">
             AI
         </div>
     `;
 
+    // Tombol Edit (khusus User) dan Tombol Copy (khusus AI)
+    const actionButtons = isUser ? `
+        <button onclick="editUserMessage('${escapeForAttribute(content)}')" title="Edit prompt" class="opacity-0 group-hover:opacity-100 transition p-1 text-slate-400 hover:text-teal-400 self-center">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/>
+            </svg>
+        </button>
+    ` : `
+        <button onclick="copyToClipboard('${messageId}', this)" title="Salin pesan" class="opacity-0 group-hover:opacity-100 transition p-1 text-slate-400 hover:text-teal-400 self-start mt-2">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+            </svg>
+        </button>
+    `;
+
     const bubbleClass = isUser 
-        ? 'bg-teal-600 text-white rounded-2xl rounded-tr-none' 
-        : 'bg-slate-800 border border-slate-700/60 text-slate-200 rounded-2xl rounded-tl-none';
+        ? 'bg-teal-600 text-white rounded-2xl rounded-tr-none px-4 py-3 text-xs sm:text-sm leading-relaxed shadow-sm' 
+        : 'bg-slate-800 border border-slate-700/60 text-slate-200 rounded-2xl rounded-tl-none px-4 py-3 text-xs sm:text-sm leading-relaxed shadow-sm prose prose-invert max-w-none prose-p:my-1 prose-ul:my-1 prose-ol:my-1 prose-li:my-0.5 prose-strong:text-teal-300';
 
     wrapper.innerHTML = `
-        ${avatar}
-        <div class="${bubbleClass} p-3.5 sm:p-4 text-xs sm:text-sm leading-relaxed shadow-sm">
-            ${escapeHtml(content)}
+        ${isUser ? actionButtons : avatar}
+        <div id="${messageId}" class="${bubbleClass}">
+            ${formattedContent}
         </div>
+        ${isUser ? '' : actionButtons}
     `;
 
     container.appendChild(wrapper);
     container.scrollTop = container.scrollHeight;
+}
+
+// Fitur Salin Teks ke Clipboard
+function copyToClipboard(elementId, btnElement) {
+    const textToCopy = document.getElementById(elementId).innerText;
+    navigator.clipboard.writeText(textToCopy).then(() => {
+        const originalIcon = btnElement.innerHTML;
+        btnElement.innerHTML = `
+            <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+            </svg>
+        `;
+        setTimeout(() => {
+            btnElement.innerHTML = originalIcon;
+        }, 2000);
+    });
+}
+
+// Fitur Edit Prompt User
+function editUserMessage(text) {
+    const input = document.getElementById('chatInput');
+    input.value = text;
+    input.focus();
+}
+
+// Helper Escape Atribut Text
+function escapeForAttribute(str) {
+    return str.replace(/'/g, "\\'").replace(/"/g, '&quot;').replace(/\n/g, ' ');
 }
 
 // Function Indikator Loading (Bouncing Dots)
