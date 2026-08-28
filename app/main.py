@@ -47,6 +47,11 @@ def read_index():
 def read_login():
     return FileResponse("login.html")
 
+@app.get("/register", include_in_schema=False)
+@app.get("/register.html", include_in_schema=False)
+def read_register():
+    return FileResponse("register.html")
+
 @app.get("/health")
 def health() -> dict:
     return {"status": "ok", "service": "EVA Analysis & AI Recommendation API"}
