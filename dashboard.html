@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard — EVA AI Platform</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Plus Jakarta Sans', 'sans-serif'] }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-slate-900 font-sans text-slate-100 antialiased min-h-screen flex flex-col">
+
+    <!-- Proteksi Halaman Frontend -->
+    <script>
+        if (!localStorage.getItem('eva_token')) {
+            window.location.href = '/login';
+        }
+    </script>
+
+    <!-- Navbar -->
+    <nav class="bg-slate-950 border-b border-slate-800 px-6 py-4 flex justify-between items-center sticky top-0 z-50">
+        <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-teal-500 to-blue-600 flex items-center justify-center text-white shadow-lg shadow-teal-500/20">
+                <i class="fa-solid fa-chart-line text-lg"></i>
+            </div>
+            <span class="font-extrabold text-xl text-white tracking-tight">EVA<span class="text-teal-400">AI</span></span>
+        </div>
+        
+        <div class="flex items-center gap-6">
+            <div class="text-sm text-slate-400">
+                Halo, <span id="userNameDisplay" class="font-bold text-white">Pengguna</span>
+            </div>
+            <button onclick="handleLogout()" class="text-xs px-4 py-2 bg-rose-500/10 text-rose-400 border border-rose-500/20 hover:bg-rose-500/20 hover:border-rose-500/40 rounded-lg transition flex items-center gap-2 font-semibold">
+                <i class="fa-solid fa-arrow-right-from-bracket"></i> Keluar
+            </button>
+        </div>
+    </nav>
+
+    <!-- Main Content Layout -->
+    <main class="flex-1 max-w-7xl w-full mx-auto p-6 lg:p-8 grid grid-cols-1 lg:grid-cols-12 gap-8">
+        
+        <!-- Sidebar / Menu Kiri -->
+        <div class="lg:col-span-3 space-y-2">
+            <a href="#" class="block px-4 py-3 bg-teal-500/10 text-teal-400 rounded-xl border border-teal-500/20 font-semibold text-sm flex items-center gap-3 transition">
+                <i class="fa-solid fa-house w-5"></i> Ringkasan
+            </a>
+            <a href="#" class="block px-4 py-3 text-slate-400 hover:bg-slate-800 hover:text-slate-200 rounded-xl font-semibold text-sm flex items-center gap-3 transition">
+                <i class="fa-solid fa-calculator w-5"></i> Kalkulator EVA
+            </a>
+            <a href="#" class="block px-4 py-3 text-slate-400 hover:bg-slate-800 hover:text-slate-200 rounded-xl font-semibold text-sm flex items-center gap-3 transition">
+                <i class="fa-solid fa-robot w-5"></i> Asisten AI
+            </a>
+            <a href="#" class="block px-4 py-3 text-slate-400 hover:bg-slate-800 hover:text-slate-200 rounded-xl font-semibold text-sm flex items-center gap-3 transition">
+                <i class="fa-solid fa-clock-rotate-left w-5"></i> Riwayat Analisis
+            </a>
+        </div>
+
+        <!-- Area Konten Utama -->
+        <div class="lg:col-span-9 space-y-6">
+            
+            <!-- Header Konten -->
+            <div class="bg-gradient-to-r from-slate-800 to-slate-800/50 rounded-2xl p-6 border border-slate-700 relative overflow-hidden">
+                <div class="absolute -right-20 -top-20 w-64 h-64 bg-teal-500/10 rounded-full blur-3xl"></div>
+                <h1 class="text-2xl font-bold text-white mb-2 relative z-10">Selamat Datang di Dashboard!</h1>
+                <p class="text-slate-400 text-sm relative z-10">Anda telah berhasil masuk menggunakan otentikasi JWT FastAPI. Pilih menu di sebelah kiri untuk memulai analisis produktivitas tenaga kerja Anda.</p>
+            </div>
+
+            <!-- Kartu Statistik Dummy -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div class="bg-slate-800 p-5 rounded-2xl border border-slate-700">
+                    <div class="text-slate-400 text-xs font-bold uppercase tracking-wider mb-1">Total Analisis EVA</div>
+                    <div class="text-3xl font-extrabold text-white">0</div>
+                </div>
+                <div class="bg-slate-800 p-5 rounded-2xl border border-slate-700">
+                    <div class="text-slate-400 text-xs font-bold uppercase tracking-wider mb-1">Status Rata-rata</div>
+                    <div class="text-lg font-bold text-teal-400 mt-2">Belum Tersedia</div>
+                </div>
+                <div class="bg-slate-800 p-5 rounded-2xl border border-slate-700">
+                    <div class="text-slate-400 text-xs font-bold uppercase tracking-wider mb-1">Rekomendasi AI</div>
+                    <div class="text-3xl font-extrabold text-white">0</div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <script>
+        // Tampilkan Nama Pengguna dari Local Storage
+        document.addEventListener('DOMContentLoaded', () => {
+            const userName = localStorage.getItem('eva_user_name');
+            if (userName) {
+                document.getElementById('userNameDisplay').textContent = userName;
+            }
+        });
+
+        // Fungsi Logout
+        function handleLogout() {
+            // Hapus token dan data sesi dari local storage
+            localStorage.removeItem('eva_token');
+            localStorage.removeItem('eva_user_name');
+            localStorage.removeItem('eva_guest_chat_count');
+            
+            // Redirect kembali ke halaman login
+            window.location.href = '/login';
+        }
+    </script>
+</body>
+</html>
