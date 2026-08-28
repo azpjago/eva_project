@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Daftar — EVA AI Platform</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Plus Jakarta Sans', 'sans-serif'] }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-slate-900 font-sans text-slate-800 antialiased min-h-screen flex items-center justify-center p-4 relative overflow-hidden">
+
+    <div class="absolute -top-40 -left-40 w-96 h-96 bg-teal-500/20 rounded-full blur-3xl"></div>
+    <div class="absolute -bottom-40 -right-40 w-96 h-96 bg-blue-500/20 rounded-full blur-3xl"></div>
+
+    <div class="w-full max-w-md relative z-10">
+        <div class="text-center mb-8">
+            <a href="/" class="inline-flex items-center gap-3 mb-3">
+                <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-teal-500 to-blue-600 flex items-center justify-center text-white shadow-lg shadow-teal-500/30">
+                    <i class="fa-solid fa-chart-line text-xl"></i>
+                </div>
+                <span class="font-extrabold text-2xl text-white tracking-tight">EVA<span class="text-teal-400">AI</span></span>
+            </a>
+            <h2 class="text-xl font-bold text-slate-100">Buat Akun Kemitraan</h2>
+            <p class="text-xs text-slate-400 mt-1">Daftar untuk mengakses Dashboard Analisis Produktivitas Kemnaker</p>
+        </div>
+
+        <div class="bg-white/95 backdrop-blur-xl p-8 rounded-3xl shadow-2xl border border-slate-700/50">
+            <form id="registerForm" onsubmit="handleRegister(event)" class="space-y-5">
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Nama Lengkap</label>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-slate-400">
+                            <i class="fa-solid fa-user text-sm"></i>
+                        </span>
+                        <input type="text" id="fullName" placeholder="Nama Anda" class="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-300 focus:ring-2 focus:ring-teal-500 focus:border-teal-500 text-sm transition">
+                    </div>
+                    <p class="text-[11px] text-slate-400 mt-1.5 ml-1">Opsional — jika kosong, akan diambil dari email Anda.</p>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Email</label>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-slate-400">
+                            <i class="fa-solid fa-envelope text-sm"></i>
+                        </span>
+                        <input type="email" id="email" placeholder="nama@perusahaan.com" required class="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-300 focus:ring-2 focus:ring-teal-500 focus:border-teal-500 text-sm transition">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Kata Sandi</label>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-slate-400">
+                            <i class="fa-solid fa-lock text-sm"></i>
+                        </span>
+                        <input type="password" id="password" placeholder="Minimal 8 karakter" required minlength="8" class="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-300 focus:ring-2 focus:ring-teal-500 focus:border-teal-500 text-sm transition">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Konfirmasi Kata Sandi</label>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-slate-400">
+                            <i class="fa-solid fa-lock text-sm"></i>
+                        </span>
+                        <input type="password" id="confirmPassword" placeholder="Ulangi kata sandi" required minlength="8" class="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-300 focus:ring-2 focus:ring-teal-500 focus:border-teal-500 text-sm transition">
+                    </div>
+                </div>
+
+                <div id="errorAlert" class="hidden p-3 rounded-xl text-xs font-medium bg-rose-100 text-rose-700 border border-rose-300"></div>
+
+                <button type="submit" id="btnRegister" class="w-full py-3.5 px-4 rounded-xl text-sm font-bold text-white bg-gradient-to-r from-teal-600 to-blue-600 hover:from-teal-700 hover:to-blue-700 transition shadow-lg shadow-teal-500/25 flex items-center justify-center gap-2">
+                    <span>Daftar Sekarang</span> <i class="fa-solid fa-arrow-right text-xs"></i>
+                </button>
+            </form>
+
+            <div class="mt-6 text-center text-xs text-slate-500 border-t border-slate-200 pt-5">
+                Sudah memiliki akun? <a href="/login" class="font-bold text-teal-600 hover:underline">Masuk di sini</a>
+            </div>
+        </div>
+
+        <div class="text-center mt-6">
+            <a href="/" class="text-xs text-slate-400 hover:text-white transition inline-flex items-center gap-1">
+                <i class="fa-solid fa-arrow-left"></i> Kembali ke Halaman Utama
+            </a>
+        </div>
+    </div>
+
+    <script>
+        async function handleRegister(e) {
+            e.preventDefault();
+            const btn = document.getElementById('btnRegister');
+            const errorAlert = document.getElementById('errorAlert');
+            const fullName = document.getElementById('fullName').value.trim();
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+
+            errorAlert.classList.add('hidden');
+
+            // Validasi kecocokan kata sandi di sisi klien
+            if (password !== confirmPassword) {
+                errorAlert.className = "p-3 rounded-xl text-xs font-medium bg-rose-100 text-rose-700 border border-rose-300 block";
+                errorAlert.innerHTML = `<i class="fa-solid fa-triangle-exclamation"></i> Kata sandi dan konfirmasi tidak sama.`;
+                return;
+            }
+
+            btn.disabled = true;
+            btn.innerHTML = `<i class="fa-solid fa-spinner animate-spin"></i> Membuat akun...`;
+
+            try {
+                const response = await fetch('/api/auth/register', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        email,
+                        password,
+                        full_name: fullName || null
+                    })
+                });
+
+                const data = await response.json();
+                if (!response.ok) throw new Error(data.detail || 'Pendaftaran gagal.');
+
+                // Simpan token & user ke localStorage — langsung login setelah daftar
+                localStorage.setItem('eva_token', data.access_token);
+                localStorage.setItem('eva_user_name', data.user_name);
+                localStorage.removeItem('eva_guest_chat_count');
+
+                errorAlert.className = "p-3 rounded-xl text-xs font-medium bg-emerald-100 text-emerald-700 border border-emerald-300 block";
+                errorAlert.innerHTML = `<i class="fa-solid fa-circle-check"></i> Akun berhasil dibuat! Mengalihkan ke dashboard...`;
+
+                setTimeout(() => {
+                    window.location.href = '/dashboard';
+                }, 800);
+
+            } catch (err) {
+                errorAlert.className = "p-3 rounded-xl text-xs font-medium bg-rose-100 text-rose-700 border border-rose-300 block";
+                errorAlert.textContent = err.message;
+                btn.disabled = false;
+                btn.innerHTML = `<span>Daftar Sekarang</span> <i class="fa-solid fa-arrow-right text-xs"></i>`;
+            }
+        }
+    </script>
+</body>
+</html>
