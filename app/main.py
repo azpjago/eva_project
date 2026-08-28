@@ -111,3 +111,7 @@ def login(credentials: UserLogin, db: Session = Depends(get_db)):
     
     token = create_access_token({"sub": str(user.id), "email": user.email})
     return TokenResponse(access_token=token, user_name=user.full_name)
+
+@app.get("/dashboard", include_in_schema=False)
+def read_dashboard():
+    return FileResponse("dashboard.html")
