@@ -9,7 +9,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
+
     <script>
         tailwind.config = {
             theme: {
@@ -19,6 +19,12 @@
             }
         }
     </script>
+    <style>
+        details[open] .chevron { transform: rotate(180deg); }
+        .chevron { transition: transform 0.2s ease; }
+        input[type=number]::-webkit-inner-spin-button,
+        input[type=number]::-webkit-outer-spin-button { opacity: 1; }
+    </style>
 </head>
 <body class="bg-slate-900 font-sans text-slate-100 antialiased min-h-screen flex flex-col">
 
@@ -37,7 +43,7 @@
             </div>
             <span class="font-extrabold text-xl text-white tracking-tight">EVA<span class="text-teal-400">AI</span></span>
         </div>
-        
+
         <div class="flex items-center gap-6">
             <div class="text-sm text-slate-400">
                 Halo, <span id="userNameDisplay" class="font-bold text-white">Pengguna</span>
@@ -50,13 +56,13 @@
 
     <!-- Main Content Layout -->
     <main class="flex-1 max-w-7xl w-full mx-auto p-6 lg:p-8 grid grid-cols-1 lg:grid-cols-12 gap-8">
-        
+
         <!-- Sidebar / Menu Kiri -->
-        <div class="lg:col-span-3 space-y-2">
-            <a href="#" class="block px-4 py-3 bg-teal-500/10 text-teal-400 rounded-xl border border-teal-500/20 font-semibold text-sm flex items-center gap-3 transition">
+        <div class="lg:col-span-3 space-y-2 lg:sticky lg:top-24 self-start">
+            <a href="#" id="navRingkasan" onclick="switchView('ringkasan'); return false;" class="block px-4 py-3 bg-teal-500/10 text-teal-400 rounded-xl border border-teal-500/20 font-semibold text-sm flex items-center gap-3 transition">
                 <i class="fa-solid fa-house w-5"></i> Ringkasan
             </a>
-            <a href="#" class="block px-4 py-3 text-slate-400 hover:bg-slate-800 hover:text-slate-200 rounded-xl font-semibold text-sm flex items-center gap-3 transition">
+            <a href="#" id="navInputData" onclick="switchView('input-data'); return false;" class="block px-4 py-3 text-slate-400 hover:bg-slate-800 hover:text-slate-200 rounded-xl font-semibold text-sm flex items-center gap-3 transition">
                 <i class="fa-solid fa-calculator w-5"></i> Kalkulator EVA
             </a>
             <a href="#" class="block px-4 py-3 text-slate-400 hover:bg-slate-800 hover:text-slate-200 rounded-xl font-semibold text-sm flex items-center gap-3 transition">
@@ -69,28 +75,467 @@
 
         <!-- Area Konten Utama -->
         <div class="lg:col-span-9 space-y-6">
-            
-            <!-- Header Konten -->
-            <div class="bg-gradient-to-r from-slate-800 to-slate-800/50 rounded-2xl p-6 border border-slate-700 relative overflow-hidden">
-                <div class="absolute -right-20 -top-20 w-64 h-64 bg-teal-500/10 rounded-full blur-3xl"></div>
-                <h1 class="text-2xl font-bold text-white mb-2 relative z-10">Selamat Datang di Dashboard!</h1>
-                <p class="text-slate-400 text-sm relative z-10">Anda telah berhasil masuk menggunakan otentikasi JWT FastAPI. Pilih menu di sebelah kiri untuk memulai analisis produktivitas tenaga kerja Anda.</p>
+
+            <!-- ===== VIEW: RINGKASAN ===== -->
+            <div id="view-ringkasan" class="space-y-6">
+
+                <div class="bg-gradient-to-r from-slate-800 to-slate-800/50 rounded-2xl p-6 border border-slate-700 relative overflow-hidden">
+                    <div class="absolute -right-20 -top-20 w-64 h-64 bg-teal-500/10 rounded-full blur-3xl"></div>
+                    <h1 class="text-2xl font-bold text-white mb-2 relative z-10">Selamat Datang di Dashboard!</h1>
+                    <p class="text-slate-400 text-sm relative z-10">Anda telah berhasil masuk menggunakan otentikasi JWT FastAPI. Pilih menu di sebelah kiri untuk memulai analisis produktivitas tenaga kerja Anda.</p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="bg-slate-800 p-5 rounded-2xl border border-slate-700">
+                        <div class="text-slate-400 text-xs font-bold uppercase tracking-wider mb-1">Total Analisis EVA</div>
+                        <div class="text-3xl font-extrabold text-white">0</div>
+                    </div>
+                    <div class="bg-slate-800 p-5 rounded-2xl border border-slate-700">
+                        <div class="text-slate-400 text-xs font-bold uppercase tracking-wider mb-1">Status Rata-rata</div>
+                        <div class="text-lg font-bold text-teal-400 mt-2">Belum Tersedia</div>
+                    </div>
+                    <div class="bg-slate-800 p-5 rounded-2xl border border-slate-700">
+                        <div class="text-slate-400 text-xs font-bold uppercase tracking-wider mb-1">Rekomendasi AI</div>
+                        <div class="text-3xl font-extrabold text-white">0</div>
+                    </div>
+                </div>
+
             </div>
 
-            <!-- Kartu Statistik Dummy -->
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div class="bg-slate-800 p-5 rounded-2xl border border-slate-700">
-                    <div class="text-slate-400 text-xs font-bold uppercase tracking-wider mb-1">Total Analisis EVA</div>
-                    <div class="text-3xl font-extrabold text-white">0</div>
+            <!-- ===== VIEW: INPUT DATA (KALKULATOR EVA) ===== -->
+            <div id="view-input-data" class="hidden space-y-6">
+
+                <div class="bg-gradient-to-r from-slate-800 to-slate-800/50 rounded-2xl p-6 border border-slate-700 relative overflow-hidden">
+                    <div class="absolute -right-20 -top-20 w-64 h-64 bg-teal-500/10 rounded-full blur-3xl"></div>
+                    <h1 class="text-2xl font-bold text-white mb-2 relative z-10">Input Data Nilai Tambah</h1>
+                    <p class="text-slate-400 text-sm relative z-10">Input Data Berdasarkan Laporan Keuangan Perusahaan.</p>
                 </div>
-                <div class="bg-slate-800 p-5 rounded-2xl border border-slate-700">
-                    <div class="text-slate-400 text-xs font-bold uppercase tracking-wider mb-1">Status Rata-rata</div>
-                    <div class="text-lg font-bold text-teal-400 mt-2">Belum Tersedia</div>
+
+                <!-- 1. Penjualan -->
+                <details class="bg-slate-800 rounded-2xl border border-slate-700 overflow-hidden" open>
+                    <summary class="cursor-pointer list-none flex items-center justify-between px-5 py-4 select-none">
+                        <span class="font-bold text-white text-sm flex items-center gap-2">
+                            <i class="fa-solid fa-cart-shopping w-4 text-teal-400"></i> Penjualan
+                        </span>
+                        <i class="fa-solid fa-chevron-down text-slate-500 text-xs chevron"></i>
+                    </summary>
+                    <div class="px-5 pb-5 grid grid-cols-1 md:grid-cols-2 gap-4 border-t border-slate-700 pt-4">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-400 mb-1.5">Periode</label>
+                            <input type="text" placeholder="cth. Q1 2026" class="w-full px-3 py-2.5 rounded-lg bg-slate-900 border border-slate-700 text-sm text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-400 mb-1.5">Total Penjualan / Pendapatan (Rp)</label>
+                            <input type="number" min="0" placeholder="0" class="w-full px-3 py-2.5 rounded-lg bg-slate-900 border border-slate-700 text-sm text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-400 mb-1.5">Jumlah Unit Terjual (unit)</label>
+                            <input type="number" min="0" placeholder="0" class="w-full px-3 py-2.5 rounded-lg bg-slate-900 border border-slate-700 text-sm text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-400 mb-1.5">Harga Jual Rata-rata (Rp)</label>
+                            <input type="number" min="0" placeholder="0" class="w-full px-3 py-2.5 rounded-lg bg-slate-900 border border-slate-700 text-sm text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-400 mb-1.5">Pertumbuhan Penjualan (%)</label>
+                            <input type="number" placeholder="0" class="w-full px-3 py-2.5 rounded-lg bg-slate-900 border border-slate-700 text-sm text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-400 mb-1.5">Penjualan Periode Sebelumnya (Rp)</label>
+                            <input type="number" min="0" placeholder="0" class="w-full px-3 py-2.5 rounded-lg bg-slate-900 border border-slate-700 text-sm text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
+                        </div>
+                    </div>
+                </details>
+
+                <!-- 2. Biaya Tenaga Kerja -->
+                <details class="bg-slate-800 rounded-2xl border border-slate-700 overflow-hidden">
+                    <summary class="cursor-pointer list-none flex items-center justify-between px-5 py-4 select-none">
+                        <span class="font-bold text-white text-sm flex items-center gap-2">
+                            <i class="fa-solid fa-users w-4 text-teal-400"></i> Biaya Tenaga Kerja
+                        </span>
+                        <span class="flex items-center gap-3">
+                            <span class="text-xs text-slate-400">Total: <span id="total-biaya_tenaga_kerja" class="text-teal-400 font-bold">Rp0</span></span>
+                            <i class="fa-solid fa-chevron-down text-slate-500 text-xs chevron"></i>
+                        </span>
+                    </summary>
+                    <div class="px-5 pb-5 grid grid-cols-1 md:grid-cols-2 gap-4 border-t border-slate-700 pt-4">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-400 mb-1.5">Upah dan Gaji (Rp)</label>
+                            <input type="number" min="0" data-group="biaya_tenaga_kerja" oninput="recomputeTotals()" placeholder="0" class="w-full px-3 py-2.5 rounded-lg bg-slate-900 border border-slate-700 text-sm text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-400 mb-1.5">Dana Pensiun (Rp)</label>
+                            <input type="number" min="0" data-group="biaya_tenaga_kerja" oninput="recomputeTotals()" placeholder="0" class="w-full px-3 py-2.5 rounded-lg bg-slate-900 border border-slate-700 text-sm text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-400 mb-1.5">Tunjangan-tunjangan Tenaga Kerja (Rp)</label>
+                            <input type="number" min="0" data-group="biaya_tenaga_kerja" oninput="recomputeTotals()" placeholder="0" class="w-full px-3 py-2.5 rounded-lg bg-slate-900 border border-slate-700 text-sm text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
+                        </div>
+                    </div>
+                </details>
+
+                <!-- 3. Bahan yang Digunakan -->
+                <details class="bg-slate-800 rounded-2xl border border-slate-700 overflow-hidden">
+                    <summary class="cursor-pointer list-none flex items-center justify-between px-5 py-4 select-none">
+                        <span class="font-bold text-white text-sm flex items-center gap-2">
+                            <i class="fa-solid fa-boxes-stacked w-4 text-teal-400"></i> Bahan yang Digunakan
+                        </span>
+                        <span class="flex items-center gap-3">
+                            <span class="text-xs text-slate-400">Total: <span id="total-bahan_digunakan" class="text-teal-400 font-bold">Rp0</span></span>
+                            <i class="fa-solid fa-chevron-down text-slate-500 text-xs chevron"></i>
+                        </span>
+                    </summary>
+                    <div class="px-5 pb-5 grid grid-cols-1 md:grid-cols-2 gap-4 border-t border-slate-700 pt-4">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-400 mb-1.5">Barang dan Jasa yang Dibeli (Rp)</label>
+                            <input type="number" min="0" data-group="bahan_digunakan" oninput="recomputeTotals()" placeholder="0" class="w-full px-3 py-2.5 rounded-lg bg-slate-900 border border-slate-700 text-sm text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-400 mb-1.5">Barang yang Digunakan (Rp)</label>
+                            <input type="number" min="0" data-group="bahan_digunakan" oninput="recomputeTotals()" placeholder="0" class="w-full px-3 py-2.5 rounded-lg bg-slate-900 border border-slate-700 text-sm text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-400 mb-1.5">Bahan Baku (Rp)</label>
+                            <input type="number" min="0" data-group="bahan_digunakan" oninput="recomputeTotals()" placeholder="0" class="w-full px-3 py-2.5 rounded-lg bg-slate-900 border border-slate-700 text-sm text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-400 mb-1.5">Bahan Pengemas (Rp)</label>
+                            <input type="number" min="0" data-group="bahan_digunakan" oninput="recomputeTotals()" placeholder="0" class="w-full px-3 py-2.5 rounded-lg bg-slate-900 border border-slate-700 text-sm text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
+                        </div>
+                    </div>
+                </details>
+
+                <!-- 4. Overhead Produksi -->
+                <details class="bg-slate-800 rounded-2xl border border-slate-700 overflow-hidden">
+                    <summary class="cursor-pointer list-none flex items-center justify-between px-5 py-4 select-none">
+                        <span class="font-bold text-white text-sm flex items-center gap-2">
+                            <i class="fa-solid fa-industry w-4 text-teal-400"></i> Overhead Produksi
+                        </span>
+                        <span class="flex items-center gap-3">
+                            <span class="text-xs text-slate-400">Total: <span id="total-overhead_produksi" class="text-teal-400 font-bold">Rp0</span></span>
+                            <i class="fa-solid fa-chevron-down text-slate-500 text-xs chevron"></i>
+                        </span>
+                    </summary>
+                    <div class="px-5 pb-5 grid grid-cols-1 md:grid-cols-2 gap-4 border-t border-slate-700 pt-4">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-400 mb-1.5">Pekerjaan Sub Kontrak (Rp)</label>
+                            <input type="number" min="0" data-group="overhead_produksi" oninput="recomputeTotals()" placeholder="0" class="w-full px-3 py-2.5 rounded-lg bg-slate-900 border border-slate-700 text-sm text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-400 mb-1.5">Sewa (Rp)</label>
+                            <input type="number" min="0" data-group="overhead_produksi" oninput="recomputeTotals()" placeholder="0" class="w-full px-3 py-2.5 rounded-lg bg-slate-900 border border-slate-700 text-sm text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-400 mb-1.5">Air dan Listrik (Rp)</label>
+                            <input type="number" min="0" data-group="overhead_produksi" oninput="recomputeTotals()" placeholder="0" class="w-full px-3 py-2.5 rounded-lg bg-slate-900 border border-slate-700 text-sm text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-400 mb-1.5">Asuransi Perusahaan (Rp)</label>
+                            <input type="number" min="0" data-group="overhead_produksi" oninput="recomputeTotals()" placeholder="0" class="w-full px-3 py-2.5 rounded-lg bg-slate-900 border border-slate-700 text-sm text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-400 mb-1.5">Biaya Transport (Rp)</label>
+                            <input type="number" min="0" data-group="overhead_produksi" oninput="recomputeTotals()" placeholder="0" class="w-full px-3 py-2.5 rounded-lg bg-slate-900 border border-slate-700 text-sm text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-400 mb-1.5">Pemeliharaan Mesin (Rp)</label>
+                            <input type="number" min="0" data-group="overhead_produksi" oninput="recomputeTotals()" placeholder="0" class="w-full px-3 py-2.5 rounded-lg bg-slate-900 border border-slate-700 text-sm text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-400 mb-1.5">Biaya Suplai dan Gudang (Rp)</label>
+                            <input type="number" min="0" data-group="overhead_produksi" oninput="recomputeTotals()" placeholder="0" class="w-full px-3 py-2.5 rounded-lg bg-slate-900 border border-slate-700 text-sm text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-400 mb-1.5">Biaya Lain-lain (Rp)</label>
+                            <input type="number" min="0" data-group="overhead_produksi" oninput="recomputeTotals()" placeholder="0" class="w-full px-3 py-2.5 rounded-lg bg-slate-900 border border-slate-700 text-sm text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
+                        </div>
+                    </div>
+                </details>
+
+                <!-- 5. Bunga Pinjaman -->
+                <details class="bg-slate-800 rounded-2xl border border-slate-700 overflow-hidden">
+                    <summary class="cursor-pointer list-none flex items-center justify-between px-5 py-4 select-none">
+                        <span class="font-bold text-white text-sm flex items-center gap-2">
+                            <i class="fa-solid fa-percent w-4 text-teal-400"></i> Bunga Pinjaman
+                        </span>
+                        <span class="flex items-center gap-3">
+                            <span class="text-xs text-slate-400">Total: <span id="total-bunga_pinjaman" class="text-teal-400 font-bold">Rp0</span></span>
+                            <i class="fa-solid fa-chevron-down text-slate-500 text-xs chevron"></i>
+                        </span>
+                    </summary>
+                    <div class="px-5 pb-5 grid grid-cols-1 md:grid-cols-2 gap-4 border-t border-slate-700 pt-4">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-400 mb-1.5">Bunga Pinjaman Jangka Pendek (Rp)</label>
+                            <input type="number" min="0" data-group="bunga_pinjaman" oninput="recomputeTotals()" placeholder="0" class="w-full px-3 py-2.5 rounded-lg bg-slate-900 border border-slate-700 text-sm text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-400 mb-1.5">Bunga Pinjaman Jangka Panjang (Rp)</label>
+                            <input type="number" min="0" data-group="bunga_pinjaman" oninput="recomputeTotals()" placeholder="0" class="w-full px-3 py-2.5 rounded-lg bg-slate-900 border border-slate-700 text-sm text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
+                        </div>
+                    </div>
+                </details>
+
+                <!-- 6. Biaya Administrasi -->
+                <details class="bg-slate-800 rounded-2xl border border-slate-700 overflow-hidden">
+                    <summary class="cursor-pointer list-none flex items-center justify-between px-5 py-4 select-none">
+                        <span class="font-bold text-white text-sm flex items-center gap-2">
+                            <i class="fa-solid fa-file-invoice w-4 text-teal-400"></i> Biaya Administrasi
+                        </span>
+                        <span class="flex items-center gap-3">
+                            <span class="text-xs text-slate-400">Total: <span id="total-biaya_administrasi" class="text-teal-400 font-bold">Rp0</span></span>
+                            <i class="fa-solid fa-chevron-down text-slate-500 text-xs chevron"></i>
+                        </span>
+                    </summary>
+                    <div class="px-5 pb-5 grid grid-cols-1 md:grid-cols-2 gap-4 border-t border-slate-700 pt-4">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-400 mb-1.5">Sewa (Rp)</label>
+                            <input type="number" min="0" data-group="biaya_administrasi" oninput="recomputeTotals()" placeholder="0" class="w-full px-3 py-2.5 rounded-lg bg-slate-900 border border-slate-700 text-sm text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-400 mb-1.5">Air dan Listrik (Rp)</label>
+                            <input type="number" min="0" data-group="biaya_administrasi" oninput="recomputeTotals()" placeholder="0" class="w-full px-3 py-2.5 rounded-lg bg-slate-900 border border-slate-700 text-sm text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-400 mb-1.5">Telepon, Pos dan Telegram (Rp)</label>
+                            <input type="number" min="0" data-group="biaya_administrasi" oninput="recomputeTotals()" placeholder="0" class="w-full px-3 py-2.5 rounded-lg bg-slate-900 border border-slate-700 text-sm text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-400 mb-1.5">Percetakan, Stationary & Office Supplies (Rp)</label>
+                            <input type="number" min="0" data-group="biaya_administrasi" oninput="recomputeTotals()" placeholder="0" class="w-full px-3 py-2.5 rounded-lg bg-slate-900 border border-slate-700 text-sm text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-400 mb-1.5">Biaya Kendaraan (Rp)</label>
+                            <input type="number" min="0" data-group="biaya_administrasi" oninput="recomputeTotals()" placeholder="0" class="w-full px-3 py-2.5 rounded-lg bg-slate-900 border border-slate-700 text-sm text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-400 mb-1.5">Advertising (Rp)</label>
+                            <input type="number" min="0" data-group="biaya_administrasi" oninput="recomputeTotals()" placeholder="0" class="w-full px-3 py-2.5 rounded-lg bg-slate-900 border border-slate-700 text-sm text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-400 mb-1.5">Hiburan / Entertainment (Rp)</label>
+                            <input type="number" min="0" data-group="biaya_administrasi" oninput="recomputeTotals()" placeholder="0" class="w-full px-3 py-2.5 rounded-lg bg-slate-900 border border-slate-700 text-sm text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-400 mb-1.5">Majalah dan Surat Kabar (Rp)</label>
+                            <input type="number" min="0" data-group="biaya_administrasi" oninput="recomputeTotals()" placeholder="0" class="w-full px-3 py-2.5 rounded-lg bg-slate-900 border border-slate-700 text-sm text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-400 mb-1.5">Jamuan Makan (Rp)</label>
+                            <input type="number" min="0" data-group="biaya_administrasi" oninput="recomputeTotals()" placeholder="0" class="w-full px-3 py-2.5 rounded-lg bg-slate-900 border border-slate-700 text-sm text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-400 mb-1.5">Perbaikan Umum (Rp)</label>
+                            <input type="number" min="0" data-group="biaya_administrasi" oninput="recomputeTotals()" placeholder="0" class="w-full px-3 py-2.5 rounded-lg bg-slate-900 border border-slate-700 text-sm text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-400 mb-1.5">Biaya Bank (Rp)</label>
+                            <input type="number" min="0" data-group="biaya_administrasi" oninput="recomputeTotals()" placeholder="0" class="w-full px-3 py-2.5 rounded-lg bg-slate-900 border border-slate-700 text-sm text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-400 mb-1.5">Biaya Akuntan dan Audit (Rp)</label>
+                            <input type="number" min="0" data-group="biaya_administrasi" oninput="recomputeTotals()" placeholder="0" class="w-full px-3 py-2.5 rounded-lg bg-slate-900 border border-slate-700 text-sm text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-400 mb-1.5">Biaya Bantuan Hukum & Jasa Profesional (Rp)</label>
+                            <input type="number" min="0" data-group="biaya_administrasi" oninput="recomputeTotals()" placeholder="0" class="w-full px-3 py-2.5 rounded-lg bg-slate-900 border border-slate-700 text-sm text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-400 mb-1.5">Komisi (Rp)</label>
+                            <input type="number" min="0" data-group="biaya_administrasi" oninput="recomputeTotals()" placeholder="0" class="w-full px-3 py-2.5 rounded-lg bg-slate-900 border border-slate-700 text-sm text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-400 mb-1.5">Biaya Umum (Rp)</label>
+                            <input type="number" min="0" data-group="biaya_administrasi" oninput="recomputeTotals()" placeholder="0" class="w-full px-3 py-2.5 rounded-lg bg-slate-900 border border-slate-700 text-sm text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
+                        </div>
+                    </div>
+                </details>
+
+                <!-- 7. Penyusutan -->
+                <details class="bg-slate-800 rounded-2xl border border-slate-700 overflow-hidden">
+                    <summary class="cursor-pointer list-none flex items-center justify-between px-5 py-4 select-none">
+                        <span class="font-bold text-white text-sm flex items-center gap-2">
+                            <i class="fa-solid fa-arrow-trend-down w-4 text-teal-400"></i> Penyusutan
+                        </span>
+                        <span class="flex items-center gap-3">
+                            <span class="text-xs text-slate-400">Total: <span id="total-penyusutan" class="text-teal-400 font-bold">Rp0</span></span>
+                            <i class="fa-solid fa-chevron-down text-slate-500 text-xs chevron"></i>
+                        </span>
+                    </summary>
+                    <div class="px-5 pb-5 grid grid-cols-1 md:grid-cols-2 gap-4 border-t border-slate-700 pt-4">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-400 mb-1.5">Penyusutan Gedung (Rp)</label>
+                            <input type="number" min="0" data-group="penyusutan" oninput="recomputeTotals()" placeholder="0" class="w-full px-3 py-2.5 rounded-lg bg-slate-900 border border-slate-700 text-sm text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-400 mb-1.5">Penyusutan Peralatan dan Mesin (Rp)</label>
+                            <input type="number" min="0" data-group="penyusutan" oninput="recomputeTotals()" placeholder="0" class="w-full px-3 py-2.5 rounded-lg bg-slate-900 border border-slate-700 text-sm text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
+                        </div>
+                    </div>
+                </details>
+
+                <!-- 8. Pajak -->
+                <details class="bg-slate-800 rounded-2xl border border-slate-700 overflow-hidden">
+                    <summary class="cursor-pointer list-none flex items-center justify-between px-5 py-4 select-none">
+                        <span class="font-bold text-white text-sm flex items-center gap-2">
+                            <i class="fa-solid fa-landmark w-4 text-teal-400"></i> Pajak
+                        </span>
+                        <span class="flex items-center gap-3">
+                            <span class="text-xs text-slate-400">Total: <span id="total-pajak" class="text-teal-400 font-bold">Rp0</span></span>
+                            <i class="fa-solid fa-chevron-down text-slate-500 text-xs chevron"></i>
+                        </span>
+                    </summary>
+                    <div class="px-5 pb-5 grid grid-cols-1 md:grid-cols-2 gap-4 border-t border-slate-700 pt-4">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-400 mb-1.5">Pajak Penghasilan (Rp)</label>
+                            <input type="number" min="0" data-group="pajak" oninput="recomputeTotals()" placeholder="0" class="w-full px-3 py-2.5 rounded-lg bg-slate-900 border border-slate-700 text-sm text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-400 mb-1.5">Pajak Kekayaan (Rp)</label>
+                            <input type="number" min="0" data-group="pajak" oninput="recomputeTotals()" placeholder="0" class="w-full px-3 py-2.5 rounded-lg bg-slate-900 border border-slate-700 text-sm text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-400 mb-1.5">Pajak Upah (Rp)</label>
+                            <input type="number" min="0" data-group="pajak" oninput="recomputeTotals()" placeholder="0" class="w-full px-3 py-2.5 rounded-lg bg-slate-900 border border-slate-700 text-sm text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
+                        </div>
+                    </div>
+                </details>
+
+                <!-- 9. Aktiva Perusahaan -->
+                <details class="bg-slate-800 rounded-2xl border border-slate-700 overflow-hidden">
+                    <summary class="cursor-pointer list-none flex items-center justify-between px-5 py-4 select-none">
+                        <span class="font-bold text-white text-sm flex items-center gap-2">
+                            <i class="fa-solid fa-building w-4 text-teal-400"></i> Aktiva Perusahaan
+                        </span>
+                        <span class="flex items-center gap-3">
+                            <span class="text-xs text-slate-400">Total: <span id="total-aktiva" class="text-teal-400 font-bold">Rp0</span></span>
+                            <i class="fa-solid fa-chevron-down text-slate-500 text-xs chevron"></i>
+                        </span>
+                    </summary>
+                    <div class="px-5 pb-5 grid grid-cols-1 md:grid-cols-2 gap-4 border-t border-slate-700 pt-4">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-400 mb-1.5">Kas dan Bank (Rp)</label>
+                            <input type="number" min="0" data-group="aktiva" oninput="recomputeTotals()" placeholder="0" class="w-full px-3 py-2.5 rounded-lg bg-slate-900 border border-slate-700 text-sm text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-400 mb-1.5">Persediaan (Rp)</label>
+                            <input type="number" min="0" data-group="aktiva" oninput="recomputeTotals()" placeholder="0" class="w-full px-3 py-2.5 rounded-lg bg-slate-900 border border-slate-700 text-sm text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-400 mb-1.5">Piutang Dagang (Rp)</label>
+                            <input type="number" min="0" data-group="aktiva" oninput="recomputeTotals()" placeholder="0" class="w-full px-3 py-2.5 rounded-lg bg-slate-900 border border-slate-700 text-sm text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-400 mb-1.5">Piutang dan Lain-lain (Rp)</label>
+                            <input type="number" min="0" data-group="aktiva" oninput="recomputeTotals()" placeholder="0" class="w-full px-3 py-2.5 rounded-lg bg-slate-900 border border-slate-700 text-sm text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-400 mb-1.5">Tanah (Rp)</label>
+                            <input type="number" min="0" data-group="aktiva" oninput="recomputeTotals()" placeholder="0" class="w-full px-3 py-2.5 rounded-lg bg-slate-900 border border-slate-700 text-sm text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-400 mb-1.5">Gedung (Rp)</label>
+                            <input type="number" min="0" data-group="aktiva" oninput="recomputeTotals()" placeholder="0" class="w-full px-3 py-2.5 rounded-lg bg-slate-900 border border-slate-700 text-sm text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-400 mb-1.5">Mesin dan Peralatan (Rp)</label>
+                            <input type="number" min="0" data-group="aktiva" oninput="recomputeTotals()" placeholder="0" class="w-full px-3 py-2.5 rounded-lg bg-slate-900 border border-slate-700 text-sm text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-400 mb-1.5">Aktiva Tetap Lainnya (Rp)</label>
+                            <input type="number" min="0" data-group="aktiva" oninput="recomputeTotals()" placeholder="0" class="w-full px-3 py-2.5 rounded-lg bg-slate-900 border border-slate-700 text-sm text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
+                        </div>
+                    </div>
+                </details>
+
+                <!-- 10. Laba -->
+                <details class="bg-slate-800 rounded-2xl border border-slate-700 overflow-hidden">
+                    <summary class="cursor-pointer list-none flex items-center justify-between px-5 py-4 select-none">
+                        <span class="font-bold text-white text-sm flex items-center gap-2">
+                            <i class="fa-solid fa-sack-dollar w-4 text-teal-400"></i> Laba
+                        </span>
+                        <span class="flex items-center gap-3">
+                            <span class="text-xs text-slate-400">Total: <span id="total-laba" class="text-teal-400 font-bold">Rp0</span></span>
+                            <i class="fa-solid fa-chevron-down text-slate-500 text-xs chevron"></i>
+                        </span>
+                    </summary>
+                    <div class="px-5 pb-5 grid grid-cols-1 md:grid-cols-2 gap-4 border-t border-slate-700 pt-4">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-400 mb-1.5">Laba Bersih (Rp)</label>
+                            <input type="number" min="0" data-group="laba" oninput="recomputeTotals()" placeholder="0" class="w-full px-3 py-2.5 rounded-lg bg-slate-900 border border-slate-700 text-sm text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-400 mb-1.5">Laba Operasi (Rp)</label>
+                            <input type="number" min="0" data-group="laba" oninput="recomputeTotals()" placeholder="0" class="w-full px-3 py-2.5 rounded-lg bg-slate-900 border border-slate-700 text-sm text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
+                        </div>
+                    </div>
+                </details>
+
+                <!-- 11. Total Investasi -->
+                <details class="bg-slate-800 rounded-2xl border border-slate-700 overflow-hidden">
+                    <summary class="cursor-pointer list-none flex items-center justify-between px-5 py-4 select-none">
+                        <span class="font-bold text-white text-sm flex items-center gap-2">
+                            <i class="fa-solid fa-user-clock w-4 text-teal-400"></i> Total Investasi
+                        </span>
+                        <i class="fa-solid fa-chevron-down text-slate-500 text-xs chevron"></i>
+                    </summary>
+                    <div class="px-5 pb-5 grid grid-cols-1 md:grid-cols-2 gap-4 border-t border-slate-700 pt-4">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-400 mb-1.5">Jumlah Tenaga Kerja (orang)</label>
+                            <input type="number" min="0" placeholder="0" class="w-full px-3 py-2.5 rounded-lg bg-slate-900 border border-slate-700 text-sm text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-400 mb-1.5">Jumlah Jam Kerja (jam)</label>
+                            <input type="number" min="0" placeholder="0" class="w-full px-3 py-2.5 rounded-lg bg-slate-900 border border-slate-700 text-sm text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-400 mb-1.5">Jumlah Jam Lembur (jam)</label>
+                            <input type="number" min="0" placeholder="0" class="w-full px-3 py-2.5 rounded-lg bg-slate-900 border border-slate-700 text-sm text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-400 mb-1.5">Total Jam Kerja (jam)</label>
+                            <input type="number" min="0" placeholder="0" class="w-full px-3 py-2.5 rounded-lg bg-slate-900 border border-slate-700 text-sm text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
+                        </div>
+                    </div>
+                </details>
+                <!-- Rangkuman Perhitungan Nilai Tambah -->
+                <div class="bg-slate-800 rounded-2xl border border-teal-500/30 p-6">
+                    <h2 class="text-sm font-bold text-teal-400 uppercase tracking-wider mb-4 flex items-center gap-2">
+                        <i class="fa-solid fa-square-root-variable"></i> Rangkuman Perhitungan Nilai Tambah
+                    </h2>
+                    <div class="grid grid-cols-2 md:grid-cols-5 gap-4 text-sm">
+                        <div>
+                            <div class="text-slate-400 text-xs mb-1">Biaya Tenaga Kerja</div>
+                            <div id="rt-biaya_tenaga_kerja" class="font-bold text-white">Rp0</div>
+                        </div>
+                        <div>
+                            <div class="text-slate-400 text-xs mb-1">Laba</div>
+                            <div id="rt-laba" class="font-bold text-white">Rp0</div>
+                        </div>
+                        <div>
+                            <div class="text-slate-400 text-xs mb-1">Penyusutan</div>
+                            <div id="rt-penyusutan" class="font-bold text-white">Rp0</div>
+                        </div>
+                        <div>
+                            <div class="text-slate-400 text-xs mb-1">Pajak</div>
+                            <div id="rt-pajak" class="font-bold text-white">Rp0</div>
+                        </div>
+                        <div>
+                            <div class="text-slate-400 text-xs mb-1">Bunga</div>
+                            <div id="rt-bunga_pinjaman" class="font-bold text-white">Rp0</div>
+                        </div>
+                    </div>
+                    <div class="mt-5 pt-5 border-t border-slate-700 flex items-center justify-between">
+                        <span class="text-slate-300 font-semibold text-sm">Total Nilai Tambah</span>
+                        <span id="rt-total" class="text-2xl font-extrabold text-teal-400">Rp0</span>
+                    </div>
                 </div>
-                <div class="bg-slate-800 p-5 rounded-2xl border border-slate-700">
-                    <div class="text-slate-400 text-xs font-bold uppercase tracking-wider mb-1">Rekomendasi AI</div>
-                    <div class="text-3xl font-extrabold text-white">0</div>
+
+                <div class="flex justify-end gap-3 pb-4">
+                    <button type="button" onclick="resetInputData()" class="px-5 py-2.5 rounded-xl text-sm font-semibold text-slate-300 border border-slate-700 hover:bg-slate-800 transition flex items-center gap-2">
+                        <i class="fa-solid fa-rotate-left"></i> Reset Form
+                    </button>
                 </div>
+
             </div>
 
         </div>
@@ -107,13 +552,64 @@
 
         // Fungsi Logout
         function handleLogout() {
-            // Hapus token dan data sesi dari local storage
             localStorage.removeItem('eva_token');
             localStorage.removeItem('eva_user_name');
             localStorage.removeItem('eva_guest_chat_count');
-            
-            // Redirect kembali ke halaman login
             window.location.href = '/login';
+        }
+
+        // ===== Navigasi antar tampilan (Ringkasan <-> Kalkulator EVA) =====
+        const NAV_ACTIVE = "block px-4 py-3 bg-teal-500/10 text-teal-400 rounded-xl border border-teal-500/20 font-semibold text-sm flex items-center gap-3 transition";
+        const NAV_INACTIVE = "block px-4 py-3 text-slate-400 hover:bg-slate-800 hover:text-slate-200 rounded-xl font-semibold text-sm flex items-center gap-3 transition";
+
+        function switchView(view) {
+            document.getElementById('view-ringkasan').classList.toggle('hidden', view !== 'ringkasan');
+            document.getElementById('view-input-data').classList.toggle('hidden', view !== 'input-data');
+            document.getElementById('navRingkasan').className = view === 'ringkasan' ? NAV_ACTIVE : NAV_INACTIVE;
+            document.getElementById('navInputData').className = view === 'input-data' ? NAV_ACTIVE : NAV_INACTIVE;
+        }
+
+        // ===== Perhitungan otomatis total per kategori & Rangkuman Nilai Tambah =====
+        // Rumus: Nilai Tambah = Biaya Tenaga Kerja + Laba + Penyusutan + Pajak + Bunga
+        const CURRENCY_GROUPS = [
+            'biaya_tenaga_kerja', 'bahan_digunakan', 'overhead_produksi',
+            'bunga_pinjaman', 'biaya_administrasi', 'penyusutan', 'pajak',
+            'aktiva', 'laba'
+        ];
+
+        function formatRupiah(n) {
+            return 'Rp' + Math.round(n).toLocaleString('id-ID');
+        }
+
+        function recomputeTotals() {
+            const totals = {};
+            CURRENCY_GROUPS.forEach(group => {
+                const inputs = document.querySelectorAll(`input[data-group="${group}"]`);
+                let sum = 0;
+                inputs.forEach(inp => { sum += parseFloat(inp.value) || 0; });
+                totals[group] = sum;
+                const el = document.getElementById(`total-${group}`);
+                if (el) el.textContent = formatRupiah(sum);
+            });
+
+            const biayaTK = totals.biaya_tenaga_kerja || 0;
+            const laba = totals.laba || 0;
+            const penyusutan = totals.penyusutan || 0;
+            const pajak = totals.pajak || 0;
+            const bunga = totals.bunga_pinjaman || 0;
+            const nilaiTambah = biayaTK + laba + penyusutan + pajak + bunga;
+
+            document.getElementById('rt-biaya_tenaga_kerja').textContent = formatRupiah(biayaTK);
+            document.getElementById('rt-laba').textContent = formatRupiah(laba);
+            document.getElementById('rt-penyusutan').textContent = formatRupiah(penyusutan);
+            document.getElementById('rt-pajak').textContent = formatRupiah(pajak);
+            document.getElementById('rt-bunga_pinjaman').textContent = formatRupiah(bunga);
+            document.getElementById('rt-total').textContent = formatRupiah(nilaiTambah);
+        }
+
+        function resetInputData() {
+            document.querySelectorAll('#view-input-data input').forEach(inp => { inp.value = ''; });
+            recomputeTotals();
         }
     </script>
 </body>
