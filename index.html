@@ -148,19 +148,19 @@
         </section>
 
         <!-- Live Demo / Interactive Calculator Section -->
-        <section id="demo" class="py-16 bg-white border-y border-slate-200">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div class="mb-12 text-center">
-                    <h2 class="text-3xl font-bold text-slate-900">Uji Coba Endpoint Backend (Live Interactive)</h2>
-                    <p class="text-slate-600 mt-2">Masukan data finansial perusahaan Anda untuk menguji integrasi API FastAPI secara langsung.</p>
-                </div>
+<section id="demo" class="min-h-[calc(100vh-5rem)] py-8 bg-white border-y border-slate-200 flex flex-col justify-center">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
+        <div class="mb-6 text-center">
+            <h2 class="text-2xl sm:text-3xl font-bold text-slate-900">Uji Coba Endpoint Backend (Live Interactive)</h2>
+            <p class="text-slate-600 mt-1 text-sm">Masukan data finansial perusahaan Anda untuk menguji integrasi API FastAPI secara langsung.</p>
+        </div>
 
-                <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-                    <!-- Form Input Card -->
-                    <div class="lg:col-span-5 bg-slate-50 p-6 sm:p-8 rounded-2xl border border-slate-200 shadow-sm">
-                        <h3 class="text-lg font-bold text-slate-900 mb-6 flex items-center gap-2">
-                            <i class="fa-solid fa-file-invoice-dollar text-brand-600"></i> Form Input Finansial
-                        </h3>
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
+            <!-- Form Input Card -->
+            <div class="lg:col-span-5 bg-slate-50 p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between">
+                <h3 class="text-base font-bold text-slate-900 mb-4 flex items-center gap-2">
+                    <i class="fa-solid fa-file-invoice-dollar text-brand-600"></i> Form Input Finansial
+                </h3>
                         
                         <!-- Form Input Finansial -->
 <form id="evaForm" onsubmit="handleCalculate(event)" class="space-y-4">
@@ -203,7 +203,7 @@
                     </div>
 
                     <!-- Output / Result Card -->
-                    <div class="lg:col-span-7 bg-slate-900 text-white p-6 sm:p-8 rounded-2xl shadow-xl min-h-[420px] flex flex-col justify-between">
+                    <div class="lg:col-span-7 bg-slate-900 text-white p-6 rounded-2xl shadow-xl flex flex-col justify-between">
                         <div>
                             <div class="flex items-center justify-between pb-4 border-b border-slate-800">
                                 <span class="text-xs font-bold uppercase tracking-widest text-slate-400">Hasil Analisis & Narasi AI</span>
@@ -225,8 +225,8 @@
         </section>
 
 <!-- Chat Section Container -->
-<section id="chat-section" class="w-full max-w-4xl mx-auto px-4 py-8">
-    <div class="bg-slate-900 text-white rounded-2xl shadow-xl overflow-hidden border border-slate-800 flex flex-col h-[520px] sm:h-[600px]">
+<section id="chat-section" class="w-full max-w-5xl mx-auto px-4 py-6 min-h-[calc(100vh-5rem)] flex items-center justify-center">
+    <div class="bg-slate-900 text-white rounded-2xl shadow-xl overflow-hidden border border-slate-800 flex flex-col w-full h-[calc(100vh-12rem)] max-h-[750px] min-h-[500px]">
         
         <!-- Header Chat -->
         <div class="px-4 py-3 sm:px-6 sm:py-4 bg-slate-800/80 border-b border-slate-700/60 flex items-center justify-between">
@@ -345,6 +345,76 @@ function checkGuestLimit() {
     return false;
 }
 
+// Handler calculate
+async function handleCalculate(e) {
+    e.preventDefault();
+    const btn = document.getElementById('btnSubmit');
+    const resultContent = document.getElementById('resultContent');
+
+    btn.disabled = true;
+    btn.innerHTML = `Memproses...`;
+
+    // Sesuai dengan schema FinancialInput backend
+    const payload = {
+        company_name: document.getElementById('company_name').value,
+        period: document.getElementById('period').value,
+        ebit: parseFloat(document.getElementById('ebit').value),
+        tax_rate: parseFloat(document.getElementById('tax_rate').value),
+        invested_capital: parseFloat(document.getElementById('invested_capital').value),
+        wacc: parseFloat(document.getElementById('wacc').value)
+    };
+
+    try {
+        const response = await fetch(`/api/ai/recommend`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+
+        if (!response.ok) throw new Error(`Status HTTP: ${response.status}`);
+        const data = await response.json();
+        currentEvaContext = data.eva_result;
+
+        const formattedEva = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(data.eva_result.eva);
+
+        // Di dalam async function handleCalculate(e) setelah data didapatkan:
+const evaVal = data.eva_result.eva;
+
+// Tentukan warna teks adaptif berdasarkan nilai EVA
+let colorClass = 'text-amber-400'; // Default: EVA = 0 (Kuning)
+if (evaVal > 0) {
+    colorClass = 'text-emerald-400'; // EVA > 0 / Profit (Hijau)
+} else if (evaVal < 0) {
+    colorClass = 'text-rose-400'; // EVA < 0 / Negatif (Merah)
+}
+
+resultContent.innerHTML = `
+    <div class="p-4 bg-slate-800 rounded-xl space-y-3">
+        <div class="flex justify-between items-center">
+            <span class="text-xs text-slate-400">Nilai EVA</span>
+            <span class="font-bold text-lg ${colorClass}">${formattedEva} (${data.eva_result.status})</span>
+        </div>
+        <div>
+            <span class="text-xs text-teal-400 font-bold uppercase">Fokus Strategis</span>
+            <p class="text-sm font-semibold">${data.fokus_rekomendasi}</p>
+        </div>
+        <div>
+            <span class="text-xs text-teal-400 font-bold uppercase">Aksi Produktivitas</span>
+            <p class="text-sm text-slate-300">${data.aksi_produktivitas}</p>
+        </div>
+        <div class="pt-2 border-t border-slate-700">
+            <span class="text-xs text-teal-400 font-bold uppercase">Narasi AI Gemini</span>
+            <p class="text-sm text-slate-200 mt-1 leading-relaxed">${data.narasi_ai}</p>
+        </div>
+    </div>
+`;
+    } catch (err) {
+        resultContent.innerHTML = `<p class="text-rose-400 text-sm">Gagal memproses data: ${err.message}</p>`;
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = `Hitung & Minta Rekomendasi AI`;
+    }
+}
 // Handler Kirim Pesan
 async function handleSendMessage(e) {
     e.preventDefault();
