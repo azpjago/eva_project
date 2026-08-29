@@ -2,7 +2,7 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Dashboard — EVA AI Platform</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -26,6 +26,9 @@
         input[type=number]::-webkit-outer-spin-button { opacity: 1; }
         #yearTabsList { scrollbar-width: thin; }
         #yearTabsList > .group { min-width: max-content; }
+        /* Transisi halus saat ganti halaman */
+        .fade-in { animation: fadeIn 0.3s ease-in-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
 <body class="bg-slate-900 font-sans text-slate-100 antialiased min-h-screen flex flex-col">
@@ -79,33 +82,23 @@
         <div class="lg:col-span-9 space-y-6">
 
             <!-- ===== VIEW: RINGKASAN ===== -->
-            <div id="view-ringkasan" class="space-y-6">
+            <div id="view-ringkasan" class="space-y-6 fade-in">
 
                 <div class="bg-gradient-to-r from-slate-800 to-slate-800/50 rounded-2xl p-6 border border-slate-700 relative overflow-hidden">
                     <div class="absolute -right-20 -top-20 w-64 h-64 bg-teal-500/10 rounded-full blur-3xl"></div>
-                    <h1 class="text-2xl font-bold text-white mb-2 relative z-10">Selamat Datang di Dashboard!</h1>
-                    <p class="text-slate-400 text-sm relative z-10">Anda telah berhasil masuk menggunakan otentikasi JWT FastAPI. Pilih menu di sebelah kiri untuk memulai analisis produktivitas tenaga kerja Anda.</p>
+                    <h1 class="text-2xl font-bold text-white mb-2 relative z-10">Ringkasan Analisis EVA</h1>
+                    <p class="text-slate-400 text-sm relative z-10">Visualisasi data dari hasil perhitungan Kalkulator EVA Anda akan tampil secara otomatis di bawah ini.</p>
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div class="bg-slate-800 p-5 rounded-2xl border border-slate-700">
-                        <div class="text-slate-400 text-xs font-bold uppercase tracking-wider mb-1">Total Analisis EVA</div>
-                        <div class="text-3xl font-extrabold text-white">0</div>
-                    </div>
-                    <div class="bg-slate-800 p-5 rounded-2xl border border-slate-700">
-                        <div class="text-slate-400 text-xs font-bold uppercase tracking-wider mb-1">Status Rata-rata</div>
-                        <div class="text-lg font-bold text-teal-400 mt-2">Belum Tersedia</div>
-                    </div>
-                    <div class="bg-slate-800 p-5 rounded-2xl border border-slate-700">
-                        <div class="text-slate-400 text-xs font-bold uppercase tracking-wider mb-1">Rekomendasi AI</div>
-                        <div class="text-3xl font-extrabold text-white">0</div>
-                    </div>
+                <!-- Container untuk Data Visualisasi Dinamis -->
+                <div id="ringkasan-content">
+                    <!-- Data akan di-generate via JavaScript -->
                 </div>
 
             </div>
 
             <!-- ===== VIEW: INPUT DATA (KALKULATOR EVA) ===== -->
-            <div id="view-input-data" class="hidden space-y-6">
+            <div id="view-input-data" class="hidden space-y-6 fade-in">
 
                 <div class="bg-gradient-to-r from-slate-800 to-slate-800/50 rounded-2xl p-6 border border-slate-700 relative overflow-hidden">
                     <div class="absolute -right-20 -top-20 w-64 h-64 bg-teal-500/10 rounded-full blur-3xl"></div>
@@ -143,23 +136,23 @@
                     <div class="px-5 pb-5 grid grid-cols-1 md:grid-cols-2 gap-4 border-t border-slate-700 pt-4">
                         <div>
                             <label class="block text-xs font-semibold text-slate-400 mb-1.5">Total Penjualan / Pendapatan (Rp)</label>
-                            <input type="number" min="0" placeholder="0" class="w-full px-3 py-2.5 rounded-lg bg-slate-900 border border-slate-700 text-sm text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
+                            <input type="number" min="0" placeholder="0" class="w-full px-3 py-2.5 rounded-lg bg-slate-900 border border-slate-700 text-base md:text-sm text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
                         </div>
                         <div>
                             <label class="block text-xs font-semibold text-slate-400 mb-1.5">Jumlah Unit Terjual (unit)</label>
-                            <input type="number" min="0" placeholder="0" class="w-full px-3 py-2.5 rounded-lg bg-slate-900 border border-slate-700 text-sm text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
+                            <input type="number" min="0" placeholder="0" class="w-full px-3 py-2.5 rounded-lg bg-slate-900 border border-slate-700 text-base md:text-sm text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
                         </div>
                         <div>
                             <label class="block text-xs font-semibold text-slate-400 mb-1.5">Harga Jual Rata-rata (Rp)</label>
-                            <input type="number" min="0" placeholder="0" class="w-full px-3 py-2.5 rounded-lg bg-slate-900 border border-slate-700 text-sm text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
+                            <input type="number" min="0" placeholder="0" class="w-full px-3 py-2.5 rounded-lg bg-slate-900 border border-slate-700 text-base md:text-sm text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
                         </div>
                         <div>
                             <label class="block text-xs font-semibold text-slate-400 mb-1.5">Pertumbuhan Penjualan (%)</label>
-                            <input type="number" placeholder="0" class="w-full px-3 py-2.5 rounded-lg bg-slate-900 border border-slate-700 text-sm text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
+                            <input type="number" placeholder="0" class="w-full px-3 py-2.5 rounded-lg bg-slate-900 border border-slate-700 text-base md:text-sm text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
                         </div>
                         <div>
                             <label class="block text-xs font-semibold text-slate-400 mb-1.5">Penjualan Periode Sebelumnya (Rp)</label>
-                            <input type="number" min="0" placeholder="0" class="w-full px-3 py-2.5 rounded-lg bg-slate-900 border border-slate-700 text-sm text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
+                            <input type="number" min="0" placeholder="0" class="w-full px-3 py-2.5 rounded-lg bg-slate-900 border border-slate-700 text-base md:text-sm text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
                         </div>
                     </div>
                 </details>
@@ -178,15 +171,15 @@
                     <div class="px-5 pb-5 grid grid-cols-1 md:grid-cols-2 gap-4 border-t border-slate-700 pt-4">
                         <div>
                             <label class="block text-xs font-semibold text-slate-400 mb-1.5">Upah dan Gaji (Rp)</label>
-                            <input type="number" min="0" data-group="biaya_tenaga_kerja" oninput="recomputeTotals()" placeholder="0" class="w-full px-3 py-2.5 rounded-lg bg-slate-900 border border-slate-700 text-sm text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
+                            <input type="number" min="0" data-group="biaya_tenaga_kerja" oninput="recomputeTotals()" placeholder="0" class="w-full px-3 py-2.5 rounded-lg bg-slate-900 border border-slate-700 text-base md:text-sm text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
                         </div>
                         <div>
                             <label class="block text-xs font-semibold text-slate-400 mb-1.5">Dana Pensiun (Rp)</label>
-                            <input type="number" min="0" data-group="biaya_tenaga_kerja" oninput="recomputeTotals()" placeholder="0" class="w-full px-3 py-2.5 rounded-lg bg-slate-900 border border-slate-700 text-sm text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
+                            <input type="number" min="0" data-group="biaya_tenaga_kerja" oninput="recomputeTotals()" placeholder="0" class="w-full px-3 py-2.5 rounded-lg bg-slate-900 border border-slate-700 text-base md:text-sm text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
                         </div>
                         <div>
                             <label class="block text-xs font-semibold text-slate-400 mb-1.5">Tunjangan-tunjangan Tenaga Kerja (Rp)</label>
-                            <input type="number" min="0" data-group="biaya_tenaga_kerja" oninput="recomputeTotals()" placeholder="0" class="w-full px-3 py-2.5 rounded-lg bg-slate-900 border border-slate-700 text-sm text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
+                            <input type="number" min="0" data-group="biaya_tenaga_kerja" oninput="recomputeTotals()" placeholder="0" class="w-full px-3 py-2.5 rounded-lg bg-slate-900 border border-slate-700 text-base md:text-sm text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
                         </div>
                     </div>
                 </details>
@@ -205,19 +198,19 @@
                     <div class="px-5 pb-5 grid grid-cols-1 md:grid-cols-2 gap-4 border-t border-slate-700 pt-4">
                         <div>
                             <label class="block text-xs font-semibold text-slate-400 mb-1.5">Barang dan Jasa yang Dibeli (Rp)</label>
-                            <input type="number" min="0" data-group="bahan_digunakan" oninput="recomputeTotals()" placeholder="0" class="w-full px-3 py-2.5 rounded-lg bg-slate-900 border border-slate-700 text-sm text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
+                            <input type="number" min="0" data-group="bahan_digunakan" oninput="recomputeTotals()" placeholder="0" class="w-full px-3 py-2.5 rounded-lg bg-slate-900 border border-slate-700 text-base md:text-sm text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
                         </div>
                         <div>
                             <label class="block text-xs font-semibold text-slate-400 mb-1.5">Barang yang Digunakan (Rp)</label>
-                            <input type="number" min="0" data-group="bahan_digunakan" oninput="recomputeTotals()" placeholder="0" class="w-full px-3 py-2.5 rounded-lg bg-slate-900 border border-slate-700 text-sm text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
+                            <input type="number" min="0" data-group="bahan_digunakan" oninput="recomputeTotals()" placeholder="0" class="w-full px-3 py-2.5 rounded-lg bg-slate-900 border border-slate-700 text-base md:text-sm text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
                         </div>
                         <div>
                             <label class="block text-xs font-semibold text-slate-400 mb-1.5">Bahan Baku (Rp)</label>
-                            <input type="number" min="0" data-group="bahan_digunakan" oninput="recomputeTotals()" placeholder="0" class="w-full px-3 py-2.5 rounded-lg bg-slate-900 border border-slate-700 text-sm text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
+                            <input type="number" min="0" data-group="bahan_digunakan" oninput="recomputeTotals()" placeholder="0" class="w-full px-3 py-2.5 rounded-lg bg-slate-900 border border-slate-700 text-base md:text-sm text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
                         </div>
                         <div>
                             <label class="block text-xs font-semibold text-slate-400 mb-1.5">Bahan Pengemas (Rp)</label>
-                            <input type="number" min="0" data-group="bahan_digunakan" oninput="recomputeTotals()" placeholder="0" class="w-full px-3 py-2.5 rounded-lg bg-slate-900 border border-slate-700 text-sm text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
+                            <input type="number" min="0" data-group="bahan_digunakan" oninput="recomputeTotals()" placeholder="0" class="w-full px-3 py-2.5 rounded-lg bg-slate-900 border border-slate-700 text-base md:text-sm text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
                         </div>
                     </div>
                 </details>
@@ -236,35 +229,35 @@
                     <div class="px-5 pb-5 grid grid-cols-1 md:grid-cols-2 gap-4 border-t border-slate-700 pt-4">
                         <div>
                             <label class="block text-xs font-semibold text-slate-400 mb-1.5">Pekerjaan Sub Kontrak (Rp)</label>
-                            <input type="number" min="0" data-group="overhead_produksi" oninput="recomputeTotals()" placeholder="0" class="w-full px-3 py-2.5 rounded-lg bg-slate-900 border border-slate-700 text-sm text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
+                            <input type="number" min="0" data-group="overhead_produksi" oninput="recomputeTotals()" placeholder="0" class="w-full px-3 py-2.5 rounded-lg bg-slate-900 border border-slate-700 text-base md:text-sm text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
                         </div>
                         <div>
                             <label class="block text-xs font-semibold text-slate-400 mb-1.5">Sewa (Rp)</label>
-                            <input type="number" min="0" data-group="overhead_produksi" oninput="recomputeTotals()" placeholder="0" class="w-full px-3 py-2.5 rounded-lg bg-slate-900 border border-slate-700 text-sm text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
+                            <input type="number" min="0" data-group="overhead_produksi" oninput="recomputeTotals()" placeholder="0" class="w-full px-3 py-2.5 rounded-lg bg-slate-900 border border-slate-700 text-base md:text-sm text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
                         </div>
                         <div>
                             <label class="block text-xs font-semibold text-slate-400 mb-1.5">Air dan Listrik (Rp)</label>
-                            <input type="number" min="0" data-group="overhead_produksi" oninput="recomputeTotals()" placeholder="0" class="w-full px-3 py-2.5 rounded-lg bg-slate-900 border border-slate-700 text-sm text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
+                            <input type="number" min="0" data-group="overhead_produksi" oninput="recomputeTotals()" placeholder="0" class="w-full px-3 py-2.5 rounded-lg bg-slate-900 border border-slate-700 text-base md:text-sm text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
                         </div>
                         <div>
                             <label class="block text-xs font-semibold text-slate-400 mb-1.5">Asuransi Perusahaan (Rp)</label>
-                            <input type="number" min="0" data-group="overhead_produksi" oninput="recomputeTotals()" placeholder="0" class="w-full px-3 py-2.5 rounded-lg bg-slate-900 border border-slate-700 text-sm text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
+                            <input type="number" min="0" data-group="overhead_produksi" oninput="recomputeTotals()" placeholder="0" class="w-full px-3 py-2.5 rounded-lg bg-slate-900 border border-slate-700 text-base md:text-sm text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
                         </div>
                         <div>
                             <label class="block text-xs font-semibold text-slate-400 mb-1.5">Biaya Transport (Rp)</label>
-                            <input type="number" min="0" data-group="overhead_produksi" oninput="recomputeTotals()" placeholder="0" class="w-full px-3 py-2.5 rounded-lg bg-slate-900 border border-slate-700 text-sm text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
+                            <input type="number" min="0" data-group="overhead_produksi" oninput="recomputeTotals()" placeholder="0" class="w-full px-3 py-2.5 rounded-lg bg-slate-900 border border-slate-700 text-base md:text-sm text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
                         </div>
                         <div>
                             <label class="block text-xs font-semibold text-slate-400 mb-1.5">Pemeliharaan Mesin (Rp)</label>
-                            <input type="number" min="0" data-group="overhead_produksi" oninput="recomputeTotals()" placeholder="0" class="w-full px-3 py-2.5 rounded-lg bg-slate-900 border border-slate-700 text-sm text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
+                            <input type="number" min="0" data-group="overhead_produksi" oninput="recomputeTotals()" placeholder="0" class="w-full px-3 py-2.5 rounded-lg bg-slate-900 border border-slate-700 text-base md:text-sm text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
                         </div>
                         <div>
                             <label class="block text-xs font-semibold text-slate-400 mb-1.5">Biaya Suplai dan Gudang (Rp)</label>
-                            <input type="number" min="0" data-group="overhead_produksi" oninput="recomputeTotals()" placeholder="0" class="w-full px-3 py-2.5 rounded-lg bg-slate-900 border border-slate-700 text-sm text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
+                            <input type="number" min="0" data-group="overhead_produksi" oninput="recomputeTotals()" placeholder="0" class="w-full px-3 py-2.5 rounded-lg bg-slate-900 border border-slate-700 text-base md:text-sm text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
                         </div>
                         <div>
                             <label class="block text-xs font-semibold text-slate-400 mb-1.5">Biaya Lain-lain (Rp)</label>
-                            <input type="number" min="0" data-group="overhead_produksi" oninput="recomputeTotals()" placeholder="0" class="w-full px-3 py-2.5 rounded-lg bg-slate-900 border border-slate-700 text-sm text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
+                            <input type="number" min="0" data-group="overhead_produksi" oninput="recomputeTotals()" placeholder="0" class="w-full px-3 py-2.5 rounded-lg bg-slate-900 border border-slate-700 text-base md:text-sm text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
                         </div>
                     </div>
                 </details>
@@ -283,11 +276,11 @@
                     <div class="px-5 pb-5 grid grid-cols-1 md:grid-cols-2 gap-4 border-t border-slate-700 pt-4">
                         <div>
                             <label class="block text-xs font-semibold text-slate-400 mb-1.5">Bunga Pinjaman Jangka Pendek (Rp)</label>
-                            <input type="number" min="0" data-group="bunga_pinjaman" oninput="recomputeTotals()" placeholder="0" class="w-full px-3 py-2.5 rounded-lg bg-slate-900 border border-slate-700 text-sm text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
+                            <input type="number" min="0" data-group="bunga_pinjaman" oninput="recomputeTotals()" placeholder="0" class="w-full px-3 py-2.5 rounded-lg bg-slate-900 border border-slate-700 text-base md:text-sm text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
                         </div>
                         <div>
                             <label class="block text-xs font-semibold text-slate-400 mb-1.5">Bunga Pinjaman Jangka Panjang (Rp)</label>
-                            <input type="number" min="0" data-group="bunga_pinjaman" oninput="recomputeTotals()" placeholder="0" class="w-full px-3 py-2.5 rounded-lg bg-slate-900 border border-slate-700 text-sm text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
+                            <input type="number" min="0" data-group="bunga_pinjaman" oninput="recomputeTotals()" placeholder="0" class="w-full px-3 py-2.5 rounded-lg bg-slate-900 border border-slate-700 text-base md:text-sm text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
                         </div>
                     </div>
                 </details>
@@ -306,63 +299,63 @@
                     <div class="px-5 pb-5 grid grid-cols-1 md:grid-cols-2 gap-4 border-t border-slate-700 pt-4">
                         <div>
                             <label class="block text-xs font-semibold text-slate-400 mb-1.5">Sewa (Rp)</label>
-                            <input type="number" min="0" data-group="biaya_administrasi" oninput="recomputeTotals()" placeholder="0" class="w-full px-3 py-2.5 rounded-lg bg-slate-900 border border-slate-700 text-sm text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
+                            <input type="number" min="0" data-group="biaya_administrasi" oninput="recomputeTotals()" placeholder="0" class="w-full px-3 py-2.5 rounded-lg bg-slate-900 border border-slate-700 text-base md:text-sm text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
                         </div>
                         <div>
                             <label class="block text-xs font-semibold text-slate-400 mb-1.5">Air dan Listrik (Rp)</label>
-                            <input type="number" min="0" data-group="biaya_administrasi" oninput="recomputeTotals()" placeholder="0" class="w-full px-3 py-2.5 rounded-lg bg-slate-900 border border-slate-700 text-sm text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
+                            <input type="number" min="0" data-group="biaya_administrasi" oninput="recomputeTotals()" placeholder="0" class="w-full px-3 py-2.5 rounded-lg bg-slate-900 border border-slate-700 text-base md:text-sm text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
                         </div>
                         <div>
                             <label class="block text-xs font-semibold text-slate-400 mb-1.5">Telepon, Pos dan Telegram (Rp)</label>
-                            <input type="number" min="0" data-group="biaya_administrasi" oninput="recomputeTotals()" placeholder="0" class="w-full px-3 py-2.5 rounded-lg bg-slate-900 border border-slate-700 text-sm text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
+                            <input type="number" min="0" data-group="biaya_administrasi" oninput="recomputeTotals()" placeholder="0" class="w-full px-3 py-2.5 rounded-lg bg-slate-900 border border-slate-700 text-base md:text-sm text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
                         </div>
                         <div>
                             <label class="block text-xs font-semibold text-slate-400 mb-1.5">Percetakan, Stationary & Office Supplies (Rp)</label>
-                            <input type="number" min="0" data-group="biaya_administrasi" oninput="recomputeTotals()" placeholder="0" class="w-full px-3 py-2.5 rounded-lg bg-slate-900 border border-slate-700 text-sm text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
+                            <input type="number" min="0" data-group="biaya_administrasi" oninput="recomputeTotals()" placeholder="0" class="w-full px-3 py-2.5 rounded-lg bg-slate-900 border border-slate-700 text-base md:text-sm text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
                         </div>
                         <div>
                             <label class="block text-xs font-semibold text-slate-400 mb-1.5">Biaya Kendaraan (Rp)</label>
-                            <input type="number" min="0" data-group="biaya_administrasi" oninput="recomputeTotals()" placeholder="0" class="w-full px-3 py-2.5 rounded-lg bg-slate-900 border border-slate-700 text-sm text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
+                            <input type="number" min="0" data-group="biaya_administrasi" oninput="recomputeTotals()" placeholder="0" class="w-full px-3 py-2.5 rounded-lg bg-slate-900 border border-slate-700 text-base md:text-sm text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
                         </div>
                         <div>
                             <label class="block text-xs font-semibold text-slate-400 mb-1.5">Advertising (Rp)</label>
-                            <input type="number" min="0" data-group="biaya_administrasi" oninput="recomputeTotals()" placeholder="0" class="w-full px-3 py-2.5 rounded-lg bg-slate-900 border border-slate-700 text-sm text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
+                            <input type="number" min="0" data-group="biaya_administrasi" oninput="recomputeTotals()" placeholder="0" class="w-full px-3 py-2.5 rounded-lg bg-slate-900 border border-slate-700 text-base md:text-sm text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
                         </div>
                         <div>
                             <label class="block text-xs font-semibold text-slate-400 mb-1.5">Hiburan / Entertainment (Rp)</label>
-                            <input type="number" min="0" data-group="biaya_administrasi" oninput="recomputeTotals()" placeholder="0" class="w-full px-3 py-2.5 rounded-lg bg-slate-900 border border-slate-700 text-sm text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
+                            <input type="number" min="0" data-group="biaya_administrasi" oninput="recomputeTotals()" placeholder="0" class="w-full px-3 py-2.5 rounded-lg bg-slate-900 border border-slate-700 text-base md:text-sm text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
                         </div>
                         <div>
                             <label class="block text-xs font-semibold text-slate-400 mb-1.5">Majalah dan Surat Kabar (Rp)</label>
-                            <input type="number" min="0" data-group="biaya_administrasi" oninput="recomputeTotals()" placeholder="0" class="w-full px-3 py-2.5 rounded-lg bg-slate-900 border border-slate-700 text-sm text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
+                            <input type="number" min="0" data-group="biaya_administrasi" oninput="recomputeTotals()" placeholder="0" class="w-full px-3 py-2.5 rounded-lg bg-slate-900 border border-slate-700 text-base md:text-sm text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
                         </div>
                         <div>
                             <label class="block text-xs font-semibold text-slate-400 mb-1.5">Jamuan Makan (Rp)</label>
-                            <input type="number" min="0" data-group="biaya_administrasi" oninput="recomputeTotals()" placeholder="0" class="w-full px-3 py-2.5 rounded-lg bg-slate-900 border border-slate-700 text-sm text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
+                            <input type="number" min="0" data-group="biaya_administrasi" oninput="recomputeTotals()" placeholder="0" class="w-full px-3 py-2.5 rounded-lg bg-slate-900 border border-slate-700 text-base md:text-sm text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
                         </div>
                         <div>
                             <label class="block text-xs font-semibold text-slate-400 mb-1.5">Perbaikan Umum (Rp)</label>
-                            <input type="number" min="0" data-group="biaya_administrasi" oninput="recomputeTotals()" placeholder="0" class="w-full px-3 py-2.5 rounded-lg bg-slate-900 border border-slate-700 text-sm text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
+                            <input type="number" min="0" data-group="biaya_administrasi" oninput="recomputeTotals()" placeholder="0" class="w-full px-3 py-2.5 rounded-lg bg-slate-900 border border-slate-700 text-base md:text-sm text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
                         </div>
                         <div>
                             <label class="block text-xs font-semibold text-slate-400 mb-1.5">Biaya Bank (Rp)</label>
-                            <input type="number" min="0" data-group="biaya_administrasi" oninput="recomputeTotals()" placeholder="0" class="w-full px-3 py-2.5 rounded-lg bg-slate-900 border border-slate-700 text-sm text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
+                            <input type="number" min="0" data-group="biaya_administrasi" oninput="recomputeTotals()" placeholder="0" class="w-full px-3 py-2.5 rounded-lg bg-slate-900 border border-slate-700 text-base md:text-sm text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
                         </div>
                         <div>
                             <label class="block text-xs font-semibold text-slate-400 mb-1.5">Biaya Akuntan dan Audit (Rp)</label>
-                            <input type="number" min="0" data-group="biaya_administrasi" oninput="recomputeTotals()" placeholder="0" class="w-full px-3 py-2.5 rounded-lg bg-slate-900 border border-slate-700 text-sm text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
+                            <input type="number" min="0" data-group="biaya_administrasi" oninput="recomputeTotals()" placeholder="0" class="w-full px-3 py-2.5 rounded-lg bg-slate-900 border border-slate-700 text-base md:text-sm text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
                         </div>
                         <div>
                             <label class="block text-xs font-semibold text-slate-400 mb-1.5">Biaya Bantuan Hukum & Jasa Profesional (Rp)</label>
-                            <input type="number" min="0" data-group="biaya_administrasi" oninput="recomputeTotals()" placeholder="0" class="w-full px-3 py-2.5 rounded-lg bg-slate-900 border border-slate-700 text-sm text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
+                            <input type="number" min="0" data-group="biaya_administrasi" oninput="recomputeTotals()" placeholder="0" class="w-full px-3 py-2.5 rounded-lg bg-slate-900 border border-slate-700 text-base md:text-sm text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
                         </div>
                         <div>
                             <label class="block text-xs font-semibold text-slate-400 mb-1.5">Komisi (Rp)</label>
-                            <input type="number" min="0" data-group="biaya_administrasi" oninput="recomputeTotals()" placeholder="0" class="w-full px-3 py-2.5 rounded-lg bg-slate-900 border border-slate-700 text-sm text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
+                            <input type="number" min="0" data-group="biaya_administrasi" oninput="recomputeTotals()" placeholder="0" class="w-full px-3 py-2.5 rounded-lg bg-slate-900 border border-slate-700 text-base md:text-sm text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
                         </div>
                         <div>
                             <label class="block text-xs font-semibold text-slate-400 mb-1.5">Biaya Umum (Rp)</label>
-                            <input type="number" min="0" data-group="biaya_administrasi" oninput="recomputeTotals()" placeholder="0" class="w-full px-3 py-2.5 rounded-lg bg-slate-900 border border-slate-700 text-sm text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
+                            <input type="number" min="0" data-group="biaya_administrasi" oninput="recomputeTotals()" placeholder="0" class="w-full px-3 py-2.5 rounded-lg bg-slate-900 border border-slate-700 text-base md:text-sm text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
                         </div>
                     </div>
                 </details>
@@ -381,11 +374,11 @@
                     <div class="px-5 pb-5 grid grid-cols-1 md:grid-cols-2 gap-4 border-t border-slate-700 pt-4">
                         <div>
                             <label class="block text-xs font-semibold text-slate-400 mb-1.5">Penyusutan Gedung (Rp)</label>
-                            <input type="number" min="0" data-group="penyusutan" oninput="recomputeTotals()" placeholder="0" class="w-full px-3 py-2.5 rounded-lg bg-slate-900 border border-slate-700 text-sm text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
+                            <input type="number" min="0" data-group="penyusutan" oninput="recomputeTotals()" placeholder="0" class="w-full px-3 py-2.5 rounded-lg bg-slate-900 border border-slate-700 text-base md:text-sm text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
                         </div>
                         <div>
                             <label class="block text-xs font-semibold text-slate-400 mb-1.5">Penyusutan Peralatan dan Mesin (Rp)</label>
-                            <input type="number" min="0" data-group="penyusutan" oninput="recomputeTotals()" placeholder="0" class="w-full px-3 py-2.5 rounded-lg bg-slate-900 border border-slate-700 text-sm text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
+                            <input type="number" min="0" data-group="penyusutan" oninput="recomputeTotals()" placeholder="0" class="w-full px-3 py-2.5 rounded-lg bg-slate-900 border border-slate-700 text-base md:text-sm text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
                         </div>
                     </div>
                 </details>
@@ -404,15 +397,15 @@
                     <div class="px-5 pb-5 grid grid-cols-1 md:grid-cols-2 gap-4 border-t border-slate-700 pt-4">
                         <div>
                             <label class="block text-xs font-semibold text-slate-400 mb-1.5">Pajak Penghasilan (Rp)</label>
-                            <input type="number" min="0" data-group="pajak" oninput="recomputeTotals()" placeholder="0" class="w-full px-3 py-2.5 rounded-lg bg-slate-900 border border-slate-700 text-sm text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
+                            <input type="number" min="0" data-group="pajak" oninput="recomputeTotals()" placeholder="0" class="w-full px-3 py-2.5 rounded-lg bg-slate-900 border border-slate-700 text-base md:text-sm text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
                         </div>
                         <div>
                             <label class="block text-xs font-semibold text-slate-400 mb-1.5">Pajak Kekayaan (Rp)</label>
-                            <input type="number" min="0" data-group="pajak" oninput="recomputeTotals()" placeholder="0" class="w-full px-3 py-2.5 rounded-lg bg-slate-900 border border-slate-700 text-sm text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
+                            <input type="number" min="0" data-group="pajak" oninput="recomputeTotals()" placeholder="0" class="w-full px-3 py-2.5 rounded-lg bg-slate-900 border border-slate-700 text-base md:text-sm text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
                         </div>
                         <div>
                             <label class="block text-xs font-semibold text-slate-400 mb-1.5">Pajak Upah (Rp)</label>
-                            <input type="number" min="0" data-group="pajak" oninput="recomputeTotals()" placeholder="0" class="w-full px-3 py-2.5 rounded-lg bg-slate-900 border border-slate-700 text-sm text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
+                            <input type="number" min="0" data-group="pajak" oninput="recomputeTotals()" placeholder="0" class="w-full px-3 py-2.5 rounded-lg bg-slate-900 border border-slate-700 text-base md:text-sm text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
                         </div>
                     </div>
                 </details>
@@ -431,35 +424,35 @@
                     <div class="px-5 pb-5 grid grid-cols-1 md:grid-cols-2 gap-4 border-t border-slate-700 pt-4">
                         <div>
                             <label class="block text-xs font-semibold text-slate-400 mb-1.5">Kas dan Bank (Rp)</label>
-                            <input type="number" min="0" data-group="aktiva" oninput="recomputeTotals()" placeholder="0" class="w-full px-3 py-2.5 rounded-lg bg-slate-900 border border-slate-700 text-sm text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
+                            <input type="number" min="0" data-group="aktiva" oninput="recomputeTotals()" placeholder="0" class="w-full px-3 py-2.5 rounded-lg bg-slate-900 border border-slate-700 text-base md:text-sm text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
                         </div>
                         <div>
                             <label class="block text-xs font-semibold text-slate-400 mb-1.5">Persediaan (Rp)</label>
-                            <input type="number" min="0" data-group="aktiva" oninput="recomputeTotals()" placeholder="0" class="w-full px-3 py-2.5 rounded-lg bg-slate-900 border border-slate-700 text-sm text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
+                            <input type="number" min="0" data-group="aktiva" oninput="recomputeTotals()" placeholder="0" class="w-full px-3 py-2.5 rounded-lg bg-slate-900 border border-slate-700 text-base md:text-sm text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
                         </div>
                         <div>
                             <label class="block text-xs font-semibold text-slate-400 mb-1.5">Piutang Dagang (Rp)</label>
-                            <input type="number" min="0" data-group="aktiva" oninput="recomputeTotals()" placeholder="0" class="w-full px-3 py-2.5 rounded-lg bg-slate-900 border border-slate-700 text-sm text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
+                            <input type="number" min="0" data-group="aktiva" oninput="recomputeTotals()" placeholder="0" class="w-full px-3 py-2.5 rounded-lg bg-slate-900 border border-slate-700 text-base md:text-sm text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
                         </div>
                         <div>
                             <label class="block text-xs font-semibold text-slate-400 mb-1.5">Piutang dan Lain-lain (Rp)</label>
-                            <input type="number" min="0" data-group="aktiva" oninput="recomputeTotals()" placeholder="0" class="w-full px-3 py-2.5 rounded-lg bg-slate-900 border border-slate-700 text-sm text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
+                            <input type="number" min="0" data-group="aktiva" oninput="recomputeTotals()" placeholder="0" class="w-full px-3 py-2.5 rounded-lg bg-slate-900 border border-slate-700 text-base md:text-sm text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
                         </div>
                         <div>
                             <label class="block text-xs font-semibold text-slate-400 mb-1.5">Tanah (Rp)</label>
-                            <input type="number" min="0" data-group="aktiva" oninput="recomputeTotals()" placeholder="0" class="w-full px-3 py-2.5 rounded-lg bg-slate-900 border border-slate-700 text-sm text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
+                            <input type="number" min="0" data-group="aktiva" oninput="recomputeTotals()" placeholder="0" class="w-full px-3 py-2.5 rounded-lg bg-slate-900 border border-slate-700 text-base md:text-sm text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
                         </div>
                         <div>
                             <label class="block text-xs font-semibold text-slate-400 mb-1.5">Gedung (Rp)</label>
-                            <input type="number" min="0" data-group="aktiva" oninput="recomputeTotals()" placeholder="0" class="w-full px-3 py-2.5 rounded-lg bg-slate-900 border border-slate-700 text-sm text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
+                            <input type="number" min="0" data-group="aktiva" oninput="recomputeTotals()" placeholder="0" class="w-full px-3 py-2.5 rounded-lg bg-slate-900 border border-slate-700 text-base md:text-sm text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
                         </div>
                         <div>
                             <label class="block text-xs font-semibold text-slate-400 mb-1.5">Mesin dan Peralatan (Rp)</label>
-                            <input type="number" min="0" data-group="aktiva" oninput="recomputeTotals()" placeholder="0" class="w-full px-3 py-2.5 rounded-lg bg-slate-900 border border-slate-700 text-sm text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
+                            <input type="number" min="0" data-group="aktiva" oninput="recomputeTotals()" placeholder="0" class="w-full px-3 py-2.5 rounded-lg bg-slate-900 border border-slate-700 text-base md:text-sm text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
                         </div>
                         <div>
                             <label class="block text-xs font-semibold text-slate-400 mb-1.5">Aktiva Tetap Lainnya (Rp)</label>
-                            <input type="number" min="0" data-group="aktiva" oninput="recomputeTotals()" placeholder="0" class="w-full px-3 py-2.5 rounded-lg bg-slate-900 border border-slate-700 text-sm text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
+                            <input type="number" min="0" data-group="aktiva" oninput="recomputeTotals()" placeholder="0" class="w-full px-3 py-2.5 rounded-lg bg-slate-900 border border-slate-700 text-base md:text-sm text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
                         </div>
                     </div>
                 </details>
@@ -478,11 +471,11 @@
                     <div class="px-5 pb-5 grid grid-cols-1 md:grid-cols-2 gap-4 border-t border-slate-700 pt-4">
                         <div>
                             <label class="block text-xs font-semibold text-slate-400 mb-1.5">Laba Bersih (Rp)</label>
-                            <input type="number" min="0" data-group="laba" oninput="recomputeTotals()" placeholder="0" class="w-full px-3 py-2.5 rounded-lg bg-slate-900 border border-slate-700 text-sm text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
+                            <input type="number" min="0" data-group="laba" oninput="recomputeTotals()" placeholder="0" class="w-full px-3 py-2.5 rounded-lg bg-slate-900 border border-slate-700 text-base md:text-sm text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
                         </div>
                         <div>
                             <label class="block text-xs font-semibold text-slate-400 mb-1.5">Laba Operasi (Rp)</label>
-                            <input type="number" min="0" data-group="laba" oninput="recomputeTotals()" placeholder="0" class="w-full px-3 py-2.5 rounded-lg bg-slate-900 border border-slate-700 text-sm text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
+                            <input type="number" min="0" data-group="laba" oninput="recomputeTotals()" placeholder="0" class="w-full px-3 py-2.5 rounded-lg bg-slate-900 border border-slate-700 text-base md:text-sm text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
                         </div>
                     </div>
                 </details>
@@ -496,24 +489,24 @@
                     <div class="px-5 pb-5 pt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                             <label class="block text-xs font-semibold text-slate-400 mb-1.5">Total Investasi (Rp)</label>
-                            <input type="number" min="0" data-field="total_investasi" placeholder="0" class="w-full px-3 py-2.5 rounded-lg bg-slate-900 border border-slate-700 text-sm text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
+                            <input type="number" min="0" data-field="total_investasi" placeholder="0" class="w-full px-3 py-2.5 rounded-lg bg-slate-900 border border-slate-700 text-base md:text-sm text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
                             <p class="mt-1.5 text-[11px] text-slate-500">Modal/investasi yang digunakan perusahaan pada periode tahun tersebut.</p>
                         </div>
                         <div>
                             <label class="block text-xs font-semibold text-slate-400 mb-1.5">Jumlah Tenaga Kerja (orang)</label>
-                            <input type="number" min="0" data-field="jumlah_tenaga_kerja" placeholder="0" class="w-full px-3 py-2.5 rounded-lg bg-slate-900 border border-slate-700 text-sm text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
+                            <input type="number" min="0" data-field="jumlah_tenaga_kerja" placeholder="0" class="w-full px-3 py-2.5 rounded-lg bg-slate-900 border border-slate-700 text-base md:text-sm text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
                         </div>
                         <div>
                             <label class="block text-xs font-semibold text-slate-400 mb-1.5">Jumlah Jam Kerja (jam)</label>
-                            <input type="number" min="0" data-field="jumlah_jam_kerja" placeholder="0" class="w-full px-3 py-2.5 rounded-lg bg-slate-900 border border-slate-700 text-sm text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
+                            <input type="number" min="0" data-field="jumlah_jam_kerja" placeholder="0" class="w-full px-3 py-2.5 rounded-lg bg-slate-900 border border-slate-700 text-base md:text-sm text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
                         </div>
                         <div>
                             <label class="block text-xs font-semibold text-slate-400 mb-1.5">Jumlah Jam Lembur (jam)</label>
-                            <input type="number" min="0" data-field="jumlah_jam_lembur" placeholder="0" class="w-full px-3 py-2.5 rounded-lg bg-slate-900 border border-slate-700 text-sm text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
+                            <input type="number" min="0" data-field="jumlah_jam_lembur" placeholder="0" class="w-full px-3 py-2.5 rounded-lg bg-slate-900 border border-slate-700 text-base md:text-sm text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
                         </div>
                         <div>
                             <label class="block text-xs font-semibold text-slate-400 mb-1.5">Total Jam Kerja (jam)</label>
-                            <input type="number" min="0" data-field="total_jam_kerja" placeholder="0" class="w-full px-3 py-2.5 rounded-lg bg-slate-900 border border-slate-700 text-sm text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
+                            <input type="number" min="0" data-field="total_jam_kerja" placeholder="0" class="w-full px-3 py-2.5 rounded-lg bg-slate-900 border border-slate-700 text-base md:text-sm text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
                         </div>
                     </div>
                 </div>
@@ -535,7 +528,7 @@
                     </div>
                 </div>
 
-<!-- Rangkuman Perhitungan Nilai Tambah -->
+                <!-- Rangkuman Perhitungan Nilai Tambah -->
                 <div class="bg-slate-800 rounded-2xl border border-teal-500/30 p-6">
                     <h2 class="text-sm font-bold text-teal-400 uppercase tracking-wider mb-4 flex items-center gap-2">
                         <i class="fa-solid fa-square-root-variable"></i> Rangkuman Perhitungan Nilai Tambah
@@ -568,7 +561,6 @@
                     </div>
                 </div>
 
-                <!-- Area ini siap diperluas dengan parameter keuangan tambahan. -->
                 <div class="flex justify-end gap-3 pb-4">
                     <button type="button" onclick="resetInputData()" class="px-5 py-2.5 rounded-xl text-sm font-semibold text-slate-300 border border-slate-700 hover:bg-slate-800 transition flex items-center gap-2">
                         <i class="fa-solid fa-rotate-left"></i> Reset Form
@@ -605,6 +597,11 @@
         const NAV_INACTIVE = "block px-4 py-3 text-slate-400 hover:bg-slate-800 hover:text-slate-200 rounded-xl font-semibold text-sm flex items-center gap-3 transition";
 
         function switchView(view) {
+            // Perbarui view ringkasan dengan data terbaru sebelum menampilkannya
+            if (view === 'ringkasan') {
+                updateRingkasanView();
+            }
+
             document.getElementById('view-ringkasan').classList.toggle('hidden', view !== 'ringkasan');
             document.getElementById('view-input-data').classList.toggle('hidden', view !== 'input-data');
             document.getElementById('navRingkasan').className = view === 'ringkasan' ? NAV_ACTIVE : NAV_INACTIVE;
@@ -612,7 +609,6 @@
         }
 
         // ===== Tab input data tahunan =====
-        // Tidak ada batas jumlah tahun. Data dibuat satu per satu melalui tombol +.
         let yearCount = 0;
         let activeYearId = null;
         const yearMeta = {};
@@ -667,10 +663,8 @@
                 input.placeholder = 'Tahun';
                 input.title = 'Edit judul tab secara langsung';
                 input.setAttribute('aria-label', `Judul tab ${index + 1}`);
-                input.className = `w-24 bg-transparent outline-none border-b border-transparent focus:border-teal-500 text-sm font-bold ${active ? 'text-teal-400' : 'text-slate-300'}`;
-                // Judul tab adalah input yang benar-benar bisa diedit.
-                // Saat diklik/fokus, aktifkan tab TANPA me-render ulang tab,
-                // supaya fokus keyboard tidak hilang.
+                input.className = `w-24 bg-transparent outline-none border-b border-transparent focus:border-teal-500 text-base md:text-sm font-bold ${active ? 'text-teal-400' : 'text-slate-300'}`;
+                
                 input.addEventListener('click', e => {
                     e.stopPropagation();
                     setActiveYearVisual(yearId);
@@ -682,6 +676,7 @@
                 input.addEventListener('focus', () => setActiveYearVisual(yearId));
                 input.addEventListener('input', e => {
                     yearMeta[yearId].title = e.target.value;
+                    updateRingkasanView(); // Update teks judul secara realtime jika diubah
                 });
 
                 const deleteButton = document.createElement('button');
@@ -725,14 +720,11 @@
                 panel.classList.toggle('hidden', panel.dataset.yearId !== yearId);
             });
 
-            // Perbarui tampilan aktif tanpa membangun ulang elemen tab,
-            // sehingga input judul tetap fokus dan bisa diketik.
             document.querySelectorAll('#yearTabsList > div.group').forEach(tab => {
                 tab.classList.remove('bg-slate-900', 'border-slate-700', 'text-teal-400');
                 tab.classList.add('bg-slate-800/70', 'border-transparent', 'text-slate-400');
             });
 
-            // Penentuan visual yang stabil dilakukan berdasarkan urutan tab.
             const ids = Object.keys(yearMeta);
             const index = ids.indexOf(yearId);
             const tabs = document.querySelectorAll('#yearTabsList > div.group');
@@ -784,6 +776,7 @@
                 activeYearId = null;
                 renderYearTabs();
                 updateYearEmptyState();
+                updateRingkasanView();
                 return;
             }
 
@@ -800,6 +793,7 @@
                 panelEl.classList.toggle('hidden', panelEl.dataset.yearId !== activeYearId);
             });
             recomputeTotals(getYearPanel(activeYearId));
+            updateRingkasanView();
         }
 
         function addYear() {
@@ -814,7 +808,6 @@
             newPanel.dataset.yearId = newYearId;
             newPanel.classList.remove('hidden');
 
-            // Data tahun baru selalu kosong.
             newPanel.querySelectorAll('input[type="number"]').forEach(input => {
                 input.value = '';
             });
@@ -822,11 +815,9 @@
                 input.value = '';
             });
 
-            // Template tidak ditampilkan sebagai data aktif.
             template.classList.add('hidden');
             template.dataset.yearId = 'template';
 
-            // Detail pertama dibuka agar pengguna langsung melihat form.
             const firstDetails = newPanel.querySelector('details');
             if (firstDetails) firstDetails.open = true;
 
@@ -834,7 +825,6 @@
             activeYearId = newYearId;
             activateYear(newYearId);
 
-            // Fokus ke judul tab baru agar tahun bisa langsung diketik.
             requestAnimationFrame(() => {
                 const inputs = [...document.querySelectorAll('#yearTabsList input')];
                 const newTitleInput = inputs[inputs.length - 1];
@@ -843,14 +833,9 @@
                     newTitleInput.select();
                 }
             });
+            updateRingkasanView();
         }
 
-        // ===== Perhitungan otomatis =====
-        // Tambahkan nama grup baru ke CURRENCY_GROUPS ketika parameter
-        // keuangan tambahan sudah dimasukkan ke form.
-        //
-        // Rumus Nilai Tambah:
-        // Biaya Tenaga Kerja + Laba + Penyusutan + Pajak + Bunga.
         const CURRENCY_GROUPS = [
             'biaya_tenaga_kerja', 'bahan_digunakan', 'overhead_produksi',
             'bunga_pinjaman', 'biaya_administrasi', 'penyusutan', 'pajak',
@@ -868,17 +853,13 @@
                 CURRENCY_GROUPS.map(group => [group, sumGroup(panel, group)])
             );
 
-            // Perbarui total pada setiap kategori.
             CURRENCY_GROUPS.forEach(group => {
                 const totalEl = panel.querySelector(`[data-total="${group}"]`);
-
                 if (totalEl) {
                     totalEl.textContent = formatRupiah(totals[group]);
                 }
             });
 
-            // Nilai tambah sesuai rangkuman pada dokumen:
-            // Biaya Tenaga Kerja + Laba + Penyusutan + Pajak + Bunga.
             const nilaiTambah =
                 (totals.biaya_tenaga_kerja || 0) +
                 (totals.laba || 0) +
@@ -893,21 +874,21 @@
             setResult(panel, 'bunga_pinjaman', totals.bunga_pinjaman);
             setResult(panel, 'total_nilai_tambah', nilaiTambah);
             setResult(panel, 'total_ringkasan', nilaiTambah);
+
+            // Perbarui juga data ringkasan secara real-time
+            updateRingkasanView();
         }
 
         function sumGroup(panel, group) {
             let sum = 0;
-
             panel.querySelectorAll(`input[data-group="${group}"]`).forEach(input => {
                 sum += parseFloat(input.value) || 0;
             });
-
             return sum;
         }
 
         function setResult(panel, key, value) {
             const resultEl = panel.querySelector(`[data-result="${key}"]`);
-
             if (resultEl) {
                 resultEl.textContent = formatRupiah(value);
             }
@@ -924,9 +905,87 @@
             recomputeTotals(panel);
         }
 
+        // ===== FUNGSI GENERATE VISUALISASI RINGKASAN DINAMIS =====
+        function updateRingkasanView() {
+            const container = document.getElementById('ringkasan-content');
+            if (!container) return;
+
+            const activePanels = document.querySelectorAll('.year-panel:not([data-year-id="template"])');
+
+            // JIKA KOSONG: Munculkan pesan belum ada data
+            if (activePanels.length === 0) {
+                container.innerHTML = `
+                    <div class="bg-slate-800/70 rounded-2xl border border-dashed border-slate-600 px-6 py-12 text-center fade-in">
+                        <div class="w-14 h-14 mx-auto mb-4 rounded-2xl bg-teal-500/10 border border-teal-500/20 text-teal-400 flex items-center justify-center">
+                            <i class="fa-solid fa-chart-pie text-xl"></i>
+                        </div>
+                        <h2 class="text-lg font-bold text-white mb-2">Belum Ada Data Visualisasi</h2>
+                        <p class="text-sm text-slate-400 max-w-md mx-auto mb-5">Silakan tambahkan dan isi data keuangan di Kalkulator EVA terlebih dahulu agar visualisasi rangkuman dapat ditampilkan di sini.</p>
+                        <button type="button" onclick="switchView('input-data')" class="px-6 py-3 rounded-xl bg-teal-500 hover:bg-teal-400 text-slate-950 font-bold text-sm transition inline-flex items-center gap-2">
+                            <i class="fa-solid fa-arrow-right"></i> Ke Kalkulator EVA
+                        </button>
+                    </div>
+                `;
+                return;
+            }
+
+            // JIKA ADA DATA: Generate Grid Kartu
+            let htmlContent = '<div class="grid grid-cols-1 md:grid-cols-2 gap-6 fade-in">';
+
+            activePanels.forEach((panel, index) => {
+                const yearId = panel.dataset.yearId;
+                const title = yearMeta[yearId]?.title || `Tahun ${index + 1} (Belum Dinamai)`;
+
+                const getValue = (key) => {
+                    const el = panel.querySelector(`[data-result="${key}"]`);
+                    return el ? el.textContent : 'Rp0';
+                };
+
+                htmlContent += `
+                    <div class="bg-slate-800 p-6 rounded-2xl border border-slate-700 hover:border-teal-500/50 transition-colors duration-300">
+                        <div class="flex items-center justify-between mb-4 border-b border-slate-700 pb-4">
+                            <h3 class="text-lg font-bold text-white flex items-center gap-2">
+                                <i class="fa-solid fa-calendar-days text-teal-400"></i> ${title}
+                            </h3>
+                            <span class="px-3 py-1 bg-teal-500/10 text-teal-400 text-[10px] uppercase font-bold rounded-lg border border-teal-500/20">Data Analisis</span>
+                        </div>
+                        <div class="space-y-4">
+                            <div class="bg-slate-900/60 p-4 rounded-xl border border-slate-700/50">
+                                <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">Total Nilai Tambah</p>
+                                <p class="text-2xl font-extrabold text-teal-400">${getValue('total_nilai_tambah')}</p>
+                            </div>
+                            
+                            <div class="grid grid-cols-2 gap-3">
+                                <div class="bg-slate-900/60 p-3 rounded-xl border border-slate-700/50">
+                                    <p class="text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-1">Biaya Tenaga Kerja</p>
+                                    <p class="text-sm font-bold text-white">${getValue('biaya_tenaga_kerja')}</p>
+                                </div>
+                                <div class="bg-slate-900/60 p-3 rounded-xl border border-slate-700/50">
+                                    <p class="text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-1">Laba</p>
+                                    <p class="text-sm font-bold text-white">${getValue('laba')}</p>
+                                </div>
+                                <div class="bg-slate-900/60 p-3 rounded-xl border border-slate-700/50">
+                                    <p class="text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-1">Penyusutan</p>
+                                    <p class="text-sm font-bold text-white">${getValue('penyusutan')}</p>
+                                </div>
+                                <div class="bg-slate-900/60 p-3 rounded-xl border border-slate-700/50">
+                                    <p class="text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-1">Pajak</p>
+                                    <p class="text-sm font-bold text-white">${getValue('pajak')}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            htmlContent += '</div>';
+            container.innerHTML = htmlContent;
+        }
+
         document.addEventListener('DOMContentLoaded', () => {
             renderYearTabs();
             updateYearEmptyState();
+            updateRingkasanView();
         });
     </script>
 </body>
