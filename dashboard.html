@@ -24,6 +24,8 @@
         .chevron { transition: transform 0.2s ease; }
         input[type=number]::-webkit-inner-spin-button,
         input[type=number]::-webkit-outer-spin-button { opacity: 1; }
+        #yearTabsList { scrollbar-width: thin; }
+        #yearTabsList > .group { min-width: max-content; }
     </style>
 </head>
 <body class="bg-slate-900 font-sans text-slate-100 antialiased min-h-screen flex flex-col">
@@ -108,8 +110,27 @@
                 <div class="bg-gradient-to-r from-slate-800 to-slate-800/50 rounded-2xl p-6 border border-slate-700 relative overflow-hidden">
                     <div class="absolute -right-20 -top-20 w-64 h-64 bg-teal-500/10 rounded-full blur-3xl"></div>
                     <h1 class="text-2xl font-bold text-white mb-2 relative z-10">Input Data Nilai Tambah</h1>
-                    <p class="text-slate-400 text-sm relative z-10">Input Data Berdasarkan Laporan Keuangan Perusahaan.</p>
+                    <p class="text-slate-400 text-sm relative z-10">Input data laporan keuangan per tahun. Gunakan tab untuk berpindah antar tahun.</p>
                 </div>
+
+                <!-- ===== TAB DATA TAHUNAN ===== -->
+                <div id="yearTabs" class="bg-slate-800 rounded-2xl border border-slate-700 overflow-hidden">
+                    <div id="yearTabsList" class="flex items-center gap-2 overflow-x-auto min-h-[64px] px-4"></div>
+                </div>
+
+                <div id="emptyYearState" class="bg-slate-800/70 rounded-2xl border border-dashed border-slate-600 px-6 py-12 text-center">
+                    <div class="w-14 h-14 mx-auto mb-4 rounded-2xl bg-teal-500/10 border border-teal-500/20 text-teal-400 flex items-center justify-center">
+                        <i class="fa-solid fa-plus text-xl"></i>
+                    </div>
+                    <h2 class="text-lg font-bold text-white mb-2">Belum Ada Data Keuangan</h2>
+                    <p class="text-sm text-slate-400 max-w-md mx-auto mb-5">Tambahkan data keuangan pertama. Setelah dibuat, judul tab dapat langsung Anda ubah menjadi tahun yang sesuai.</p>
+                    <button type="button" onclick="addYear()" class="px-6 py-3 rounded-xl bg-teal-500 hover:bg-teal-400 text-slate-950 font-bold text-sm transition inline-flex items-center gap-2">
+                        <i class="fa-solid fa-plus"></i> Tambah Data Keuangan
+                    </button>
+                </div>
+
+                <div id="yearPanels" class="space-y-6 hidden">
+                    <div class="year-panel space-y-6 hidden" data-year-id="template">
 
                 <!-- 1. Penjualan -->
                 <details class="bg-slate-800 rounded-2xl border border-slate-700 overflow-hidden" open>
@@ -120,10 +141,6 @@
                         <i class="fa-solid fa-chevron-down text-slate-500 text-xs chevron"></i>
                     </summary>
                     <div class="px-5 pb-5 grid grid-cols-1 md:grid-cols-2 gap-4 border-t border-slate-700 pt-4">
-                        <div>
-                            <label class="block text-xs font-semibold text-slate-400 mb-1.5">Periode</label>
-                            <input type="text" placeholder="cth. Q1 2026" class="w-full px-3 py-2.5 rounded-lg bg-slate-900 border border-slate-700 text-sm text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
-                        </div>
                         <div>
                             <label class="block text-xs font-semibold text-slate-400 mb-1.5">Total Penjualan / Pendapatan (Rp)</label>
                             <input type="number" min="0" placeholder="0" class="w-full px-3 py-2.5 rounded-lg bg-slate-900 border border-slate-700 text-sm text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
@@ -154,7 +171,7 @@
                             <i class="fa-solid fa-users w-4 text-teal-400"></i> Biaya Tenaga Kerja
                         </span>
                         <span class="flex items-center gap-3">
-                            <span class="text-xs text-slate-400">Total: <span id="total-biaya_tenaga_kerja" class="text-teal-400 font-bold">Rp0</span></span>
+                            <span class="text-xs text-slate-400">Total: <span data-total="biaya_tenaga_kerja" class="text-teal-400 font-bold">Rp0</span></span>
                             <i class="fa-solid fa-chevron-down text-slate-500 text-xs chevron"></i>
                         </span>
                     </summary>
@@ -181,7 +198,7 @@
                             <i class="fa-solid fa-boxes-stacked w-4 text-teal-400"></i> Bahan yang Digunakan
                         </span>
                         <span class="flex items-center gap-3">
-                            <span class="text-xs text-slate-400">Total: <span id="total-bahan_digunakan" class="text-teal-400 font-bold">Rp0</span></span>
+                            <span class="text-xs text-slate-400">Total: <span data-total="bahan_digunakan" class="text-teal-400 font-bold">Rp0</span></span>
                             <i class="fa-solid fa-chevron-down text-slate-500 text-xs chevron"></i>
                         </span>
                     </summary>
@@ -212,7 +229,7 @@
                             <i class="fa-solid fa-industry w-4 text-teal-400"></i> Overhead Produksi
                         </span>
                         <span class="flex items-center gap-3">
-                            <span class="text-xs text-slate-400">Total: <span id="total-overhead_produksi" class="text-teal-400 font-bold">Rp0</span></span>
+                            <span class="text-xs text-slate-400">Total: <span data-total="overhead_produksi" class="text-teal-400 font-bold">Rp0</span></span>
                             <i class="fa-solid fa-chevron-down text-slate-500 text-xs chevron"></i>
                         </span>
                     </summary>
@@ -259,7 +276,7 @@
                             <i class="fa-solid fa-percent w-4 text-teal-400"></i> Bunga Pinjaman
                         </span>
                         <span class="flex items-center gap-3">
-                            <span class="text-xs text-slate-400">Total: <span id="total-bunga_pinjaman" class="text-teal-400 font-bold">Rp0</span></span>
+                            <span class="text-xs text-slate-400">Total: <span data-total="bunga_pinjaman" class="text-teal-400 font-bold">Rp0</span></span>
                             <i class="fa-solid fa-chevron-down text-slate-500 text-xs chevron"></i>
                         </span>
                     </summary>
@@ -282,7 +299,7 @@
                             <i class="fa-solid fa-file-invoice w-4 text-teal-400"></i> Biaya Administrasi
                         </span>
                         <span class="flex items-center gap-3">
-                            <span class="text-xs text-slate-400">Total: <span id="total-biaya_administrasi" class="text-teal-400 font-bold">Rp0</span></span>
+                            <span class="text-xs text-slate-400">Total: <span data-total="biaya_administrasi" class="text-teal-400 font-bold">Rp0</span></span>
                             <i class="fa-solid fa-chevron-down text-slate-500 text-xs chevron"></i>
                         </span>
                     </summary>
@@ -357,7 +374,7 @@
                             <i class="fa-solid fa-arrow-trend-down w-4 text-teal-400"></i> Penyusutan
                         </span>
                         <span class="flex items-center gap-3">
-                            <span class="text-xs text-slate-400">Total: <span id="total-penyusutan" class="text-teal-400 font-bold">Rp0</span></span>
+                            <span class="text-xs text-slate-400">Total: <span data-total="penyusutan" class="text-teal-400 font-bold">Rp0</span></span>
                             <i class="fa-solid fa-chevron-down text-slate-500 text-xs chevron"></i>
                         </span>
                     </summary>
@@ -380,7 +397,7 @@
                             <i class="fa-solid fa-landmark w-4 text-teal-400"></i> Pajak
                         </span>
                         <span class="flex items-center gap-3">
-                            <span class="text-xs text-slate-400">Total: <span id="total-pajak" class="text-teal-400 font-bold">Rp0</span></span>
+                            <span class="text-xs text-slate-400">Total: <span data-total="pajak" class="text-teal-400 font-bold">Rp0</span></span>
                             <i class="fa-solid fa-chevron-down text-slate-500 text-xs chevron"></i>
                         </span>
                     </summary>
@@ -407,7 +424,7 @@
                             <i class="fa-solid fa-building w-4 text-teal-400"></i> Aktiva Perusahaan
                         </span>
                         <span class="flex items-center gap-3">
-                            <span class="text-xs text-slate-400">Total: <span id="total-aktiva" class="text-teal-400 font-bold">Rp0</span></span>
+                            <span class="text-xs text-slate-400">Total: <span data-total="aktiva" class="text-teal-400 font-bold">Rp0</span></span>
                             <i class="fa-solid fa-chevron-down text-slate-500 text-xs chevron"></i>
                         </span>
                     </summary>
@@ -454,7 +471,7 @@
                             <i class="fa-solid fa-sack-dollar w-4 text-teal-400"></i> Laba
                         </span>
                         <span class="flex items-center gap-3">
-                            <span class="text-xs text-slate-400">Total: <span id="total-laba" class="text-teal-400 font-bold">Rp0</span></span>
+                            <span class="text-xs text-slate-400">Total: <span data-total="laba" class="text-teal-400 font-bold">Rp0</span></span>
                             <i class="fa-solid fa-chevron-down text-slate-500 text-xs chevron"></i>
                         </span>
                     </summary>
@@ -470,34 +487,55 @@
                     </div>
                 </details>
 
-                <!-- 11. Total Investasi -->
-                <details class="bg-slate-800 rounded-2xl border border-slate-700 overflow-hidden">
-                    <summary class="cursor-pointer list-none flex items-center justify-between px-5 py-4 select-none">
-                        <span class="font-bold text-white text-sm flex items-center gap-2">
-                            <i class="fa-solid fa-user-clock w-4 text-teal-400"></i> Total Investasi
-                        </span>
-                        <i class="fa-solid fa-chevron-down text-slate-500 text-xs chevron"></i>
-                    </summary>
-                    <div class="px-5 pb-5 grid grid-cols-1 md:grid-cols-2 gap-4 border-t border-slate-700 pt-4">
+                <!-- 11. Investasi & Produktivitas -->
+                <div class="bg-slate-800 rounded-2xl border border-slate-700 overflow-hidden">
+                    <div class="px-5 py-4 flex items-center gap-2 border-b border-slate-700">
+                        <i class="fa-solid fa-user-clock w-4 text-teal-400"></i>
+                        <span class="font-bold text-white text-sm">Investasi & Produktivitas</span>
+                    </div>
+                    <div class="px-5 pb-5 pt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-400 mb-1.5">Total Investasi (Rp)</label>
+                            <input type="number" min="0" data-field="total_investasi" placeholder="0" class="w-full px-3 py-2.5 rounded-lg bg-slate-900 border border-slate-700 text-sm text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
+                            <p class="mt-1.5 text-[11px] text-slate-500">Modal/investasi yang digunakan perusahaan pada periode tahun tersebut.</p>
+                        </div>
                         <div>
                             <label class="block text-xs font-semibold text-slate-400 mb-1.5">Jumlah Tenaga Kerja (orang)</label>
-                            <input type="number" min="0" placeholder="0" class="w-full px-3 py-2.5 rounded-lg bg-slate-900 border border-slate-700 text-sm text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
+                            <input type="number" min="0" data-field="jumlah_tenaga_kerja" placeholder="0" class="w-full px-3 py-2.5 rounded-lg bg-slate-900 border border-slate-700 text-sm text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
                         </div>
                         <div>
                             <label class="block text-xs font-semibold text-slate-400 mb-1.5">Jumlah Jam Kerja (jam)</label>
-                            <input type="number" min="0" placeholder="0" class="w-full px-3 py-2.5 rounded-lg bg-slate-900 border border-slate-700 text-sm text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
+                            <input type="number" min="0" data-field="jumlah_jam_kerja" placeholder="0" class="w-full px-3 py-2.5 rounded-lg bg-slate-900 border border-slate-700 text-sm text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
                         </div>
                         <div>
                             <label class="block text-xs font-semibold text-slate-400 mb-1.5">Jumlah Jam Lembur (jam)</label>
-                            <input type="number" min="0" placeholder="0" class="w-full px-3 py-2.5 rounded-lg bg-slate-900 border border-slate-700 text-sm text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
+                            <input type="number" min="0" data-field="jumlah_jam_lembur" placeholder="0" class="w-full px-3 py-2.5 rounded-lg bg-slate-900 border border-slate-700 text-sm text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
                         </div>
                         <div>
                             <label class="block text-xs font-semibold text-slate-400 mb-1.5">Total Jam Kerja (jam)</label>
-                            <input type="number" min="0" placeholder="0" class="w-full px-3 py-2.5 rounded-lg bg-slate-900 border border-slate-700 text-sm text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
+                            <input type="number" min="0" data-field="total_jam_kerja" placeholder="0" class="w-full px-3 py-2.5 rounded-lg bg-slate-900 border border-slate-700 text-sm text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
                         </div>
                     </div>
-                </details>
-                <!-- Rangkuman Perhitungan Nilai Tambah -->
+                </div>
+                <!-- Total Nilai Tambah -->
+                <div class="bg-gradient-to-r from-teal-500/10 to-slate-800 rounded-2xl border border-teal-500/30 p-6">
+                    <div class="flex items-center justify-between gap-4">
+                        <div>
+                            <div class="text-xs font-bold uppercase tracking-wider text-teal-400 mb-1">
+                                Total Nilai Tambah
+                            </div>
+                            <p class="text-xs text-slate-400">
+                                Hasil dari biaya tenaga kerja, laba, penyusutan, pajak, dan bunga.
+                            </p>
+                        </div>
+                        <div data-result="total_nilai_tambah"
+                             class="text-2xl md:text-3xl font-extrabold text-teal-400 whitespace-nowrap">
+                            Rp0
+                        </div>
+                    </div>
+                </div>
+
+<!-- Rangkuman Perhitungan Nilai Tambah -->
                 <div class="bg-slate-800 rounded-2xl border border-teal-500/30 p-6">
                     <h2 class="text-sm font-bold text-teal-400 uppercase tracking-wider mb-4 flex items-center gap-2">
                         <i class="fa-solid fa-square-root-variable"></i> Rangkuman Perhitungan Nilai Tambah
@@ -505,35 +543,39 @@
                     <div class="grid grid-cols-2 md:grid-cols-5 gap-4 text-sm">
                         <div>
                             <div class="text-slate-400 text-xs mb-1">Biaya Tenaga Kerja</div>
-                            <div id="rt-biaya_tenaga_kerja" class="font-bold text-white">Rp0</div>
+                            <div data-result="biaya_tenaga_kerja" class="font-bold text-white">Rp0</div>
                         </div>
                         <div>
                             <div class="text-slate-400 text-xs mb-1">Laba</div>
-                            <div id="rt-laba" class="font-bold text-white">Rp0</div>
+                            <div data-result="laba" class="font-bold text-white">Rp0</div>
                         </div>
                         <div>
                             <div class="text-slate-400 text-xs mb-1">Penyusutan</div>
-                            <div id="rt-penyusutan" class="font-bold text-white">Rp0</div>
+                            <div data-result="penyusutan" class="font-bold text-white">Rp0</div>
                         </div>
                         <div>
                             <div class="text-slate-400 text-xs mb-1">Pajak</div>
-                            <div id="rt-pajak" class="font-bold text-white">Rp0</div>
+                            <div data-result="pajak" class="font-bold text-white">Rp0</div>
                         </div>
                         <div>
                             <div class="text-slate-400 text-xs mb-1">Bunga</div>
-                            <div id="rt-bunga_pinjaman" class="font-bold text-white">Rp0</div>
+                            <div data-result="bunga_pinjaman" class="font-bold text-white">Rp0</div>
                         </div>
                     </div>
                     <div class="mt-5 pt-5 border-t border-slate-700 flex items-center justify-between">
-                        <span class="text-slate-300 font-semibold text-sm">Total Nilai Tambah</span>
-                        <span id="rt-total" class="text-2xl font-extrabold text-teal-400">Rp0</span>
+                        <span class="text-slate-300 font-semibold text-sm">Total</span>
+                        <span data-result="total_ringkasan" class="text-2xl font-extrabold text-teal-400">Rp0</span>
                     </div>
                 </div>
 
+                <!-- Area ini siap diperluas dengan parameter keuangan tambahan. -->
                 <div class="flex justify-end gap-3 pb-4">
                     <button type="button" onclick="resetInputData()" class="px-5 py-2.5 rounded-xl text-sm font-semibold text-slate-300 border border-slate-700 hover:bg-slate-800 transition flex items-center gap-2">
                         <i class="fa-solid fa-rotate-left"></i> Reset Form
                     </button>
+                </div>
+
+                    </div>
                 </div>
 
             </div>
@@ -569,8 +611,246 @@
             document.getElementById('navInputData').className = view === 'input-data' ? NAV_ACTIVE : NAV_INACTIVE;
         }
 
-        // ===== Perhitungan otomatis total per kategori & Rangkuman Nilai Tambah =====
-        // Rumus: Nilai Tambah = Biaya Tenaga Kerja + Laba + Penyusutan + Pajak + Bunga
+        // ===== Tab input data tahunan =====
+        // Tidak ada batas jumlah tahun. Data dibuat satu per satu melalui tombol +.
+        let yearCount = 0;
+        let activeYearId = null;
+        const yearMeta = {};
+
+        function getYearPanel(yearId = activeYearId) {
+            if (!yearId) return null;
+            return document.querySelector(`.year-panel[data-year-id="${yearId}"]`);
+        }
+
+        function updateYearEmptyState() {
+            const empty = document.getElementById('emptyYearState');
+            const panels = document.getElementById('yearPanels');
+            const hasData = yearCount > 0;
+            empty.classList.toggle('hidden', hasData);
+            panels.classList.toggle('hidden', !hasData);
+        }
+
+        function renderYearTabs() {
+            const list = document.getElementById('yearTabsList');
+            list.innerHTML = '';
+
+            if (yearCount === 0) {
+                const hint = document.createElement('div');
+                hint.className = 'w-full flex items-center justify-center';
+                hint.innerHTML = '<span class="text-sm text-slate-500">Tab tahun akan muncul di sini setelah Anda menambahkan data</span>';
+                list.appendChild(hint);
+                updateYearEmptyState();
+                return;
+            }
+
+            Object.keys(yearMeta).forEach((yearId, index) => {
+                const meta = yearMeta[yearId];
+                const active = yearId === activeYearId;
+
+                const tab = document.createElement('div');
+                tab.className = `group flex items-center gap-2 shrink-0 px-4 py-2.5 rounded-t-xl border border-b-0 transition ${
+                    active
+                        ? 'bg-slate-900 border-slate-700 text-teal-400'
+                        : 'bg-slate-800/70 border-transparent text-slate-400 hover:text-slate-200 hover:bg-slate-800'
+                }`;
+
+                const iconButton = document.createElement('button');
+                iconButton.type = 'button';
+                iconButton.className = `flex items-center justify-center text-xs ${active ? 'text-teal-400' : 'text-slate-500'}`;
+                iconButton.innerHTML = '<i class="fa-solid fa-calendar-days"></i>';
+                iconButton.title = 'Buka data tahun ini';
+                iconButton.addEventListener('click', () => activateYear(yearId));
+
+                const input = document.createElement('input');
+                input.type = 'text';
+                input.value = meta.title;
+                input.placeholder = 'Tahun';
+                input.title = 'Edit judul tab secara langsung';
+                input.setAttribute('aria-label', `Judul tab ${index + 1}`);
+                input.className = `w-24 bg-transparent outline-none border-b border-transparent focus:border-teal-500 text-sm font-bold ${active ? 'text-teal-400' : 'text-slate-300'}`;
+                // Judul tab adalah input yang benar-benar bisa diedit.
+                // Saat diklik/fokus, aktifkan tab TANPA me-render ulang tab,
+                // supaya fokus keyboard tidak hilang.
+                input.addEventListener('click', e => {
+                    e.stopPropagation();
+                    setActiveYearVisual(yearId);
+                });
+                input.addEventListener('mousedown', e => {
+                    e.stopPropagation();
+                    setActiveYearVisual(yearId);
+                });
+                input.addEventListener('focus', () => setActiveYearVisual(yearId));
+                input.addEventListener('input', e => {
+                    yearMeta[yearId].title = e.target.value;
+                });
+
+                const deleteButton = document.createElement('button');
+                deleteButton.type = 'button';
+                deleteButton.className = `ml-1 w-6 h-6 rounded-md flex items-center justify-center text-xs transition ${active ? 'text-slate-500 hover:text-rose-400 hover:bg-rose-500/10' : 'text-slate-600 hover:text-rose-400 hover:bg-rose-500/10'}`;
+                deleteButton.innerHTML = '<i class="fa-solid fa-trash-can"></i>';
+                deleteButton.title = `Hapus data ${meta.title || 'tahun ini'}`;
+                deleteButton.setAttribute('aria-label', `Hapus tab ${meta.title || `tahun ${index + 1}`}`);
+                deleteButton.addEventListener('mousedown', e => e.stopPropagation());
+                deleteButton.addEventListener('click', e => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    deleteYear(yearId);
+                });
+
+                tab.appendChild(iconButton);
+                tab.appendChild(input);
+                tab.appendChild(deleteButton);
+                list.appendChild(tab);
+            });
+
+            const addWrap = document.createElement('div');
+            addWrap.className = 'shrink-0 ml-1';
+            const addButton = document.createElement('button');
+            addButton.type = 'button';
+            addButton.onclick = addYear;
+            addButton.className = 'w-10 h-10 rounded-xl border border-dashed border-slate-600 text-slate-400 hover:text-teal-400 hover:border-teal-500/60 hover:bg-teal-500/5 transition flex items-center justify-center';
+            addButton.innerHTML = '<i class="fa-solid fa-plus"></i>';
+            addButton.title = 'Tambah data keuangan tahun baru';
+            addWrap.appendChild(addButton);
+            list.appendChild(addWrap);
+
+            updateYearEmptyState();
+        }
+
+        function setActiveYearVisual(yearId) {
+            if (!yearMeta[yearId]) return;
+            activeYearId = yearId;
+
+            document.querySelectorAll('.year-panel').forEach(panel => {
+                panel.classList.toggle('hidden', panel.dataset.yearId !== yearId);
+            });
+
+            // Perbarui tampilan aktif tanpa membangun ulang elemen tab,
+            // sehingga input judul tetap fokus dan bisa diketik.
+            document.querySelectorAll('#yearTabsList > div.group').forEach(tab => {
+                tab.classList.remove('bg-slate-900', 'border-slate-700', 'text-teal-400');
+                tab.classList.add('bg-slate-800/70', 'border-transparent', 'text-slate-400');
+            });
+
+            // Penentuan visual yang stabil dilakukan berdasarkan urutan tab.
+            const ids = Object.keys(yearMeta);
+            const index = ids.indexOf(yearId);
+            const tabs = document.querySelectorAll('#yearTabsList > div.group');
+            if (index >= 0 && tabs[index]) {
+                const activeTab = tabs[index];
+                activeTab.classList.remove('bg-slate-800/70', 'border-transparent', 'text-slate-400');
+                activeTab.classList.add('bg-slate-900', 'border-slate-700', 'text-teal-400');
+                const tabInput = activeTab.querySelector('input');
+                if (tabInput) {
+                    tabInput.classList.remove('text-slate-300');
+                    tabInput.classList.add('text-teal-400');
+                }
+            }
+
+            recomputeTotals(getYearPanel(yearId));
+        }
+
+        function activateYear(yearId) {
+            if (!yearMeta[yearId]) return;
+            activeYearId = yearId;
+
+            document.querySelectorAll('.year-panel').forEach(panel => {
+                panel.classList.toggle('hidden', panel.dataset.yearId !== yearId);
+            });
+
+            renderYearTabs();
+            recomputeTotals(getYearPanel(yearId));
+        }
+
+        function deleteYear(yearId) {
+            if (!yearMeta[yearId]) return;
+
+            const title = (yearMeta[yearId].title || '').trim();
+            const label = title || 'tahun ini';
+            const confirmed = window.confirm(`Hapus data ${label}? Semua input keuangan pada tab ini akan dihapus.`);
+            if (!confirmed) return;
+
+            const ids = Object.keys(yearMeta);
+            const deletedIndex = ids.indexOf(yearId);
+            const wasActive = activeYearId === yearId;
+
+            delete yearMeta[yearId];
+            const panel = document.querySelector(`.year-panel[data-year-id="${yearId}"]`);
+            if (panel) panel.remove();
+
+            yearCount = Object.keys(yearMeta).length;
+
+            if (yearCount === 0) {
+                activeYearId = null;
+                renderYearTabs();
+                updateYearEmptyState();
+                return;
+            }
+
+            if (wasActive) {
+                const remainingIds = Object.keys(yearMeta);
+                const fallbackIndex = Math.min(Math.max(deletedIndex - 1, 0), remainingIds.length - 1);
+                activeYearId = remainingIds[fallbackIndex];
+            } else if (!yearMeta[activeYearId]) {
+                activeYearId = Object.keys(yearMeta)[0];
+            }
+
+            renderYearTabs();
+            document.querySelectorAll('.year-panel').forEach(panelEl => {
+                panelEl.classList.toggle('hidden', panelEl.dataset.yearId !== activeYearId);
+            });
+            recomputeTotals(getYearPanel(activeYearId));
+        }
+
+        function addYear() {
+            const template = document.querySelector('.year-panel[data-year-id="template"]');
+            if (!template) return;
+
+            yearCount += 1;
+            const newYearId = `year-${yearCount}`;
+            yearMeta[newYearId] = { title: '' };
+
+            const newPanel = template.cloneNode(true);
+            newPanel.dataset.yearId = newYearId;
+            newPanel.classList.remove('hidden');
+
+            // Data tahun baru selalu kosong.
+            newPanel.querySelectorAll('input[type="number"]').forEach(input => {
+                input.value = '';
+            });
+            newPanel.querySelectorAll('input[type="text"]').forEach(input => {
+                input.value = '';
+            });
+
+            // Template tidak ditampilkan sebagai data aktif.
+            template.classList.add('hidden');
+            template.dataset.yearId = 'template';
+
+            // Detail pertama dibuka agar pengguna langsung melihat form.
+            const firstDetails = newPanel.querySelector('details');
+            if (firstDetails) firstDetails.open = true;
+
+            document.getElementById('yearPanels').appendChild(newPanel);
+            activeYearId = newYearId;
+            activateYear(newYearId);
+
+            // Fokus ke judul tab baru agar tahun bisa langsung diketik.
+            requestAnimationFrame(() => {
+                const inputs = [...document.querySelectorAll('#yearTabsList input')];
+                const newTitleInput = inputs[inputs.length - 1];
+                if (newTitleInput) {
+                    newTitleInput.focus();
+                    newTitleInput.select();
+                }
+            });
+        }
+
+        // ===== Perhitungan otomatis =====
+        // Tambahkan nama grup baru ke CURRENCY_GROUPS ketika parameter
+        // keuangan tambahan sudah dimasukkan ke form.
+        //
+        // Rumus Nilai Tambah:
+        // Biaya Tenaga Kerja + Laba + Penyusutan + Pajak + Bunga.
         const CURRENCY_GROUPS = [
             'biaya_tenaga_kerja', 'bahan_digunakan', 'overhead_produksi',
             'bunga_pinjaman', 'biaya_administrasi', 'penyusutan', 'pajak',
@@ -581,36 +861,73 @@
             return 'Rp' + Math.round(n).toLocaleString('id-ID');
         }
 
-        function recomputeTotals() {
-            const totals = {};
+        function recomputeTotals(panel = getYearPanel()) {
+            if (!panel) return;
+
+            const totals = Object.fromEntries(
+                CURRENCY_GROUPS.map(group => [group, sumGroup(panel, group)])
+            );
+
+            // Perbarui total pada setiap kategori.
             CURRENCY_GROUPS.forEach(group => {
-                const inputs = document.querySelectorAll(`input[data-group="${group}"]`);
-                let sum = 0;
-                inputs.forEach(inp => { sum += parseFloat(inp.value) || 0; });
-                totals[group] = sum;
-                const el = document.getElementById(`total-${group}`);
-                if (el) el.textContent = formatRupiah(sum);
+                const totalEl = panel.querySelector(`[data-total="${group}"]`);
+
+                if (totalEl) {
+                    totalEl.textContent = formatRupiah(totals[group]);
+                }
             });
 
-            const biayaTK = totals.biaya_tenaga_kerja || 0;
-            const laba = totals.laba || 0;
-            const penyusutan = totals.penyusutan || 0;
-            const pajak = totals.pajak || 0;
-            const bunga = totals.bunga_pinjaman || 0;
-            const nilaiTambah = biayaTK + laba + penyusutan + pajak + bunga;
+            // Nilai tambah sesuai rangkuman pada dokumen:
+            // Biaya Tenaga Kerja + Laba + Penyusutan + Pajak + Bunga.
+            const nilaiTambah =
+                (totals.biaya_tenaga_kerja || 0) +
+                (totals.laba || 0) +
+                (totals.penyusutan || 0) +
+                (totals.pajak || 0) +
+                (totals.bunga_pinjaman || 0);
 
-            document.getElementById('rt-biaya_tenaga_kerja').textContent = formatRupiah(biayaTK);
-            document.getElementById('rt-laba').textContent = formatRupiah(laba);
-            document.getElementById('rt-penyusutan').textContent = formatRupiah(penyusutan);
-            document.getElementById('rt-pajak').textContent = formatRupiah(pajak);
-            document.getElementById('rt-bunga_pinjaman').textContent = formatRupiah(bunga);
-            document.getElementById('rt-total').textContent = formatRupiah(nilaiTambah);
+            setResult(panel, 'biaya_tenaga_kerja', totals.biaya_tenaga_kerja);
+            setResult(panel, 'laba', totals.laba);
+            setResult(panel, 'penyusutan', totals.penyusutan);
+            setResult(panel, 'pajak', totals.pajak);
+            setResult(panel, 'bunga_pinjaman', totals.bunga_pinjaman);
+            setResult(panel, 'total_nilai_tambah', nilaiTambah);
+            setResult(panel, 'total_ringkasan', nilaiTambah);
+        }
+
+        function sumGroup(panel, group) {
+            let sum = 0;
+
+            panel.querySelectorAll(`input[data-group="${group}"]`).forEach(input => {
+                sum += parseFloat(input.value) || 0;
+            });
+
+            return sum;
+        }
+
+        function setResult(panel, key, value) {
+            const resultEl = panel.querySelector(`[data-result="${key}"]`);
+
+            if (resultEl) {
+                resultEl.textContent = formatRupiah(value);
+            }
         }
 
         function resetInputData() {
-            document.querySelectorAll('#view-input-data input').forEach(inp => { inp.value = ''; });
-            recomputeTotals();
+            const panel = getYearPanel();
+            if (!panel) return;
+
+            panel.querySelectorAll('input[type="number"]').forEach(input => {
+                input.value = '';
+            });
+
+            recomputeTotals(panel);
         }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            renderYearTabs();
+            updateYearEmptyState();
+        });
     </script>
 </body>
 </html>
