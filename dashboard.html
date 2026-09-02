@@ -103,7 +103,7 @@
                 <div class="bg-gradient-to-r from-slate-800 to-slate-800/50 rounded-2xl p-6 border border-slate-700 relative overflow-hidden">
                     <div class="absolute -right-20 -top-20 w-64 h-64 bg-teal-500/10 rounded-full blur-3xl"></div>
                     <h1 class="text-2xl font-bold text-white mb-2 relative z-10">Input Data Nilai Tambah</h1>
-                    <p class="text-slate-400 text-sm relative z-10">Input data laporan keuangan per tahun. Gunakan tab untuk berpindah antar tahun.</p>
+                    <p class="text-slate-400 text-sm relative z-10">Input data laporan keuangan per tahun. Jangan lupa tekan Simpan Analisis jika sudah selesai.</p>
                 </div>
 
                 <!-- ===== TAB DATA TAHUNAN ===== -->
@@ -136,7 +136,7 @@
                     <div class="px-5 pb-5 grid grid-cols-1 md:grid-cols-2 gap-4 border-t border-slate-700 pt-4">
                         <div>
                             <label class="block text-xs font-semibold text-slate-400 mb-1.5">Total Penjualan / Pendapatan (Rp)</label>
-                            <input type="number" min="0" placeholder="0" class="w-full px-3 py-2.5 rounded-lg bg-slate-900 border border-slate-700 text-base md:text-sm text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
+                            <input type="number" min="0" data-group="penjualan" oninput="recomputeTotals()" placeholder="0" class="w-full px-3 py-2.5 rounded-lg bg-slate-900 border border-slate-700 text-base md:text-sm text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
                         </div>
                         <div>
                             <label class="block text-xs font-semibold text-slate-400 mb-1.5">Jumlah Unit Terjual (unit)</label>
@@ -518,7 +518,7 @@
                                 Total Nilai Tambah
                             </div>
                             <p class="text-xs text-slate-400">
-                                Hasil dari biaya tenaga kerja, laba, penyusutan, pajak, dan bunga.
+                                Hasil dari pengurangan Total Penjualan dengan Bahan Digunakan, Overhead Produksi, dan Biaya Administrasi.
                             </p>
                         </div>
                         <div data-result="total_nilai_tambah"
@@ -533,30 +533,26 @@
                     <h2 class="text-sm font-bold text-teal-400 uppercase tracking-wider mb-4 flex items-center gap-2">
                         <i class="fa-solid fa-square-root-variable"></i> Rangkuman Perhitungan Nilai Tambah
                     </h2>
-                    <div class="grid grid-cols-2 md:grid-cols-5 gap-4 text-sm">
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
                         <div>
-                            <div class="text-slate-400 text-xs mb-1">Biaya Tenaga Kerja</div>
-                            <div data-result="biaya_tenaga_kerja" class="font-bold text-white">Rp0</div>
+                            <div class="text-slate-400 text-xs mb-1">Total Penjualan</div>
+                            <div data-result="penjualan" class="font-bold text-white">Rp0</div>
                         </div>
                         <div>
-                            <div class="text-slate-400 text-xs mb-1">Laba</div>
-                            <div data-result="laba" class="font-bold text-white">Rp0</div>
+                            <div class="text-slate-400 text-xs mb-1">Bahan Digunakan</div>
+                            <div data-result="bahan_digunakan" class="font-bold text-white">Rp0</div>
                         </div>
                         <div>
-                            <div class="text-slate-400 text-xs mb-1">Penyusutan</div>
-                            <div data-result="penyusutan" class="font-bold text-white">Rp0</div>
+                            <div class="text-slate-400 text-xs mb-1">Overhead Produksi</div>
+                            <div data-result="overhead_produksi" class="font-bold text-white">Rp0</div>
                         </div>
                         <div>
-                            <div class="text-slate-400 text-xs mb-1">Pajak</div>
-                            <div data-result="pajak" class="font-bold text-white">Rp0</div>
-                        </div>
-                        <div>
-                            <div class="text-slate-400 text-xs mb-1">Bunga</div>
-                            <div data-result="bunga_pinjaman" class="font-bold text-white">Rp0</div>
+                            <div class="text-slate-400 text-xs mb-1">Biaya Administrasi</div>
+                            <div data-result="biaya_administrasi" class="font-bold text-white">Rp0</div>
                         </div>
                     </div>
                     <div class="mt-5 pt-5 border-t border-slate-700 flex items-center justify-between">
-                        <span class="text-slate-300 font-semibold text-sm">Total</span>
+                        <span class="text-slate-300 font-semibold text-sm">Total Nilai Tambah</span>
                         <span data-result="total_ringkasan" class="text-2xl font-extrabold text-teal-400">Rp0</span>
                     </div>
                 </div>
@@ -564,6 +560,10 @@
                 <div class="flex justify-end gap-3 pb-4">
                     <button type="button" onclick="resetInputData()" class="px-5 py-2.5 rounded-xl text-sm font-semibold text-slate-300 border border-slate-700 hover:bg-slate-800 transition flex items-center gap-2">
                         <i class="fa-solid fa-rotate-left"></i> Reset Form
+                    </button>
+                    <!-- Tombol Simpan Analisis -->
+                    <button type="button" id="btnSaveData" onclick="saveDataToServer()" class="px-5 py-2.5 rounded-xl text-sm font-bold text-slate-900 bg-teal-500 hover:bg-teal-400 transition flex items-center gap-2 shadow-lg shadow-teal-500/20">
+                        <i class="fa-solid fa-floppy-disk"></i> Simpan Analisis
                     </button>
                 </div>
 
@@ -582,6 +582,13 @@
             if (userName) {
                 document.getElementById('userNameDisplay').textContent = userName;
             }
+            
+            renderYearTabs();
+            updateYearEmptyState();
+            updateRingkasanView();
+            
+            // Tambahan: Muat data dari server saat halaman pertama dibuka
+            loadDataFromServer();
         });
 
         // Fungsi Logout
@@ -837,7 +844,7 @@
         }
 
         const CURRENCY_GROUPS = [
-            'biaya_tenaga_kerja', 'bahan_digunakan', 'overhead_produksi',
+            'penjualan', 'biaya_tenaga_kerja', 'bahan_digunakan', 'overhead_produksi',
             'bunga_pinjaman', 'biaya_administrasi', 'penyusutan', 'pajak',
             'aktiva', 'laba'
         ];
@@ -860,18 +867,18 @@
                 }
             });
 
+            // LOGIKA BARU: Total Penjualan - Bahan Digunakan - Overhead Produksi - Biaya Administrasi
             const nilaiTambah =
-                (totals.biaya_tenaga_kerja || 0) +
-                (totals.laba || 0) +
-                (totals.penyusutan || 0) +
-                (totals.pajak || 0) +
-                (totals.bunga_pinjaman || 0);
+                (totals.penjualan || 0) -
+                (totals.bahan_digunakan || 0) -
+                (totals.overhead_produksi || 0) -
+                (totals.biaya_administrasi || 0);
 
-            setResult(panel, 'biaya_tenaga_kerja', totals.biaya_tenaga_kerja);
-            setResult(panel, 'laba', totals.laba);
-            setResult(panel, 'penyusutan', totals.penyusutan);
-            setResult(panel, 'pajak', totals.pajak);
-            setResult(panel, 'bunga_pinjaman', totals.bunga_pinjaman);
+            // Set data yang baru untuk ditampilkan di rangkuman
+            setResult(panel, 'penjualan', totals.penjualan);
+            setResult(panel, 'bahan_digunakan', totals.bahan_digunakan);
+            setResult(panel, 'overhead_produksi', totals.overhead_produksi);
+            setResult(panel, 'biaya_administrasi', totals.biaya_administrasi);
             setResult(panel, 'total_nilai_tambah', nilaiTambah);
             setResult(panel, 'total_ringkasan', nilaiTambah);
 
@@ -957,20 +964,20 @@
                             
                             <div class="grid grid-cols-2 gap-3">
                                 <div class="bg-slate-900/60 p-3 rounded-xl border border-slate-700/50">
-                                    <p class="text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-1">Biaya Tenaga Kerja</p>
-                                    <p class="text-sm font-bold text-white">${getValue('biaya_tenaga_kerja')}</p>
+                                    <p class="text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-1">Total Penjualan</p>
+                                    <p class="text-sm font-bold text-white">${getValue('penjualan')}</p>
                                 </div>
                                 <div class="bg-slate-900/60 p-3 rounded-xl border border-slate-700/50">
-                                    <p class="text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-1">Laba</p>
-                                    <p class="text-sm font-bold text-white">${getValue('laba')}</p>
+                                    <p class="text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-1">Bahan Digunakan</p>
+                                    <p class="text-sm font-bold text-white">${getValue('bahan_digunakan')}</p>
                                 </div>
                                 <div class="bg-slate-900/60 p-3 rounded-xl border border-slate-700/50">
-                                    <p class="text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-1">Penyusutan</p>
-                                    <p class="text-sm font-bold text-white">${getValue('penyusutan')}</p>
+                                    <p class="text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-1">Overhead Produksi</p>
+                                    <p class="text-sm font-bold text-white">${getValue('overhead_produksi')}</p>
                                 </div>
                                 <div class="bg-slate-900/60 p-3 rounded-xl border border-slate-700/50">
-                                    <p class="text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-1">Pajak</p>
-                                    <p class="text-sm font-bold text-white">${getValue('pajak')}</p>
+                                    <p class="text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-1">Biaya Administrasi</p>
+                                    <p class="text-sm font-bold text-white">${getValue('biaya_administrasi')}</p>
                                 </div>
                             </div>
                         </div>
@@ -982,11 +989,119 @@
             container.innerHTML = htmlContent;
         }
 
-        document.addEventListener('DOMContentLoaded', () => {
-            renderYearTabs();
-            updateYearEmptyState();
-            updateRingkasanView();
-        });
+        // ===== FUNGSI INTEGRASI DATABASE (API FETCH) =====
+        async function saveDataToServer() {
+            const token = localStorage.getItem('eva_token');
+            if (!token) {
+                alert("Sesi Anda telah habis. Silakan login kembali.");
+                window.location.href = '/login';
+                return;
+            }
+
+            const btn = document.getElementById('btnSaveData');
+            const originalContent = btn.innerHTML;
+            btn.innerHTML = `<i class="fa-solid fa-spinner animate-spin"></i> Menyimpan...`;
+            btn.disabled = true;
+
+            const activePanels = document.querySelectorAll('.year-panel:not([data-year-id="template"])');
+            const payload = [];
+
+            activePanels.forEach(panel => {
+                const yearId = panel.dataset.yearId;
+                const title = yearMeta[yearId]?.title || "Tahun Baru";
+                
+                // Ekstrak nilai semua input
+                const inputValues = Array.from(panel.querySelectorAll('input[type="number"]')).map(inp => inp.value);
+                
+                // Ekstrak hasil nilai tambah murni berupa angka
+                const totalEl = panel.querySelector('[data-result="total_nilai_tambah"]');
+                const nilaiTambah = totalEl ? parseFloat(totalEl.textContent.replace(/Rp|\./g, '')) || 0 : 0;
+
+                payload.push({
+                    year_title: title,
+                    raw_data: JSON.stringify(inputValues),
+                    nilai_tambah: nilaiTambah
+                });
+            });
+
+            try {
+                const response = await fetch('/api/eva/save', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify(payload)
+                });
+                
+                if (!response.ok) {
+                    const errData = await response.json();
+                    throw new Error(errData.detail || "Gagal menyimpan data ke server");
+                }
+                alert("Data analisis berhasil disimpan ke database!");
+            } catch (err) {
+                alert("Error: " + err.message);
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = originalContent;
+            }
+        }
+
+        async function loadDataFromServer() {
+            const token = localStorage.getItem('eva_token');
+            if (!token) return;
+
+            try {
+                const response = await fetch('/api/eva/history', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (!response.ok) return;
+                
+                const data = await response.json();
+                
+                if (data && data.length > 0) {
+                    // Bersihkan state panel jika ada (mencegah duplikasi saat reload parsial)
+                    for (let key in yearMeta) delete yearMeta[key];
+                    document.querySelectorAll('.year-panel:not([data-year-id="template"])').forEach(p => p.remove());
+                    yearCount = 0; // Reset counter agar selaras dengan fungsi addYear() bawaan
+
+                    data.forEach((record) => {
+                        yearCount += 1;
+                        const newYearId = `year-${yearCount}`; 
+                        yearMeta[newYearId] = { title: record.year_title };
+
+                        const template = document.querySelector('.year-panel[data-year-id="template"]');
+                        const newPanel = template.cloneNode(true);
+                        newPanel.dataset.yearId = newYearId;
+                        newPanel.classList.remove('hidden');
+
+                        // Isi angka dari raw_data (JSON database)
+                        try {
+                            const inputValues = JSON.parse(record.raw_data);
+                            newPanel.querySelectorAll('input[type="number"]').forEach((inp, idx) => {
+                                inp.value = inputValues[idx] !== undefined ? inputValues[idx] : '';
+                            });
+                        } catch (e) {
+                            console.error("Gagal mem-parsing raw_data", e);
+                        }
+
+                        document.getElementById('yearPanels').appendChild(newPanel);
+                        recomputeTotals(newPanel);
+                    });
+
+                    // Set tab pertama sebagai tab aktif
+                    const firstId = Object.keys(yearMeta)[0];
+                    if (firstId) {
+                        activeYearId = firstId;
+                    }
+                    
+                    renderYearTabs();
+                    if (activeYearId) activateYear(activeYearId);
+                }
+            } catch (err) {
+                console.error("Gagal memuat riwayat data:", err);
+            }
+        }
     </script>
 </body>
 </html>
