@@ -19,7 +19,6 @@ class TokenResponse(BaseModel):
     token_type: str = "bearer"
     user_name: str
 
-
 class FinancialInput(BaseModel):
     """Raw financial figures uploaded/entered by the user.
 
@@ -70,3 +69,18 @@ class ChatRequest(BaseModel):
 class ChatResponse(BaseModel):
     reply: str
     history: list[ChatMessage]
+
+class EvaRecordBase(BaseModel):
+    year_title: str
+    raw_data: str
+    nilai_tambah: float
+
+class EvaRecordCreate(EvaRecordBase):
+    pass
+
+class EvaRecordResponse(EvaRecordBase):
+    id: int
+    user_id: int
+
+    class Config:
+        from_attributes = True
