@@ -1,6 +1,7 @@
 """Pydantic models for request & response bodies."""
 
 from pydantic import BaseModel, Field
+from datetime import datetime
 
 # Tambahkan pada app/schemas.py
 from pydantic import BaseModel, EmailStr
