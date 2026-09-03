@@ -84,3 +84,28 @@ class EvaRecordResponse(EvaRecordBase):
 
     class Config:
         from_attributes = True
+
+class DashboardContext(BaseModel):
+    period: str
+    nilai_tambah: float
+    total_investasi: float
+
+class DashboardRecommendation(BaseModel):
+    status: str
+    fokus_rekomendasi: str
+    aksi_produktivitas: str
+    narasi_ai: str
+
+class ChatMsgSend(BaseModel):
+    content: str
+    period_context: str = ""
+    nilai_tambah_context: float = 0.0
+    investasi_context: float = 0.0
+
+class ChatMsgResponse(BaseModel):
+    id: int
+    role: str
+    content: str
+    created_at: datetime
+    class Config:
+        from_attributes = True
