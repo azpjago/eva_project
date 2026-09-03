@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Dashboard — EVA AI Platform</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
@@ -70,7 +71,7 @@
             <a href="#" id="navInputData" onclick="switchView('input-data'); return false;" class="block px-4 py-3 text-slate-400 hover:bg-slate-800 hover:text-slate-200 rounded-xl font-semibold text-sm flex items-center gap-3 transition">
                 <i class="fa-solid fa-calculator w-5"></i> Kalkulator EVA
             </a>
-            <a href="#" class="block px-4 py-3 text-slate-400 hover:bg-slate-800 hover:text-slate-200 rounded-xl font-semibold text-sm flex items-center gap-3 transition">
+            <a href="#" id="navAsistenAI" onclick="switchView('asisten-ai'); return false;" class="block px-4 py-3 text-slate-400 hover:bg-slate-800 hover:text-slate-200 rounded-xl font-semibold text-sm flex items-center gap-3 transition">
                 <i class="fa-solid fa-robot w-5"></i> Asisten AI
             </a>
             <a href="#" class="block px-4 py-3 text-slate-400 hover:bg-slate-800 hover:text-slate-200 rounded-xl font-semibold text-sm flex items-center gap-3 transition">
@@ -83,23 +84,17 @@
 
             <!-- ===== VIEW: RINGKASAN ===== -->
             <div id="view-ringkasan" class="space-y-6 fade-in">
-
                 <div class="bg-gradient-to-r from-slate-800 to-slate-800/50 rounded-2xl p-6 border border-slate-700 relative overflow-hidden">
                     <div class="absolute -right-20 -top-20 w-64 h-64 bg-teal-500/10 rounded-full blur-3xl"></div>
                     <h1 class="text-2xl font-bold text-white mb-2 relative z-10">Ringkasan Analisis EVA</h1>
                     <p class="text-slate-400 text-sm relative z-10">Visualisasi data dari hasil perhitungan Kalkulator EVA Anda akan tampil secara otomatis di bawah ini.</p>
                 </div>
-
                 <!-- Container untuk Data Visualisasi Dinamis -->
-                <div id="ringkasan-content">
-                    <!-- Data akan di-generate via JavaScript -->
-                </div>
-
+                <div id="ringkasan-content"></div>
             </div>
 
             <!-- ===== VIEW: INPUT DATA (KALKULATOR EVA) ===== -->
             <div id="view-input-data" class="hidden space-y-6 fade-in">
-
                 <div class="bg-gradient-to-r from-slate-800 to-slate-800/50 rounded-2xl p-6 border border-slate-700 relative overflow-hidden">
                     <div class="absolute -right-20 -top-20 w-64 h-64 bg-teal-500/10 rounded-full blur-3xl"></div>
                     <h1 class="text-2xl font-bold text-white mb-2 relative z-10">Input Data Nilai Tambah</h1>
@@ -510,6 +505,7 @@
                         </div>
                     </div>
                 </div>
+                
                 <!-- Total Nilai Tambah -->
                 <div class="bg-gradient-to-r from-teal-500/10 to-slate-800 rounded-2xl border border-teal-500/30 p-6">
                     <div class="flex items-center justify-between gap-4">
@@ -521,8 +517,7 @@
                                 Hasil dari pengurangan Total Penjualan dengan Bahan Digunakan, Overhead Produksi, dan Biaya Administrasi.
                             </p>
                         </div>
-                        <div data-result="total_nilai_tambah"
-                             class="text-2xl md:text-3xl font-extrabold text-teal-400 whitespace-nowrap">
+                        <div data-result="total_nilai_tambah" class="text-2xl md:text-3xl font-extrabold text-teal-400 whitespace-nowrap">
                             Rp0
                         </div>
                     </div>
@@ -569,7 +564,40 @@
 
                     </div>
                 </div>
+            </div>
 
+            <!-- ===== VIEW: ASISTEN AI ===== -->
+            <div id="view-asisten-ai" class="hidden space-y-6 fade-in h-[calc(100vh-8rem)] flex flex-col">
+                <!-- Header Rekomendasi -->
+                <div class="bg-gradient-to-r from-teal-900/50 to-slate-800 rounded-2xl p-6 border border-teal-500/30 shrink-0">
+                    <div class="flex items-center justify-between mb-3">
+                        <h1 class="text-2xl font-bold text-white flex items-center gap-2"><i class="fa-solid fa-robot text-teal-400"></i> Asisten Produktivitas</h1>
+                        <button onclick="loadRecommendation()" class="px-3 py-1.5 bg-slate-700 hover:bg-slate-600 rounded-lg text-xs text-white transition"><i class="fa-solid fa-rotate"></i> Perbarui Data</button>
+                    </div>
+                    <div id="ai-rekomendasi-konten" class="text-sm text-slate-300">
+                        <i class="fa-solid fa-spinner animate-spin text-teal-400"></i> Menganalisis data keuangan Anda...
+                    </div>
+                </div>
+
+                <!-- Interface Chat -->
+                <div class="flex-1 flex flex-col bg-slate-800 rounded-2xl border border-slate-700 overflow-hidden shadow-xl">
+                    <div class="p-4 bg-slate-900/50 border-b border-slate-700 flex justify-between items-center">
+                        <span class="font-bold text-sm text-slate-300">Konsultasi Strategi Bisnis</span>
+                        <button onclick="clearChat()" class="text-xs px-3 py-1.5 bg-rose-500/10 text-rose-400 rounded-lg hover:bg-rose-500/20 transition flex items-center gap-2"><i class="fa-solid fa-trash-can"></i> Hapus Riwayat</button>
+                    </div>
+                    
+                    <div id="chat-box" class="flex-1 overflow-y-auto p-6 space-y-6">
+                        <!-- Pesan akan dirender disini -->
+                    </div>
+
+                    <div class="p-4 bg-slate-900 border-t border-slate-700 flex gap-3 items-end">
+                        <textarea id="chat-input" class="flex-1 bg-slate-800 border border-slate-600 rounded-xl px-4 py-3 text-white text-sm focus:ring-2 focus:ring-teal-500 outline-none resize-none" rows="1" placeholder="Ketik pertanyaan Anda tentang strategi atau efisiensi... (Shift+Enter untuk baris baru)"></textarea>
+                        <input type="hidden" id="edit-msg-id" value="">
+                        <button onclick="sendChat()" id="btn-send-chat" class="w-12 h-12 rounded-xl bg-teal-500 hover:bg-teal-400 text-slate-900 font-bold transition flex items-center justify-center shrink-0 shadow-lg shadow-teal-500/20">
+                            <i class="fa-solid fa-paper-plane"></i>
+                        </button>
+                    </div>
+                </div>
             </div>
 
         </div>
@@ -587,11 +615,9 @@
             updateYearEmptyState();
             updateRingkasanView();
             
-            // Tambahan: Muat data dari server saat halaman pertama dibuka
             loadDataFromServer();
         });
 
-        // Fungsi Logout
         function handleLogout() {
             localStorage.removeItem('eva_token');
             localStorage.removeItem('eva_user_name');
@@ -599,20 +625,25 @@
             window.location.href = '/login';
         }
 
-        // ===== Navigasi antar tampilan (Ringkasan <-> Kalkulator EVA) =====
+        // ===== Navigasi antar tampilan (Ringkasan <-> Kalkulator EVA <-> Asisten AI) =====
         const NAV_ACTIVE = "block px-4 py-3 bg-teal-500/10 text-teal-400 rounded-xl border border-teal-500/20 font-semibold text-sm flex items-center gap-3 transition";
         const NAV_INACTIVE = "block px-4 py-3 text-slate-400 hover:bg-slate-800 hover:text-slate-200 rounded-xl font-semibold text-sm flex items-center gap-3 transition";
 
         function switchView(view) {
             // Perbarui view ringkasan dengan data terbaru sebelum menampilkannya
-            if (view === 'ringkasan') {
-                updateRingkasanView();
+            if (view === 'ringkasan') updateRingkasanView();
+            if (view === 'asisten-ai') {
+                loadRecommendation();
+                loadChatHistory();
             }
 
             document.getElementById('view-ringkasan').classList.toggle('hidden', view !== 'ringkasan');
             document.getElementById('view-input-data').classList.toggle('hidden', view !== 'input-data');
+            document.getElementById('view-asisten-ai').classList.toggle('hidden', view !== 'asisten-ai');
+
             document.getElementById('navRingkasan').className = view === 'ringkasan' ? NAV_ACTIVE : NAV_INACTIVE;
             document.getElementById('navInputData').className = view === 'input-data' ? NAV_ACTIVE : NAV_INACTIVE;
+            document.getElementById('navAsistenAI').className = view === 'asisten-ai' ? NAV_ACTIVE : NAV_INACTIVE;
         }
 
         // ===== Tab input data tahunan =====
@@ -683,7 +714,7 @@
                 input.addEventListener('focus', () => setActiveYearVisual(yearId));
                 input.addEventListener('input', e => {
                     yearMeta[yearId].title = e.target.value;
-                    updateRingkasanView(); // Update teks judul secara realtime jika diubah
+                    updateRingkasanView(); 
                 });
 
                 const deleteButton = document.createElement('button');
@@ -867,14 +898,12 @@
                 }
             });
 
-            // LOGIKA BARU: Total Penjualan - Bahan Digunakan - Overhead Produksi - Biaya Administrasi
             const nilaiTambah =
                 (totals.penjualan || 0) -
                 (totals.bahan_digunakan || 0) -
                 (totals.overhead_produksi || 0) -
                 (totals.biaya_administrasi || 0);
 
-            // Set data yang baru untuk ditampilkan di rangkuman
             setResult(panel, 'penjualan', totals.penjualan);
             setResult(panel, 'bahan_digunakan', totals.bahan_digunakan);
             setResult(panel, 'overhead_produksi', totals.overhead_produksi);
@@ -882,7 +911,6 @@
             setResult(panel, 'total_nilai_tambah', nilaiTambah);
             setResult(panel, 'total_ringkasan', nilaiTambah);
 
-            // Perbarui juga data ringkasan secara real-time
             updateRingkasanView();
         }
 
@@ -919,7 +947,6 @@
 
             const activePanels = document.querySelectorAll('.year-panel:not([data-year-id="template"])');
 
-            // JIKA KOSONG: Munculkan pesan belum ada data
             if (activePanels.length === 0) {
                 container.innerHTML = `
                     <div class="bg-slate-800/70 rounded-2xl border border-dashed border-slate-600 px-6 py-12 text-center fade-in">
@@ -936,7 +963,6 @@
                 return;
             }
 
-            // JIKA ADA DATA: Generate Grid Kartu
             let htmlContent = '<div class="grid grid-cols-1 md:grid-cols-2 gap-6 fade-in">';
 
             activePanels.forEach((panel, index) => {
@@ -1010,10 +1036,7 @@
                 const yearId = panel.dataset.yearId;
                 const title = yearMeta[yearId]?.title || "Tahun Baru";
                 
-                // Ekstrak nilai semua input
                 const inputValues = Array.from(panel.querySelectorAll('input[type="number"]')).map(inp => inp.value);
-                
-                // Ekstrak hasil nilai tambah murni berupa angka
                 const totalEl = panel.querySelector('[data-result="total_nilai_tambah"]');
                 const nilaiTambah = totalEl ? parseFloat(totalEl.textContent.replace(/Rp|\./g, '')) || 0 : 0;
 
@@ -1060,10 +1083,9 @@
                 const data = await response.json();
                 
                 if (data && data.length > 0) {
-                    // Bersihkan state panel jika ada (mencegah duplikasi saat reload parsial)
                     for (let key in yearMeta) delete yearMeta[key];
                     document.querySelectorAll('.year-panel:not([data-year-id="template"])').forEach(p => p.remove());
-                    yearCount = 0; // Reset counter agar selaras dengan fungsi addYear() bawaan
+                    yearCount = 0; 
 
                     data.forEach((record) => {
                         yearCount += 1;
@@ -1075,7 +1097,6 @@
                         newPanel.dataset.yearId = newYearId;
                         newPanel.classList.remove('hidden');
 
-                        // Isi angka dari raw_data (JSON database)
                         try {
                             const inputValues = JSON.parse(record.raw_data);
                             newPanel.querySelectorAll('input[type="number"]').forEach((inp, idx) => {
@@ -1089,7 +1110,6 @@
                         recomputeTotals(newPanel);
                     });
 
-                    // Set tab pertama sebagai tab aktif
                     const firstId = Object.keys(yearMeta)[0];
                     if (firstId) {
                         activeYearId = firstId;
@@ -1102,6 +1122,160 @@
                 console.error("Gagal memuat riwayat data:", err);
             }
         }
+
+        // ===== SCRIPT ASISTEN AI =====
+        let chatContext = { period: "Tahun Saat Ini", nt: 0, inv: 0 };
+
+        async function loadRecommendation() {
+            const token = localStorage.getItem('eva_token');
+            const panel = getYearPanel(); 
+            if(!panel) {
+                document.getElementById('ai-rekomendasi-konten').innerHTML = "<em>Silakan isi data keuangan di Kalkulator EVA terlebih dahulu.</em>";
+                return;
+            }
+
+            const ntEl = panel.querySelector('[data-result="total_nilai_tambah"]');
+            const invInput = panel.querySelector('input[data-field="total_investasi"]');
+            
+            chatContext.nt = ntEl ? parseFloat(ntEl.textContent.replace(/Rp|\./g, '')) || 0 : 0;
+            chatContext.inv = invInput ? parseFloat(invInput.value) || 0 : 0;
+            chatContext.period = yearMeta[activeYearId]?.title || "Periode Aktif";
+
+            document.getElementById('ai-rekomendasi-konten').innerHTML = '<i class="fa-solid fa-spinner animate-spin text-teal-400"></i> Menganalisis...';
+
+            try {
+                const res = await fetch('/api/ai/dashboard-recommend', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                    body: JSON.stringify({ period: chatContext.period, nilai_tambah: chatContext.nt, total_investasi: chatContext.inv })
+                });
+                const data = await res.json();
+                
+                let warnaStatus = data.status === 'positif' ? 'text-emerald-400' : (data.status === 'negatif' ? 'text-rose-400' : 'text-amber-400');
+                
+                document.getElementById('ai-rekomendasi-konten').innerHTML = `
+                    <div class="mb-2"><span class="font-bold text-white">Status:</span> <span class="font-extrabold uppercase ${warnaStatus}">${data.status}</span></div>
+                    <div class="mb-2"><span class="font-bold text-white">Fokus:</span> <span class="text-teal-300">${data.fokus_rekomendasi}</span></div>
+                    <div class="mb-3"><span class="font-bold text-white">Aksi Kemnaker:</span> <span class="text-teal-300">${data.aksi_produktivitas}</span></div>
+                    <div class="p-3 bg-slate-900/50 rounded-xl border border-slate-700 italic prose prose-invert max-w-none text-sm">${marked.parse(data.narasi_ai)}</div>
+                `;
+            } catch(e) {
+                document.getElementById('ai-rekomendasi-konten').innerHTML = "Gagal memuat rekomendasi.";
+            }
+        }
+
+        async function loadChatHistory() {
+            const token = localStorage.getItem('eva_token');
+            const box = document.getElementById('chat-box');
+            box.innerHTML = '<div class="text-center text-slate-500 text-sm mt-10"><i class="fa-solid fa-spinner animate-spin"></i> Memuat riwayat obrolan...</div>';
+            
+            try {
+                const res = await fetch('/api/ai/chat/history', { headers: { 'Authorization': `Bearer ${token}` } });
+                const history = await res.json();
+                box.innerHTML = '';
+                if(history.length === 0) {
+                    box.innerHTML = '<div class="text-center text-slate-500 text-sm mt-10">Belum ada obrolan. Silakan mulai bertanya!</div>';
+                } else {
+                    history.forEach(msg => appendChatUI(msg));
+                    box.scrollTop = box.scrollHeight;
+                }
+            } catch(e) {
+                box.innerHTML = '<div class="text-center text-rose-500 text-sm mt-10">Gagal memuat riwayat.</div>';
+            }
+        }
+
+        function appendChatUI(msg) {
+            const box = document.getElementById('chat-box');
+            const isUser = msg.role === 'user';
+            const align = isUser ? 'justify-end' : 'justify-start';
+            const bg = isUser ? 'bg-teal-600 text-white rounded-br-none' : 'bg-slate-700 text-slate-100 rounded-bl-none';
+            const icon = isUser ? '' : '<div class="w-8 h-8 rounded-full bg-teal-500/20 border border-teal-500/50 flex items-center justify-center shrink-0 text-teal-400 mt-1"><i class="fa-solid fa-robot"></i></div>';
+            
+            const parsedText = isUser ? msg.content.replace(/</g, "&lt;").replace(/\n/g, "<br>") : marked.parse(msg.content);
+            const safeContent = msg.content.replace(/'/g, "\\'").replace(/"/g, '&quot;').replace(/\n/g, '\\n');
+            
+            const actionBtn = isUser 
+                ? `<button onclick="prepareEdit(${msg.id}, '${safeContent}')" class="text-[10px] text-teal-200 hover:text-white mt-1 opacity-50 hover:opacity-100 transition"><i class="fa-solid fa-pen"></i> Edit</button>`
+                : `<button onclick="copyToClipboard('${safeContent}')" class="text-[10px] text-slate-400 hover:text-white mt-1 opacity-50 hover:opacity-100 transition"><i class="fa-solid fa-copy"></i> Copy</button>`;
+
+            if(box.innerHTML.includes("Belum ada obrolan")) box.innerHTML = '';
+
+            box.innerHTML += `
+            <div class="flex ${align} gap-3 w-full fade-in" id="msg-${msg.id}">
+                ${icon}
+                <div class="max-w-[85%] flex flex-col ${isUser ? 'items-end' : 'items-start'}">
+                    <div class="p-3.5 rounded-2xl ${bg} prose prose-invert prose-p:my-1 prose-ul:my-1 text-[13px] shadow-md shadow-slate-900/20">
+                        ${parsedText}
+                    </div>
+                    ${actionBtn}
+                </div>
+            </div>`;
+            box.scrollTop = box.scrollHeight;
+        }
+
+        async function sendChat() {
+            const input = document.getElementById('chat-input');
+            const btn = document.getElementById('btn-send-chat');
+            const editId = document.getElementById('edit-msg-id').value;
+            const text = input.value.trim();
+            if(!text) return;
+
+            input.value = '';
+            btn.innerHTML = '<i class="fa-solid fa-spinner animate-spin"></i>';
+            btn.disabled = true;
+
+            const tempId = Date.now();
+            appendChatUI({id: tempId, role: 'user', content: text});
+
+            const token = localStorage.getItem('eva_token');
+            const endpoint = editId ? `/api/ai/chat/edit/${editId}` : `/api/ai/chat/send`;
+            const method = editId ? 'PUT' : 'POST';
+
+            try {
+                const res = await fetch(endpoint, {
+                    method: method,
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                    body: JSON.stringify({
+                        content: text,
+                        period_context: chatContext.period,
+                        nilai_tambah_context: chatContext.nt,
+                        investasi_context: chatContext.inv
+                    })
+                });
+                
+                document.getElementById('edit-msg-id').value = ''; 
+                await loadChatHistory(); 
+            } catch(e) {
+                alert("Gagal mengirim pesan.");
+            } finally {
+                btn.innerHTML = '<i class="fa-solid fa-paper-plane"></i>';
+                btn.disabled = false;
+            }
+        }
+
+        function prepareEdit(id, text) {
+            document.getElementById('chat-input').value = text;
+            document.getElementById('edit-msg-id').value = id;
+            document.getElementById('chat-input').focus();
+        }
+
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(() => alert("Berhasil disalin ke clipboard!"));
+        }
+
+        async function clearChat() {
+            if(!confirm("Hapus seluruh riwayat percakapan ini secara permanen?")) return;
+            const token = localStorage.getItem('eva_token');
+            await fetch('/api/ai/chat/clear', { method: 'DELETE', headers: { 'Authorization': `Bearer ${token}` } });
+            document.getElementById('chat-box').innerHTML = '<div class="text-center text-slate-500 text-sm mt-10">Riwayat telah dihapus.</div>';
+        }
+
+        document.getElementById('chat-input').addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendChat();
+            }
+        });
     </script>
 </body>
 </html>

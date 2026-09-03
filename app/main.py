@@ -162,7 +162,7 @@ def get_eva_history(db: Session = Depends(get_db), current_user: User = Depends(
 
 
 # Tambahkan ini di bagian BAWAH app/main.py (sebelumnya pastikan import terpasang)
-from app.prompt import build_dashboard_recommendation_prompt, build_chat_system_context, get_status_from_ratio, RECOMMENDATION_MATRIX
+from app.prompts import build_dashboard_recommendation_prompt, build_chat_system_context, get_status_from_ratio, RECOMMENDATION_MATRIX
 from app.schemas import DashboardContext, DashboardRecommendation, ChatMsgSend, ChatMsgResponse
 from app.models import ChatMessage
 import google.generativeai as genai
