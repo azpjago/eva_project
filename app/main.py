@@ -159,3 +159,90 @@ def save_eva_records(records: list[EvaRecordCreate], db: Session = Depends(get_d
 @app.get("/api/eva/history", response_model=list[EvaRecordResponse])
 def get_eva_history(db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     return db.query(EvaRecord).filter(EvaRecord.user_id == current_user.id).all()
+
+
+# Tambahkan ini di bagian BAWAH app/main.py (sebelumnya pastikan import terpasang)
+from app.prompt import build_dashboard_recommendation_prompt, build_chat_system_context, get_status_from_ratio, RECOMMENDATION_MATRIX
+from app.schemas import DashboardContext, DashboardRecommendation, ChatMsgSend, ChatMsgResponse
+from app.models import ChatMessage
+import google.generativeai as genai
+import os
+
+# Set Gemini API Key (Sesuaikan dengan variabel env kamu)
+genai.configure(api_key=os.getenv("GEMINI_API_KEY", "ISI_API_KEY_KAMU_DISINI"))
+model = genai.GenerativeModel('gemini-1.5-flash')
+
+@app.post("/api/ai/dashboard-recommend", response_model=DashboardRecommendation)
+def get_dashboard_recommendation(data: DashboardContext, current_user: User = Depends(get_current_user)):
+    status = get_status_from_ratio(data.nilai_tambah, data.total_investasi)
+    matrix = RECOMMENDATION_MATRIX[status]
+    prompt = build_dashboard_recommendation_prompt(data.period, data.nilai_tambah, data.total_investasi, status)
+    
+    try:
+        response = model.generate_content(prompt)
+        narasi = response.text
+    except Exception as e:
+        narasi = "Sistem AI sedang sibuk, mohon coba lagi nanti."
+
+    return DashboardRecommendation(
+        status=status,
+        fokus_rekomendasi=matrix["fokus"],
+        aksi_produktivitas=matrix["aksi"],
+        narasi_ai=narasi
+    )
+
+@app.get("/api/ai/chat/history", response_model=list[ChatMsgResponse])
+def get_chat_history(db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+    return db.query(ChatMessage).filter(ChatMessage.user_id == current_user.id).order_by(ChatMessage.created_at.asc()).all()
+
+@app.delete("/api/ai/chat/clear")
+def clear_chat_history(db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+    db.query(ChatMessage).filter(ChatMessage.user_id == current_user.id).delete()
+    db.commit()
+    return {"message": "Chat history cleared"}
+
+@app.post("/api/ai/chat/send", response_model=ChatMsgResponse)
+def send_chat_message(req: ChatMsgSend, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+    # 1. Simpan pesan user
+    user_msg = ChatMessage(user_id=current_user.id, role="user", content=req.content)
+    db.add(user_msg)
+    db.commit()
+
+    # 2. Ambil riwayat untuk konteks Gemini
+    history = db.query(ChatMessage).filter(ChatMessage.user_id == current_user.id).order_by(ChatMessage.created_at.asc()).all()
+    
+    # 3. Rakit konteks percakapan
+    system_ctx = build_chat_system_context(req.period_context, req.nilai_tambah_context, req.investasi_context)
+    chat_prompt = f"{system_ctx}\n\nRiwayat Percakapan:\n"
+    for h in history[-10:]: # Ambil 10 pesan terakhir agar memori tidak over
+        chat_prompt += f"{'Pengguna' if h.role == 'user' else 'Asisten'}: {h.content}\n"
+    chat_prompt += f"\nResponlah pertanyaan Pengguna terakhir dengan ramah."
+
+    # 4. Dapatkan respon AI
+    try:
+        response = model.generate_content(chat_prompt)
+        ai_text = response.text
+    except Exception as e:
+        ai_text = "Maaf, koneksi ke AI sedang terganggu."
+
+    # 5. Simpan respon AI
+    ai_msg = ChatMessage(user_id=current_user.id, role="model", content=ai_text)
+    db.add(ai_msg)
+    db.commit()
+    db.refresh(ai_msg)
+    
+    return ai_msg
+
+@app.put("/api/ai/chat/edit/{msg_id}")
+def edit_chat_message(msg_id: int, req: ChatMsgSend, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+    # Cari pesan yang mau diedit
+    msg = db.query(ChatMessage).filter(ChatMessage.id == msg_id, ChatMessage.user_id == current_user.id).first()
+    if not msg:
+        raise HTTPException(status_code=404, detail="Pesan tidak ditemukan")
+    
+    # Hapus pesan ini dan SEMUA pesan setelahnya (truncation)
+    db.query(ChatMessage).filter(ChatMessage.user_id == current_user.id, ChatMessage.created_at >= msg.created_at).delete()
+    db.commit()
+
+    # Kirim ulang pesan yang baru diedit seolah-olah itu pesan baru
+    return send_chat_message(req, db, current_user)
