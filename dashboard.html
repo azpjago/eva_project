@@ -566,38 +566,89 @@
                 </div>
             </div>
 
-            <!-- ===== VIEW: ASISTEN AI ===== -->
-            <div id="view-asisten-ai" class="hidden space-y-6 fade-in h-[calc(100vh-8rem)] flex flex-col">
-                <!-- Header Rekomendasi -->
-                <div class="bg-gradient-to-r from-teal-900/50 to-slate-800 rounded-2xl p-6 border border-teal-500/30 shrink-0">
-                    <div class="flex items-center justify-between mb-3">
-                        <h1 class="text-2xl font-bold text-white flex items-center gap-2"><i class="fa-solid fa-robot text-teal-400"></i> Asisten Produktivitas</h1>
-                        <button onclick="loadRecommendation()" class="px-3 py-1.5 bg-slate-700 hover:bg-slate-600 rounded-lg text-xs text-white transition"><i class="fa-solid fa-rotate"></i> Perbarui Data</button>
-                    </div>
-                    <div id="ai-rekomendasi-konten" class="text-sm text-slate-300">
-                        <i class="fa-solid fa-spinner animate-spin text-teal-400"></i> Menganalisis data keuangan Anda...
-                    </div>
-                </div>
-
-                <!-- Interface Chat -->
-                <div class="flex-1 flex flex-col bg-slate-800 rounded-2xl border border-slate-700 overflow-hidden shadow-xl">
-                    <div class="p-4 bg-slate-900/50 border-b border-slate-700 flex justify-between items-center">
-                        <span class="font-bold text-sm text-slate-300">Konsultasi Strategi Bisnis</span>
-                        <button onclick="clearChat()" class="text-xs px-3 py-1.5 bg-rose-500/10 text-rose-400 rounded-lg hover:bg-rose-500/20 transition flex items-center gap-2"><i class="fa-solid fa-trash-can"></i> Hapus Riwayat</button>
+            <!-- ===== VIEW: ASISTEN AI (LAYOUT LAYAR PENUH DENGAN SWITCHER) ===== -->
+            <div id="view-asisten-ai" class="hidden space-y-6 fade-in">
+                
+                <!-- Header & Tombol Pemilih Layar (Switcher) -->
+                <div class="bg-slate-800 p-4 rounded-2xl border border-slate-700 flex flex-col sm:flex-row justify-between items-center gap-4">
+                    <div>
+                        <h1 class="text-xl font-bold text-white flex items-center gap-2">
+                            <i class="fa-solid fa-robot text-teal-400"></i> Pusat Asisten AI & Produktivitas
+                        </h1>
+                        <p class="text-xs text-slate-400 mt-0.5">Pilih mode tampilan untuk analisis strategis atau konsultasi obrolan mendalam.</p>
                     </div>
                     
-                    <div id="chat-box" class="flex-1 overflow-y-auto p-6 space-y-6">
-                        <!-- Pesan akan dirender disini -->
-                    </div>
-
-                    <div class="p-4 bg-slate-900 border-t border-slate-700 flex gap-3 items-end">
-                        <textarea id="chat-input" class="flex-1 bg-slate-800 border border-slate-600 rounded-xl px-4 py-3 text-white text-sm focus:ring-2 focus:ring-teal-500 outline-none resize-none" rows="1" placeholder="Ketik pertanyaan Anda tentang strategi atau efisiensi... (Shift+Enter untuk baris baru)"></textarea>
-                        <input type="hidden" id="edit-msg-id" value="">
-                        <button onclick="sendChat()" id="btn-send-chat" class="w-12 h-12 rounded-xl bg-teal-500 hover:bg-teal-400 text-slate-900 font-bold transition flex items-center justify-center shrink-0 shadow-lg shadow-teal-500/20">
-                            <i class="fa-solid fa-paper-plane"></i>
+                    <!-- Tombol Toggle Antar Layar -->
+                    <div class="flex items-center bg-slate-900 p-1.5 rounded-xl border border-slate-700">
+                        <button type="button" id="btnTabRekomendasi" onclick="switchAITab('rekomendasi')" class="px-4 py-2 rounded-lg text-xs font-bold transition bg-teal-500 text-slate-950 shadow-md">
+                            <i class="fa-solid fa-chart-pie mr-1.5"></i> Rekomendasi Produktivitas
+                        </button>
+                        <button type="button" id="btnTabChat" onclick="switchAITab('chat')" class="px-4 py-2 rounded-lg text-xs font-bold transition text-slate-400 hover:text-white">
+                            <i class="fa-solid fa-comments mr-1.5"></i> Chat Konsultasi AI
                         </button>
                     </div>
                 </div>
+
+                <!-- ===== PANEL 1: LAYAR REKOMENDASI PRODUKTIVITAS ===== -->
+                <div id="aiPanelRekomendasi" class="space-y-6 fade-in">
+                    <div class="bg-gradient-to-r from-teal-950/40 via-slate-800 to-slate-800 rounded-2xl p-6 sm:p-8 border border-teal-500/30 shadow-xl relative overflow-hidden">
+                        <div class="absolute -right-20 -top-20 w-64 h-64 bg-teal-500/10 rounded-full blur-3xl pointer-events-none"></div>
+                        
+                        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6 pb-4 border-b border-slate-700/80">
+                            <div>
+                                <span class="text-xs font-bold uppercase tracking-wider text-teal-400 bg-teal-500/10 px-3 py-1 rounded-full border border-teal-500/20">Analisis Preskriptif</span>
+                                <h2 class="text-2xl font-extrabold text-white mt-2">Hasil Evaluasi & Strategi Perusahaan</h2>
+                            </div>
+                            <button onclick="loadRecommendation()" class="px-4 py-2 bg-slate-700 hover:bg-slate-600 rounded-xl text-xs font-semibold text-white transition flex items-center gap-2 shadow-sm">
+                                <i class="fa-solid fa-rotate"></i> Perbarui Data Analisis
+                            </button>
+                        </div>
+
+                        <!-- Konten Rekomendasi Utama (Full Layout) -->
+                        <div id="ai-rekomendasi-konten" class="text-sm text-slate-200 space-y-4">
+                            <div class="flex items-center justify-center py-12 text-slate-400 gap-2">
+                                <i class="fa-solid fa-spinner animate-spin text-teal-400 text-lg"></i> Menganalisis data keuangan Anda...
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ===== PANEL 2: LAYAR CHAT KONSULTASI INTERAKTIF (FULL SCREEN) ===== -->
+                <div id="aiPanelChat" class="hidden space-y-4 fade-in">
+                    <div class="bg-slate-800 rounded-2xl border border-slate-700 overflow-hidden shadow-2xl flex flex-col h-[calc(100vh-14rem)] min-h-[550px]">
+                        
+                        <!-- Header Chat Box -->
+                        <div class="px-6 py-4 bg-slate-900/80 border-b border-slate-700 flex justify-between items-center">
+                            <div class="flex items-center gap-3">
+                                <div class="w-9 h-9 rounded-xl bg-teal-500/20 border border-teal-500/50 flex items-center justify-center text-teal-400 font-bold">
+                                    <i class="fa-solid fa-robot"></i>
+                                </div>
+                                <div>
+                                    <h3 class="font-bold text-sm text-white">Ruang Diskusi Strategis AI</h3>
+                                    <p class="text-[11px] text-slate-400">Terintegrasi otomatis dengan konteks data finansial aktif Anda.</p>
+                                </div>
+                            </div>
+                            <button onclick="clearChat()" class="text-xs px-3.5 py-2 bg-rose-500/10 text-rose-400 border border-rose-500/20 rounded-xl hover:bg-rose-500/20 transition flex items-center gap-2 font-semibold">
+                                <i class="fa-solid fa-trash-can"></i> Hapus Riwayat Chat
+                            </button>
+                        </div>
+                        
+                        <!-- Scrollable Message Area -->
+                        <div id="chat-box" class="flex-1 overflow-y-auto p-6 space-y-6 bg-slate-900/30">
+                            <!-- Pesan dimuat dinamis -->
+                        </div>
+
+                        <!-- Input Area Bawah -->
+                        <div class="p-4 bg-slate-900 border-t border-slate-700 flex gap-3 items-end">
+                            <textarea id="chat-input" class="flex-1 bg-slate-800 border border-slate-600 rounded-xl px-4 py-3 text-white text-sm focus:ring-2 focus:ring-teal-500 outline-none resize-none shadow-inner" rows="1" placeholder="Ketik pertanyaan mendalam mengenai strategi efisiensi atau pengembangan SDM... (Shift+Enter untuk baris baru)"></textarea>
+                            <input type="hidden" id="edit-msg-id" value="">
+                            <button onclick="sendChat()" id="btn-send-chat" class="px-5 h-12 rounded-xl bg-teal-500 hover:bg-teal-400 text-slate-950 font-bold transition flex items-center justify-center gap-2 shrink-0 shadow-lg shadow-teal-500/20">
+                                <span>Kirim</span> <i class="fa-solid fa-paper-plane text-xs"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
             </div>
 
         </div>
@@ -644,6 +695,31 @@
             document.getElementById('navRingkasan').className = view === 'ringkasan' ? NAV_ACTIVE : NAV_INACTIVE;
             document.getElementById('navInputData').className = view === 'input-data' ? NAV_ACTIVE : NAV_INACTIVE;
             document.getElementById('navAsistenAI').className = view === 'asisten-ai' ? NAV_ACTIVE : NAV_INACTIVE;
+        }
+
+        // ===== Fungsi Tab Asisten AI (Switcher Rekomendasi vs Chat) =====
+        function switchAITab(tab) {
+            const btnRekomendasi = document.getElementById('btnTabRekomendasi');
+            const btnChat = document.getElementById('btnTabChat');
+            const panelRekomendasi = document.getElementById('aiPanelRekomendasi');
+            const panelChat = document.getElementById('aiPanelChat');
+
+            const activeClass = "px-4 py-2 rounded-lg text-xs font-bold transition bg-teal-500 text-slate-950 shadow-md";
+            const inactiveClass = "px-4 py-2 rounded-lg text-xs font-bold transition text-slate-400 hover:text-white";
+
+            if (tab === 'rekomendasi') {
+                btnRekomendasi.className = activeClass;
+                btnChat.className = inactiveClass;
+                panelRekomendasi.classList.remove('hidden');
+                panelChat.classList.add('hidden');
+                loadRecommendation();
+            } else {
+                btnChat.className = activeClass;
+                btnRekomendasi.className = inactiveClass;
+                panelChat.classList.remove('hidden');
+                panelRekomendasi.classList.add('hidden');
+                loadChatHistory();
+            }
         }
 
         // ===== Tab input data tahunan =====
@@ -1141,7 +1217,7 @@
             chatContext.inv = invInput ? parseFloat(invInput.value) || 0 : 0;
             chatContext.period = yearMeta[activeYearId]?.title || "Periode Aktif";
 
-            document.getElementById('ai-rekomendasi-konten').innerHTML = '<i class="fa-solid fa-spinner animate-spin text-teal-400"></i> Menganalisis...';
+            document.getElementById('ai-rekomendasi-konten').innerHTML = '<div class="flex items-center justify-center py-12 text-slate-400 gap-2"><i class="fa-solid fa-spinner animate-spin text-teal-400 text-lg"></i> Menganalisis...</div>';
 
             try {
                 const res = await fetch('/api/ai/dashboard-recommend', {
@@ -1157,7 +1233,7 @@
                     <div class="mb-2"><span class="font-bold text-white">Status:</span> <span class="font-extrabold uppercase ${warnaStatus}">${data.status}</span></div>
                     <div class="mb-2"><span class="font-bold text-white">Fokus:</span> <span class="text-teal-300">${data.fokus_rekomendasi}</span></div>
                     <div class="mb-3"><span class="font-bold text-white">Aksi Kemnaker:</span> <span class="text-teal-300">${data.aksi_produktivitas}</span></div>
-                    <div class="p-3 bg-slate-900/50 rounded-xl border border-slate-700 italic prose prose-invert max-w-none text-sm">${marked.parse(data.narasi_ai)}</div>
+                    <div class="p-4 bg-slate-900/50 rounded-xl border border-slate-700 italic prose prose-invert max-w-none text-sm">${marked.parse(data.narasi_ai)}</div>
                 `;
             } catch(e) {
                 document.getElementById('ai-rekomendasi-konten').innerHTML = "Gagal memuat rekomendasi.";
@@ -1174,7 +1250,7 @@
                 const history = await res.json();
                 box.innerHTML = '';
                 if(history.length === 0) {
-                    box.innerHTML = '<div class="text-center text-slate-500 text-sm mt-10">Belum ada obrolan. Silakan mulai bertanya!</div>';
+                    box.innerHTML = '<div class="text-center text-slate-500 text-sm mt-16 flex flex-col items-center gap-2"><i class="fa-solid fa-comments text-3xl text-slate-600"></i><span>Belum ada obrolan. Silakan mulai bertanya mengenai strategi produktivitas!</span></div>';
                 } else {
                     history.forEach(msg => appendChatUI(msg));
                     box.scrollTop = box.scrollHeight;
@@ -1248,7 +1324,7 @@
             } catch(e) {
                 alert("Gagal mengirim pesan.");
             } finally {
-                btn.innerHTML = '<i class="fa-solid fa-paper-plane"></i>';
+                btn.innerHTML = '<span>Kirim</span> <i class="fa-solid fa-paper-plane text-xs"></i>';
                 btn.disabled = false;
             }
         }
