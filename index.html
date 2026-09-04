@@ -54,6 +54,21 @@
             backdrop-filter: blur(12px);
             border: 1px solid rgba(226, 232, 240, 0.8);
         }
+        /* Animasi Latar Belakang Bergerak Halus (Floating Blobs) */
+        @keyframes floatSlow {
+            0%, 100% { transform: translateY(0px) translateX(0px) scale(1); }
+            50% { transform: translateY(-25px) translateX(20px) scale(1.08); }
+        }
+        @keyframes floatReverse {
+            0%, 100% { transform: translateY(0px) translateX(0px) scale(1); }
+            50% { transform: translateY(30px) translateX(-25px) scale(0.92); }
+        }
+        .animate-float-slow {
+            animation: floatSlow 9s ease-in-out infinite;
+        }
+        .animate-float-reverse {
+            animation: floatReverse 11s ease-in-out infinite;
+        }
     </style>
 </head>
 <body class="bg-slate-50 font-sans text-slate-800 antialiased flex flex-col min-h-screen">
@@ -96,8 +111,15 @@
 
     <!-- Main Content Area -->
     <main class="flex-grow">
-        <!-- Hero Section -->
+        <!-- Hero Section dengan Animasi Latar Belakang Bergerak -->
         <section class="relative py-20 lg:py-28 overflow-hidden bg-gradient-to-b from-slate-100/80 via-white to-slate-50">
+            <!-- Elemen Latar Belakang Animasi Bergerak (Floating Blobs) -->
+            <div class="absolute inset-0 overflow-hidden pointer-events-none z-0">
+                <div class="absolute -top-28 -left-28 w-[450px] h-[450px] bg-teal-400/20 rounded-full blur-3xl animate-float-slow"></div>
+                <div class="absolute top-1/3 -right-28 w-[450px] h-[450px] bg-blue-500/15 rounded-full blur-3xl animate-float-reverse"></div>
+                <div class="absolute -bottom-20 left-1/3 w-[400px] h-[400px] bg-brand-500/15 rounded-full blur-3xl animate-float-slow" style="animation-delay: 2s;"></div>
+            </div>
+
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
                 <div class="max-w-3xl mx-auto text-center">
                     <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-brand-50 border border-brand-200 text-brand-700 text-xs font-semibold mb-6 shadow-sm">
@@ -148,58 +170,58 @@
         </section>
 
         <!-- Live Demo / Interactive Calculator Section -->
-<section id="demo" class="min-h-[calc(100vh-5rem)] py-8 bg-white border-y border-slate-200 flex flex-col justify-center">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
-        <div class="mb-6 text-center">
-            <h2 class="text-2xl sm:text-3xl font-bold text-slate-900">Uji Coba Endpoint Backend (Live Interactive)</h2>
-            <p class="text-slate-600 mt-1 text-sm">Masukan data finansial perusahaan Anda untuk menguji integrasi API FastAPI secara langsung.</p>
-        </div>
+        <section id="demo" class="min-h-[calc(100vh-5rem)] py-8 bg-white border-y border-slate-200 flex flex-col justify-center">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
+                <div class="mb-6 text-center">
+                    <h2 class="text-2xl sm:text-3xl font-bold text-slate-900">Uji Coba Endpoint Backend (Live Interactive)</h2>
+                    <p class="text-slate-600 mt-1 text-sm">Masukan data finansial perusahaan Anda untuk menguji integrasi API FastAPI secara langsung.</p>
+                </div>
 
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
-            <!-- Form Input Card -->
-            <div class="lg:col-span-5 bg-slate-50 p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between">
-                <h3 class="text-base font-bold text-slate-900 mb-4 flex items-center gap-2">
-                    <i class="fa-solid fa-file-invoice-dollar text-brand-600"></i> Form Input Finansial
-                </h3>
-                        
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
+                    <!-- Form Input Card -->
+                    <div class="lg:col-span-5 bg-slate-50 p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between">
+                        <h3 class="text-base font-bold text-slate-900 mb-4 flex items-center gap-2">
+                            <i class="fa-solid fa-file-invoice-dollar text-brand-600"></i> Form Input Finansial
+                        </h3>
+                                
                         <!-- Form Input Finansial -->
-<form id="evaForm" onsubmit="handleCalculate(event)" class="space-y-4">
-    <div>
-        <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">Nama Perusahaan</label>
-        <input type="text" id="company_name" value="PT Mitra Produktif Kemnaker" required class="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-sm">
-    </div>
+                        <form id="evaForm" onsubmit="handleCalculate(event)" class="space-y-4">
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">Nama Perusahaan</label>
+                                <input type="text" id="company_name" value="PT Mitra Produktif Kemnaker" required class="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-sm">
+                            </div>
 
-    <div>
-        <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">Periode Laporan</label>
-        <input type="text" id="period" value="Q1 2026" required class="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-sm">
-    </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">Periode Laporan</label>
+                                <input type="text" id="period" value="Q1 2026" required class="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-sm">
+                            </div>
 
-    <div class="grid grid-cols-2 gap-4">
-        <div>
-            <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">EBIT (Rp)</label>
-            <input type="number" id="ebit" value="2000000000" required class="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-sm">
-        </div>
-        <div>
-            <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">Tarif Pajak (0.22 = 22%)</label>
-            <input type="number" step="0.01" id="tax_rate" value="0.22" min="0" max="1" required class="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-sm">
-        </div>
-    </div>
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">EBIT (Rp)</label>
+                                    <input type="number" id="ebit" value="2000000000" required class="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-sm">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">Tarif Pajak (0.22 = 22%)</label>
+                                    <input type="number" step="0.01" id="tax_rate" value="0.22" min="0" max="1" required class="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-sm">
+                                </div>
+                            </div>
 
-    <div class="grid grid-cols-2 gap-4">
-        <div>
-            <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">Invested Capital (Rp)</label>
-            <input type="number" id="invested_capital" value="10000000000" required class="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-sm">
-        </div>
-        <div>
-            <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">WACC (0.10 = 10%)</label>
-            <input type="number" step="0.01" id="wacc" value="0.10" min="0" max="1" required class="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-sm">
-        </div>
-    </div>
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">Invested Capital (Rp)</label>
+                                    <input type="number" id="invested_capital" value="10000000000" required class="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-sm">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">WACC (0.10 = 10%)</label>
+                                    <input type="number" step="0.01" id="wacc" value="0.10" min="0" max="1" required class="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-sm">
+                                </div>
+                            </div>
 
-    <button type="submit" id="btnSubmit" class="w-full py-3 px-4 mt-2 rounded-xl text-sm font-bold text-white bg-teal-600 hover:bg-teal-700 transition">
-        Hitung & Minta Rekomendasi AI
-    </button>
-</form>
+                            <button type="submit" id="btnSubmit" class="w-full py-3 px-4 mt-2 rounded-xl text-sm font-bold text-white bg-teal-600 hover:bg-teal-700 transition">
+                                Hitung & Minta Rekomendasi AI
+                            </button>
+                        </form>
                     </div>
 
                     <!-- Output / Result Card -->
@@ -224,72 +246,72 @@
             </div>
         </section>
 
-<!-- Chat Section Container -->
-<section id="chat-section" class="w-full max-w-5xl mx-auto px-4 py-6 min-h-[calc(100vh-5rem)] flex items-center justify-center">
-    <div class="bg-slate-900 text-white rounded-2xl shadow-xl overflow-hidden border border-slate-800 flex flex-col w-full h-[calc(100vh-12rem)] max-h-[750px] min-h-[500px]">
-        
-        <!-- Header Chat -->
-        <div class="px-4 py-3 sm:px-6 sm:py-4 bg-slate-800/80 border-b border-slate-700/60 flex items-center justify-between">
-            <div class="flex items-center space-x-3">
-                <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-teal-600 flex items-center justify-center font-bold text-white text-sm sm:text-base shadow-md">
-                    AI
+        <!-- Chat Section Container -->
+        <section id="chat-section" class="w-full max-w-5xl mx-auto px-4 py-6 min-h-[calc(100vh-5rem)] flex items-center justify-center">
+            <div class="bg-slate-900 text-white rounded-2xl shadow-xl overflow-hidden border border-slate-800 flex flex-col w-full h-[calc(100vh-12rem)] max-h-[750px] min-h-[500px]">
+                
+                <!-- Header Chat -->
+                <div class="px-4 py-3 sm:px-6 sm:py-4 bg-slate-800/80 border-b border-slate-700/60 flex items-center justify-between">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-teal-600 flex items-center justify-center font-bold text-white text-sm sm:text-base shadow-md">
+                            AI
+                        </div>
+                        <div>
+                            <h3 class="font-semibold text-sm sm:text-base text-slate-100 leading-tight">Gemini Productivity Assistant</h3>
+                            <div class="flex items-center space-x-1.5 mt-0.5">
+                                <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                                <span class="text-xs text-slate-400" id="chatStatusText">Online / Ready</span>
+                            </div>
+                        </div>
+                    </div>
+                    <button onclick="clearChatHistory()" class="text-xs text-slate-400 hover:text-rose-400 transition flex items-center space-x-1">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                        <span class="hidden sm:inline">Bersihkan Chat</span>
+                    </button>
                 </div>
-                <div>
-                    <h3 class="font-semibold text-sm sm:text-base text-slate-100 leading-tight">Gemini Productivity Assistant</h3>
-                    <div class="flex items-center space-x-1.5 mt-0.5">
-                        <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-                        <span class="text-xs text-slate-400" id="chatStatusText">Online / Ready</span>
+
+                <!-- Chat Area Scrollable -->
+                <div id="chatMessages" class="flex-1 p-4 sm:p-6 overflow-y-auto space-y-4 scroll-smooth">
+                    <!-- Pesan Pembuka AI -->
+                    <div class="flex items-start space-x-3 max-w-[85%] sm:max-w-[75%]">
+                        <div class="w-8 h-8 rounded-full bg-teal-600/30 text-teal-400 flex items-center justify-center font-bold text-xs flex-shrink-0">
+                            AI
+                        </div>
+                        <div class="bg-slate-800 border border-slate-700/60 rounded-2xl rounded-tl-none p-3.5 sm:p-4 text-slate-200 text-xs sm:text-sm leading-relaxed shadow-sm">
+                            Halo! Saya asisten virtual produktivitas Kemnaker. Ada yang bisa saya bantu terkait simulasi EVA atau strategi produktivitas perusahaan Anda?
+                        </div>
                     </div>
                 </div>
-            </div>
-            <button onclick="clearChatHistory()" class="text-xs text-slate-400 hover:text-rose-400 transition flex items-center space-x-1">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
-                <span class="hidden sm:inline">Bersihkan Chat</span>
-            </button>
-        </div>
 
-        <!-- Chat Area Scrollable -->
-        <div id="chatMessages" class="flex-1 p-4 sm:p-6 overflow-y-auto space-y-4 scroll-smooth">
-            <!-- Pesan Pembuka AI -->
-            <div class="flex items-start space-x-3 max-w-[85%] sm:max-w-[75%]">
-                <div class="w-8 h-8 rounded-full bg-teal-600/30 text-teal-400 flex items-center justify-center font-bold text-xs flex-shrink-0">
-                    AI
+                <!-- Warning Limit Bar (Hidden by default) -->
+                <div id="limitWarningBar" class="hidden bg-amber-500/10 border-t border-amber-500/20 px-4 py-2.5 text-center text-xs text-amber-300 flex items-center justify-between">
+                    <span>Batas chat gratis tercapai.</span>
+                    <a href="/login" class="font-bold underline hover:text-amber-200 ml-2">Login untuk Lanjut Chat →</a>
                 </div>
-                <div class="bg-slate-800 border border-slate-700/60 rounded-2xl rounded-tl-none p-3.5 sm:p-4 text-slate-200 text-xs sm:text-sm leading-relaxed shadow-sm">
-                    Halo! Saya asisten virtual produktivitas Kemnaker. Ada yang bisa saya bantu terkait simulasi EVA atau strategi produktivitas perusahaan Anda?
-                </div>
+
+                <!-- Form Input Chat -->
+                <form id="chatForm" onsubmit="handleSendMessage(event)" class="p-3 sm:p-4 bg-slate-800/50 border-t border-slate-700/60">
+                    <div class="flex items-center space-x-2">
+                        <input 
+                            type="text" 
+                            id="chatInput" 
+                            placeholder="Ketik pertanyaan Anda di sini..." 
+                            autocomplete="off"
+                            class="flex-1 bg-slate-900 border border-slate-700 text-slate-100 rounded-xl px-4 py-2.5 sm:py-3 text-xs sm:text-sm focus:outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                        <button 
+                            type="submit" 
+                            id="btnSendChat"
+                            class="bg-teal-600 hover:bg-teal-500 text-white font-semibold px-4 py-2.5 sm:py-3 rounded-xl text-xs sm:text-sm transition flex items-center space-x-1.5 disabled:opacity-50 disabled:cursor-not-allowed flex-shrink-0"
+                        >
+                            <span>Kirim</span>
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9-7-9-7-9 7 9 7zm0 0v-8"/></svg>
+                        </button>
+                    </div>
+                </form>
+
             </div>
-        </div>
-
-        <!-- Warning Limit Bar (Hidden by default) -->
-        <div id="limitWarningBar" class="hidden bg-amber-500/10 border-t border-amber-500/20 px-4 py-2.5 text-center text-xs text-amber-300 flex items-center justify-between">
-            <span>Batas chat gratis tercapai (3/3 pesan).</span>
-            <a href="/login" class="font-bold underline hover:text-amber-200 ml-2">Login untuk Lanjut Chat →</a>
-        </div>
-
-        <!-- Form Input Chat -->
-        <form id="chatForm" onsubmit="handleSendMessage(event)" class="p-3 sm:p-4 bg-slate-800/50 border-t border-slate-700/60">
-            <div class="flex items-center space-x-2">
-                <input 
-                    type="text" 
-                    id="chatInput" 
-                    placeholder="Ketik pertanyaan Anda di sini..." 
-                    autocomplete="off"
-                    class="flex-1 bg-slate-900 border border-slate-700 text-slate-100 rounded-xl px-4 py-2.5 sm:py-3 text-xs sm:text-sm focus:outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500 disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                <button 
-                    type="submit" 
-                    id="btnSendChat"
-                    class="bg-teal-600 hover:bg-teal-500 text-white font-semibold px-4 py-2.5 sm:py-3 rounded-xl text-xs sm:text-sm transition flex items-center space-x-1.5 disabled:opacity-50 disabled:cursor-not-allowed flex-shrink-0"
-                >
-                    <span>Kirim</span>
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9-7-9-7-9 7 9 7zm0 0v-8"/></svg>
-                </button>
-            </div>
-        </form>
-
-    </div>
-</section>
+        </section>
     </main>
 
     <!-- Footer -->
@@ -306,295 +328,275 @@
     </footer>
 
     <!-- JavaScript Integrasi Backend FastAPI -->
-     <script>
-    // State Management
-let chatHistory = [];
-let currentEvaContext = null;
-const MAX_FREE_MESSAGES = 100;
-const BASE_URL = 'http://127.0.0.1:8000';
+    <script>
+        // State Management
+        let chatHistory = [];
+        let currentEvaContext = null;
+        const MAX_FREE_MESSAGES = 100;
+        const BASE_URL = 'http://127.0.0.1:8000';
 
-// Ambil jumlah pesan yang tersimpan di browser
-function getGuestMessageCount() {
-    return parseInt(localStorage.getItem('eva_guest_chat_count') || '0', 10);
-}
-
-function incrementGuestMessageCount() {
-    const current = getGuestMessageCount() + 1;
-    localStorage.setItem('eva_guest_chat_count', current.toString());
-    return current;
-}
-
-// Inisialisasi tampilan input saat halaman dimuat
-document.addEventListener("DOMContentLoaded", () => {
-    checkGuestLimit();
-});
-
-function checkGuestLimit() {
-    const count = getGuestMessageCount();
-    const chatInput = document.getElementById('chatInput');
-    const btnSendChat = document.getElementById('btnSendChat');
-    const limitBar = document.getElementById('limitWarningBar');
-
-    if (count >= MAX_FREE_MESSAGES) {
-        chatInput.disabled = true;
-        chatInput.placeholder = "Batas percakapan gratis habis. Silakan login.";
-        btnSendChat.disabled = true;
-        limitBar.classList.remove('hidden');
-        return true;
-    }
-    return false;
-}
-
-// Handler calculate
-async function handleCalculate(e) {
-    e.preventDefault();
-    const btn = document.getElementById('btnSubmit');
-    const resultContent = document.getElementById('resultContent');
-
-    btn.disabled = true;
-    btn.innerHTML = `Memproses...`;
-
-    // Sesuai dengan schema FinancialInput backend
-    const payload = {
-        company_name: document.getElementById('company_name').value,
-        period: document.getElementById('period').value,
-        ebit: parseFloat(document.getElementById('ebit').value),
-        tax_rate: parseFloat(document.getElementById('tax_rate').value),
-        invested_capital: parseFloat(document.getElementById('invested_capital').value),
-        wacc: parseFloat(document.getElementById('wacc').value)
-    };
-
-    try {
-        const response = await fetch(`/api/ai/recommend`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload)
-        });
-
-        if (!response.ok) throw new Error(`Status HTTP: ${response.status}`);
-        const data = await response.json();
-        currentEvaContext = data.eva_result;
-
-        const formattedEva = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(data.eva_result.eva);
-
-        // Di dalam async function handleCalculate(e) setelah data didapatkan:
-const evaVal = data.eva_result.eva;
-
-// Tentukan warna teks adaptif berdasarkan nilai EVA
-let colorClass = 'text-amber-400'; // Default: EVA = 0 (Kuning)
-if (evaVal > 0) {
-    colorClass = 'text-emerald-400'; // EVA > 0 / Profit (Hijau)
-} else if (evaVal < 0) {
-    colorClass = 'text-rose-400'; // EVA < 0 / Negatif (Merah)
-}
-
-resultContent.innerHTML = `
-    <div class="p-4 bg-slate-800 rounded-xl space-y-3">
-        <div class="flex justify-between items-center">
-            <span class="text-xs text-slate-400">Nilai EVA</span>
-            <span class="font-bold text-lg ${colorClass}">${formattedEva} (${data.eva_result.status})</span>
-        </div>
-        <div>
-            <span class="text-xs text-teal-400 font-bold uppercase">Fokus Strategis</span>
-            <p class="text-sm font-semibold">${data.fokus_rekomendasi}</p>
-        </div>
-        <div>
-            <span class="text-xs text-teal-400 font-bold uppercase">Aksi Produktivitas</span>
-            <p class="text-sm text-slate-300">${data.aksi_produktivitas}</p>
-        </div>
-        <div class="pt-2 border-t border-slate-700">
-            <span class="text-xs text-teal-400 font-bold uppercase">Narasi AI Gemini</span>
-            <p class="text-sm text-slate-200 mt-1 leading-relaxed">${data.narasi_ai}</p>
-        </div>
-    </div>
-`;
-    } catch (err) {
-        resultContent.innerHTML = `<p class="text-rose-400 text-sm">Gagal memproses data: ${err.message}</p>`;
-    } finally {
-        btn.disabled = false;
-        btn.innerHTML = `Hitung & Minta Rekomendasi AI`;
-    }
-}
-// Handler Kirim Pesan
-async function handleSendMessage(e) {
-    e.preventDefault();
-    if (checkGuestLimit()) return;
-
-    const input = document.getElementById('chatInput');
-    const message = input.value.trim();
-    if (!message) return;
-
-    // 1. Render Pesan User
-    appendMessage('user', message);
-    input.value = '';
-
-    // 2. Render Loading Indicator (Animasi 3 Titik)
-    const loadingId = appendLoadingIndicator();
-
-    // 3. Increment counter pesan & disable tombol
-    const updatedCount = incrementGuestMessageCount();
-    const btnSendChat = document.getElementById('btnSendChat');
-    btnSendChat.disabled = true;
-
-    try {
-        const payload = {
-            message: message,
-            history: chatHistory,
-            eva_context: currentEvaContext
-        };
-
-        const response = await fetch(`${BASE_URL}/api/ai/chat`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload)
-        });
-
-        removeLoadingIndicator(loadingId);
-
-        if (!response.ok) throw new Error(`HTTP Error: ${response.status}`);
-        const data = await response.json();
-
-        // 4. Update History & Render Balasan AI
-        chatHistory = data.history;
-        appendMessage('model', data.reply);
-
-    } catch (err) {
-        removeLoadingIndicator(loadingId);
-        appendMessage('model', `Maaf, terjadi masalah koneksi: ${err.message}`);
-    } finally {
-        // Cek kembali apakah limit sudah habis setelah pesan dikirim
-        if (!checkGuestLimit()) {
-            btnSendChat.disabled = false;
+        function getGuestMessageCount() {
+            return parseInt(localStorage.getItem('eva_guest_chat_count') || '0', 10);
         }
-    }
-}
 
-// Function Render UI Pesan dengan Formatting Markdown, Tombol Copy, dan Edit Prompt
-function appendMessage(role, content) {
-    const container = document.getElementById('chatMessages');
-    const isUser = role === 'user';
-    const messageId = 'msg-' + Date.now() + '-' + Math.floor(Math.random() * 1000);
-    
-    const wrapper = document.createElement('div');
-    wrapper.className = `group flex items-start space-x-2.5 ${isUser ? 'justify-end' : ''} max-w-[92%] sm:max-w-[85%] ${isUser ? 'ml-auto' : ''}`;
+        function incrementGuestMessageCount() {
+            const current = getGuestMessageCount() + 1;
+            localStorage.setItem('eva_guest_chat_count', current.toString());
+            return current;
+        }
 
-    // Render Markdown untuk AI, atau escape HTML untuk User
-    const formattedContent = isUser 
-        ? escapeHtml(content) 
-        : marked.parse(content);
+        document.addEventListener("DOMContentLoaded", () => {
+            checkGuestLimit();
+        });
 
-    const avatar = isUser ? '' : `
-        <div class="w-8 h-8 rounded-full bg-teal-600/30 text-teal-400 flex items-center justify-center font-bold text-xs flex-shrink-0 mt-1">
-            AI
-        </div>
-    `;
+        function checkGuestLimit() {
+            const count = getGuestMessageCount();
+            const chatInput = document.getElementById('chatInput');
+            const btnSendChat = document.getElementById('btnSendChat');
+            const limitBar = document.getElementById('limitWarningBar');
 
-    // Tombol Edit (khusus User) dan Tombol Copy (khusus AI)
-    const actionButtons = isUser ? `
-        <button onclick="editUserMessage('${escapeForAttribute(content)}')" title="Edit prompt" class="opacity-0 group-hover:opacity-100 transition p-1 text-slate-400 hover:text-teal-400 self-center">
-            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/>
-            </svg>
-        </button>
-    ` : `
-        <button onclick="copyToClipboard('${messageId}', this)" title="Salin pesan" class="opacity-0 group-hover:opacity-100 transition p-1 text-slate-400 hover:text-teal-400 self-start mt-2">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
-            </svg>
-        </button>
-    `;
+            if (count >= MAX_FREE_MESSAGES) {
+                chatInput.disabled = true;
+                chatInput.placeholder = "Batas percakapan gratis habis. Silakan login.";
+                btnSendChat.disabled = true;
+                limitBar.classList.remove('hidden');
+                return true;
+            }
+            return false;
+        }
 
-    const bubbleClass = isUser 
-        ? 'bg-teal-600 text-white rounded-2xl rounded-tr-none px-4 py-3 text-xs sm:text-sm leading-relaxed shadow-sm' 
-        : 'bg-slate-800 border border-slate-700/60 text-slate-200 rounded-2xl rounded-tl-none px-4 py-3 text-xs sm:text-sm leading-relaxed shadow-sm prose prose-invert max-w-none prose-p:my-1 prose-ul:my-1 prose-ol:my-1 prose-li:my-0.5 prose-strong:text-teal-300';
+        async function handleCalculate(e) {
+            e.preventDefault();
+            const btn = document.getElementById('btnSubmit');
+            const resultContent = document.getElementById('resultContent');
 
-    wrapper.innerHTML = `
-        ${isUser ? actionButtons : avatar}
-        <div id="${messageId}" class="${bubbleClass}">
-            ${formattedContent}
-        </div>
-        ${isUser ? '' : actionButtons}
-    `;
+            btn.disabled = true;
+            btn.innerHTML = `Memproses...`;
 
-    container.appendChild(wrapper);
-    container.scrollTop = container.scrollHeight;
-}
+            const payload = {
+                company_name: document.getElementById('company_name').value,
+                period: document.getElementById('period').value,
+                ebit: parseFloat(document.getElementById('ebit').value),
+                tax_rate: parseFloat(document.getElementById('tax_rate').value),
+                invested_capital: parseFloat(document.getElementById('invested_capital').value),
+                wacc: parseFloat(document.getElementById('wacc').value)
+            };
 
-// Fitur Salin Teks ke Clipboard
-function copyToClipboard(elementId, btnElement) {
-    const textToCopy = document.getElementById(elementId).innerText;
-    navigator.clipboard.writeText(textToCopy).then(() => {
-        const originalIcon = btnElement.innerHTML;
-        btnElement.innerHTML = `
-            <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
-            </svg>
-        `;
-        setTimeout(() => {
-            btnElement.innerHTML = originalIcon;
-        }, 2000);
-    });
-}
+            try {
+                const response = await fetch(`/api/ai/recommend`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
 
-// Fitur Edit Prompt User
-function editUserMessage(text) {
-    const input = document.getElementById('chatInput');
-    input.value = text;
-    input.focus();
-}
+                if (!response.ok) throw new Error(`Status HTTP: ${response.status}`);
+                const data = await response.json();
+                currentEvaContext = data.eva_result;
 
-// Helper Escape Atribut Text
-function escapeForAttribute(str) {
-    return str.replace(/'/g, "\\'").replace(/"/g, '&quot;').replace(/\n/g, ' ');
-}
+                const formattedEva = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(data.eva_result.eva);
+                const evaVal = data.eva_result.eva;
 
-// Function Indikator Loading (Bouncing Dots)
-function appendLoadingIndicator() {
-    const container = document.getElementById('chatMessages');
-    const loadingId = 'loading-' + Date.now();
+                let colorClass = 'text-amber-400';
+                if (evaVal > 0) {
+                    colorClass = 'text-emerald-400';
+                } else if (evaVal < 0) {
+                    colorClass = 'text-rose-400';
+                }
 
-    const wrapper = document.createElement('div');
-    wrapper.id = loadingId;
-    wrapper.className = 'flex items-start space-x-3 max-w-[85%] sm:max-w-[75%]';
-    wrapper.innerHTML = `
-        <div class="w-8 h-8 rounded-full bg-teal-600/30 text-teal-400 flex items-center justify-center font-bold text-xs flex-shrink-0">
-            AI
-        </div>
-        <div class="bg-slate-800 border border-slate-700/60 rounded-2xl rounded-tl-none px-4 py-3 text-slate-400 flex items-center space-x-1.5">
-            <span class="w-2 h-2 bg-teal-400 rounded-full animate-bounce" style="animation-delay: 0ms;"></span>
-            <span class="w-2 h-2 bg-teal-400 rounded-full animate-bounce" style="animation-delay: 150ms;"></span>
-            <span class="w-2 h-2 bg-teal-400 rounded-full animate-bounce" style="animation-delay: 300ms;"></span>
-        </div>
-    `;
+                resultContent.innerHTML = `
+                    <div class="p-4 bg-slate-800 rounded-xl space-y-3">
+                        <div class="flex justify-between items-center">
+                            <span class="text-xs text-slate-400">Nilai EVA</span>
+                            <span class="font-bold text-lg ${colorClass}">${formattedEva} (${data.eva_result.status})</span>
+                        </div>
+                        <div>
+                            <span class="text-xs text-teal-400 font-bold uppercase">Fokus Strategis</span>
+                            <p class="text-sm font-semibold">${data.fokus_rekomendasi}</p>
+                        </div>
+                        <div>
+                            <span class="text-xs text-teal-400 font-bold uppercase">Aksi Produktivitas</span>
+                            <p class="text-sm text-slate-300">${data.aksi_produktivitas}</p>
+                        </div>
+                        <div class="pt-2 border-t border-slate-700">
+                            <span class="text-xs text-teal-400 font-bold uppercase">Narasi AI Gemini</span>
+                            <p class="text-sm text-slate-200 mt-1 leading-relaxed">${data.narasi_ai}</p>
+                        </div>
+                    </div>
+                `;
+            } catch (err) {
+                resultContent.innerHTML = `<p class="text-rose-400 text-sm">Gagal memproses data: ${err.message}</p>`;
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = `Hitung & Minta Rekomendasi AI`;
+            }
+        }
 
-    container.appendChild(wrapper);
-    container.scrollTop = container.scrollHeight;
-    return loadingId;
-}
+        async function handleSendMessage(e) {
+            e.preventDefault();
+            if (checkGuestLimit()) return;
 
-function removeLoadingIndicator(id) {
-    const elem = document.getElementById(id);
-    if (elem) elem.remove();
-}
+            const input = document.getElementById('chatInput');
+            const message = input.value.trim();
+            if (!message) return;
 
-function clearChatHistory() {
-    chatHistory = [];
-    const container = document.getElementById('chatMessages');
-    container.innerHTML = `
-        <div class="flex items-start space-x-3 max-w-[85%] sm:max-w-[75%]">
-            <div class="w-8 h-8 rounded-full bg-teal-600/30 text-teal-400 flex items-center justify-center font-bold text-xs flex-shrink-0">AI</div>
-            <div class="bg-slate-800 border border-slate-700/60 rounded-2xl rounded-tl-none p-3.5 sm:p-4 text-slate-200 text-xs sm:text-sm leading-relaxed shadow-sm">
-                Riwayat obrolan dibersihkan. Ada yang ingin Anda konsultasikan kembali?
-            </div>
-        </div>
-    `;
-}
+            appendMessage('user', message);
+            input.value = '';
 
-function escapeHtml(str) {
-    return str.replace(/[&<>"']/g, (m) => ({
-        '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;'
-    })[m]);
-}
-</script>
+            const loadingId = appendLoadingIndicator();
+            incrementGuestMessageCount();
+            const btnSendChat = document.getElementById('btnSendChat');
+            btnSendChat.disabled = true;
+
+            try {
+                const payload = {
+                    message: message,
+                    history: chatHistory,
+                    eva_context: currentEvaContext
+                };
+
+                const response = await fetch(`${BASE_URL}/api/ai/chat`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                removeLoadingIndicator(loadingId);
+
+                if (!response.ok) throw new Error(`HTTP Error: ${response.status}`);
+                const data = await response.json();
+
+                chatHistory = data.history;
+                appendMessage('model', data.reply);
+
+            } catch (err) {
+                removeLoadingIndicator(loadingId);
+                appendMessage('model', `Maaf, terjadi masalah koneksi: ${err.message}`);
+            } finally {
+                if (!checkGuestLimit()) {
+                    btnSendChat.disabled = false;
+                }
+            }
+        }
+
+        function appendMessage(role, content) {
+            const container = document.getElementById('chatMessages');
+            const isUser = role === 'user';
+            const messageId = 'msg-' + Date.now() + '-' + Math.floor(Math.random() * 1000);
+            
+            const wrapper = document.createElement('div');
+            wrapper.className = `group flex items-start space-x-2.5 ${isUser ? 'justify-end' : ''} max-w-[92%] sm:max-w-[85%] ${isUser ? 'ml-auto' : ''}`;
+
+            const formattedContent = isUser 
+                ? escapeHtml(content) 
+                : marked.parse(content);
+
+            const avatar = isUser ? '' : `
+                <div class="w-8 h-8 rounded-full bg-teal-600/30 text-teal-400 flex items-center justify-center font-bold text-xs flex-shrink-0 mt-1">
+                    AI
+                </div>
+            `;
+
+            const actionButtons = isUser ? `
+                <button onclick="editUserMessage('${escapeForAttribute(content)}')" title="Edit prompt" class="opacity-0 group-hover:opacity-100 transition p-1 text-slate-400 hover:text-teal-400 self-center">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/>
+                    </svg>
+                </button>
+            ` : `
+                <button onclick="copyToClipboard('${messageId}', this)" title="Salin pesan" class="opacity-0 group-hover:opacity-100 transition p-1 text-slate-400 hover:text-teal-400 self-start mt-2">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+                    </svg>
+                </button>
+            `;
+
+            const bubbleClass = isUser 
+                ? 'bg-teal-600 text-white rounded-2xl rounded-tr-none px-4 py-3 text-xs sm:text-sm leading-relaxed shadow-sm' 
+                : 'bg-slate-800 border border-slate-700/60 text-slate-200 rounded-2xl rounded-tl-none px-4 py-3 text-xs sm:text-sm leading-relaxed shadow-sm prose prose-invert max-w-none prose-p:my-1 prose-ul:my-1 prose-ol:my-1 prose-li:my-0.5 prose-strong:text-teal-300';
+
+            wrapper.innerHTML = `
+                ${isUser ? actionButtons : avatar}
+                <div id="${messageId}" class="${bubbleClass}">
+                    ${formattedContent}
+                </div>
+                ${isUser ? '' : actionButtons}
+            `;
+
+            container.appendChild(wrapper);
+            container.scrollTop = container.scrollHeight;
+        }
+
+        function copyToClipboard(elementId, btnElement) {
+            const textToCopy = document.getElementById(elementId).innerText;
+            navigator.clipboard.writeText(textToCopy).then(() => {
+                const originalIcon = btnElement.innerHTML;
+                btnElement.innerHTML = `
+                    <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                    </svg>
+                `;
+                setTimeout(() => {
+                    btnElement.innerHTML = originalIcon;
+                }, 2000);
+            });
+        }
+
+        function editUserMessage(text) {
+            const input = document.getElementById('chatInput');
+            input.value = text;
+            input.focus();
+        }
+
+        function escapeForAttribute(str) {
+            return str.replace(/'/g, "\\'").replace(/"/g, '&quot;').replace(/\n/g, ' ');
+        }
+
+        function appendLoadingIndicator() {
+            const container = document.getElementById('chatMessages');
+            const loadingId = 'loading-' + Date.now();
+
+            const wrapper = document.createElement('div');
+            wrapper.id = loadingId;
+            wrapper.className = 'flex items-start space-x-3 max-w-[85%] sm:max-w-[75%]';
+            wrapper.innerHTML = `
+                <div class="w-8 h-8 rounded-full bg-teal-600/30 text-teal-400 flex items-center justify-center font-bold text-xs flex-shrink-0">
+                    AI
+                </div>
+                <div class="bg-slate-800 border border-slate-700/60 rounded-2xl rounded-tl-none px-4 py-3 text-slate-400 flex items-center space-x-1.5">
+                    <span class="w-2 h-2 bg-teal-400 rounded-full animate-bounce" style="animation-delay: 0ms;"></span>
+                    <span class="w-2 h-2 bg-teal-400 rounded-full animate-bounce" style="animation-delay: 150ms;"></span>
+                    <span class="w-2 h-2 bg-teal-400 rounded-full animate-bounce" style="animation-delay: 300ms;"></span>
+                </div>
+            `;
+
+            container.appendChild(wrapper);
+            container.scrollTop = container.scrollHeight;
+            return loadingId;
+        }
+
+        function removeLoadingIndicator(id) {
+            const elem = document.getElementById(id);
+            if (elem) elem.remove();
+        }
+
+        function clearChatHistory() {
+            chatHistory = [];
+            const container = document.getElementById('chatMessages');
+            container.innerHTML = `
+                <div class="flex items-start space-x-3 max-w-[85%] sm:max-w-[75%]">
+                    <div class="w-8 h-8 rounded-full bg-teal-600/30 text-teal-400 flex items-center justify-center font-bold text-xs flex-shrink-0">AI</div>
+                    <div class="bg-slate-800 border border-slate-700/60 rounded-2xl rounded-tl-none p-3.5 sm:p-4 text-slate-200 text-xs sm:text-sm leading-relaxed shadow-sm">
+                        Riwayat obrolan dibersihkan. Ada yang ingin Anda konsultasikan kembali?
+                    </div>
+                </div>
+            `;
+        }
+
+        function escapeHtml(str) {
+            return str.replace(/[&<>"']/g, (m) => ({
+                '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;'
+            })[m]);
+        }
+    </script>
 </body>
 </html>
