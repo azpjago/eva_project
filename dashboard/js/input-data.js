@@ -429,33 +429,45 @@ function generateYearPanelHTML(yearId) {
         </div>
 
         <!-- Rangkuman -->
-        <div class="bg-slate-800 rounded-2xl border border-teal-500/30 p-6">
-            <h2 class="text-sm font-bold text-teal-400 uppercase tracking-wider mb-4 flex items-center gap-2">
-                <i class="fa-solid fa-square-root-variable"></i> Rangkuman Perhitungan Nilai Tambah
-            </h2>
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-                <div>
-                    <div class="text-slate-400 text-xs mb-1">Total Penjualan</div>
-                    <div data-result="penjualan" class="font-bold text-white">Rp0</div>
-                </div>
-                <div>
-                    <div class="text-slate-400 text-xs mb-1">Bahan Digunakan</div>
-                    <div data-result="bahan_digunakan" class="font-bold text-white">Rp0</div>
-                </div>
-                <div>
-                    <div class="text-slate-400 text-xs mb-1">Overhead Produksi</div>
-                    <div data-result="overhead_produksi" class="font-bold text-white">Rp0</div>
-                </div>
-                <div>
-                    <div class="text-slate-400 text-xs mb-1">Biaya Administrasi</div>
-                    <div data-result="biaya_administrasi" class="font-bold text-white">Rp0</div>
-                </div>
-            </div>
-            <div class="mt-5 pt-5 border-t border-slate-700 flex items-center justify-between">
-                <span class="text-slate-300 font-semibold text-sm">Total Nilai Tambah</span>
-                <span data-result="total_ringkasan" class="text-2xl font-extrabold text-teal-400">Rp0</span>
-            </div>
+<div class="bg-slate-800 rounded-2xl border border-teal-500/30 p-6">
+    <h2 class="text-sm font-bold text-teal-400 uppercase tracking-wider mb-4 flex items-center gap-2">
+        <i class="fa-solid fa-square-root-variable"></i> Rangkuman Perhitungan Nilai Tambah
+    </h2>
+    <div class="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
+        <div>
+            <div class="text-slate-400 text-xs mb-1">Biaya Tenaga Kerja</div>
+            <div data-result="r_biaya_tenaga_kerja" class="font-bold text-white">Rp0</div>
         </div>
+        <div>
+            <div class="text-slate-400 text-xs mb-1">Laba Total</div>
+            <div data-result="r_laba_total" class="font-bold text-white">Rp0</div>
+        </div>
+        <div>
+            <div class="text-slate-400 text-xs mb-1">Penyusutan</div>
+            <div data-result="r_penyusutan" class="font-bold text-white">Rp0</div>
+        </div>
+        <div>
+            <div class="text-slate-400 text-xs mb-1">Pajak</div>
+            <div data-result="r_pajak" class="font-bold text-white">Rp0</div>
+        </div>
+        <div>
+            <div class="text-slate-400 text-xs mb-1">Bunga</div>
+            <div data-result="r_bunga" class="font-bold text-white">Rp0</div>
+        </div>
+    </div>
+    <div class="mt-5 pt-5 border-t border-slate-700 flex items-center justify-between">
+        <span class="text-slate-300 font-semibold text-sm">Total Nilai Tambah</span>
+        <span data-result="total_ringkasan" class="text-2xl font-extrabold text-teal-400">Rp0</span>
+    </div>
+
+    <!-- ===== HIDDEN ELEMENTS UNTUK RINGKASAN VIEW ===== -->
+    <div class="hidden">
+        <div data-result="penjualan">Rp0</div>
+        <div data-result="bahan_digunakan">Rp0</div>
+        <div data-result="overhead_produksi">Rp0</div>
+        <div data-result="biaya_administrasi">Rp0</div>
+    </div>
+</div>
 
         <div class="flex justify-end gap-3 pb-4">
             <button type="button" onclick="resetInputData()" class="px-5 py-2.5 rounded-xl text-sm font-semibold text-slate-300 border border-slate-700 hover:bg-slate-800 transition flex items-center gap-2">
@@ -779,9 +791,8 @@ function recomputeTotals(panel = getYearPanel()) {
     const investasiInput = panel.querySelector('input[data-field="total_investasi"]');
     if (investasiInput) {
         const currentVal = parseFloat(investasiInput.value) || 0;
-        // Hanya isi otomatis jika belum diubah manual (nilai 0 atau sama dengan total aktiva)
         if (currentVal === 0 || currentVal === totalAktiva) {
-            investasiInput.value = totalAktiva; // langsung angka, bukan format Rupiah
+            investasiInput.value = totalAktiva;
         }
     }
 
@@ -794,6 +805,19 @@ function recomputeTotals(panel = getYearPanel()) {
         const jamLembur = parseFloat(jamLemburInput?.value) || 0;
         totalJamKerjaInput.value = jamKerja + jamLembur;
     }
+
+    // ===== RANGKUMAN PERHITUNGAN NILAI TAMBAH (BARU) =====
+    const biayaTenagaKerja = totals.biaya_tenaga_kerja || 0;
+    const penyusutan = totals.penyusutan || 0;
+    const pajak = totals.pajak || 0;
+    const bunga = totals.bunga_pinjaman || 0;
+    const labaTotal = nilaiTambah - (biayaTenagaKerja + penyusutan + pajak + bunga);
+
+    setResult(panel, 'r_biaya_tenaga_kerja', biayaTenagaKerja);
+    setResult(panel, 'r_laba_total', labaTotal);
+    setResult(panel, 'r_penyusutan', penyusutan);
+    setResult(panel, 'r_pajak', pajak);
+    setResult(panel, 'r_bunga', bunga);
 
     updateRingkasanView();
 }
