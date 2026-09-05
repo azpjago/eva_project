@@ -1,27 +1,27 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EVA Analytics & AI Recommendation Platform</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>EVA Analytics & Recommendation Platform</title>
     <!-- Tailwind CSS CDN -->
-    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.tailwindcss.com">
+    </script>
     <!-- Google Fonts: Plus Jakarta Sans -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
     <!-- FontAwesome CDN for Icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
     <!-- CDN Marked.js untuk render Markdown ke HTML -->
-    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js">
+    </script>
+
     <script>
         tailwind.config = {
             theme: {
                 extend: {
-                    fontFamily: {
-                        sans: ['Plus Jakarta Sans', 'sans-serif'],
-                    },
+                    fontFamily: { sans: ['Plus Jakarta Sans', 'sans-serif'] },
                     colors: {
                         brand: {
                             50: '#f0fdfa',
@@ -32,17 +32,291 @@
                             800: '#115e59',
                             900: '#134e4a',
                         },
-                        navy: {
-                            800: '#1e293b',
-                            900: '#0f172a',
-                            950: '#020617',
-                        }
-                    }
-                }
+                        navy: { 800: '#1e293b', 900: '#0f172a', 950: '#020617' },
+                    },
+                },
+            },
+        };
+    </script>
+
+    <style>
+        /* ============================================================
+           OPENING ANIMATION – STYLE (Tema Biru / Teal)
+           ============================================================ */
+        /* Overlay utama */
+        #curtainOverlay {
+            position: fixed;
+            inset: 0;
+            z-index: 99999;
+            display: flex;
+            overflow: hidden;
+            background: #0b1a2a;
+            /* biru gelap */
+            pointer-events: none;
+            transition: opacity 0.8s ease;
+        }
+        #curtainOverlay.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        /* Panel geser (kiri & kanan) */
+        .slide-panel {
+            position: absolute;
+            top: 0;
+            width: 50%;
+            height: 100%;
+            will-change: transform;
+            transition: transform 1.6s cubic-bezier(0.65, 0, 0.35, 1);
+            overflow: hidden;
+        }
+        #panelLeft {
+            left: 0;
+            transform-origin: right center;
+            transform: translateX(0%);
+            background: linear-gradient(135deg, #0b1a2a 0%, #1a3a5a 50%, #0d2b44 100%);
+            border-right: 3px solid rgba(13, 148, 136, 0.3);
+            box-shadow: 4px 0 60px rgba(0, 0, 0, 0.6);
+        }
+        #panelRight {
+            right: 0;
+            transform-origin: left center;
+            transform: translateX(0%);
+            background: linear-gradient(225deg, #0b1a2a 0%, #1a3a5a 50%, #0d2b44 100%);
+            border-left: 3px solid rgba(13, 148, 136, 0.3);
+            box-shadow: -4px 0 60px rgba(0, 0, 0, 0.6);
+        }
+
+        /* Saat terbuka – geser ke samping */
+        #curtainOverlay.open #panelLeft {
+            transform: translateX(-101%);
+        }
+        #curtainOverlay.open #panelRight {
+            transform: translateX(101%);
+        }
+
+        /* Pola garis bergelombang di panel (efek futuristik) */
+        .panel-pattern {
+            position: absolute;
+            inset: 0;
+            background:
+                repeating-linear-gradient(45deg,
+                    transparent 0px,
+                    transparent 20px,
+                    rgba(13, 148, 136, 0.03) 20px,
+                    rgba(13, 148, 136, 0.03) 22px,
+                    transparent 22px,
+                    transparent 40px),
+                repeating-linear-gradient(-45deg,
+                    transparent 0px,
+                    transparent 20px,
+                    rgba(13, 148, 136, 0.03) 20px,
+                    rgba(13, 148, 136, 0.03) 22px,
+                    transparent 22px,
+                    transparent 40px);
+            pointer-events: none;
+        }
+        /* Elemen dekoratif – lingkaran berkilau */
+        .glow-circle {
+            position: absolute;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(13, 148, 136, 0.15), transparent 70%);
+            pointer-events: none;
+            animation: pulseGlow 4s ease-in-out infinite alternate;
+        }
+        .glow-circle:nth-child(1) {
+            width: 500px;
+            height: 500px;
+            top: -100px;
+            left: -150px;
+            animation-delay: 0s;
+        }
+        .glow-circle:nth-child(2) {
+            width: 400px;
+            height: 400px;
+            bottom: -100px;
+            right: -100px;
+            animation-delay: 1.5s;
+        }
+        .glow-circle:nth-child(3) {
+            width: 300px;
+            height: 300px;
+            top: 40%;
+            left: 30%;
+            animation-delay: 0.8s;
+        }
+        @keyframes pulseGlow {
+            0% {
+                opacity: 0.3;
+                transform: scale(1);
+            }
+            100% {
+                opacity: 0.8;
+                transform: scale(1.2);
             }
         }
-    </script>
-    <style>
+
+        /* Partikel canvas */
+        #sparkleCanvas {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 20;
+        }
+
+        /* Judul utama */
+        #curtainTitle {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0.8);
+            z-index: 30;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-weight: 800;
+            font-size: clamp(3rem, 12vw, 6.5rem);
+            letter-spacing: -0.02em;
+            text-align: center;
+            color: #fff;
+            text-shadow:
+                0 0 30px rgba(13, 148, 136, 0.5),
+                0 0 80px rgba(13, 148, 136, 0.2),
+                0 0 150px rgba(37, 99, 235, 0.15);
+            opacity: 0;
+            transition: opacity 0.6s ease, transform 1.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+            white-space: nowrap;
+            background: linear-gradient(135deg, #14b8a6 0%, #2563eb 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            filter: drop-shadow(0 0 40px rgba(13, 148, 136, 0.3));
+        }
+        #curtainOverlay.open #curtainTitle {
+            opacity: 1;
+            transform: translate(-50%, -50%) scale(1);
+        }
+
+        /* Subtitle */
+        #curtainSub {
+            position: absolute;
+            top: calc(50% + clamp(3.5rem, 8vw, 6rem));
+            left: 50%;
+            transform: translate(-50%, 20px);
+            z-index: 30;
+            font-size: clamp(0.8rem, 2vw, 1.4rem);
+            font-weight: 400;
+            letter-spacing: 0.3em;
+            color: rgba(255, 255, 255, 0.7);
+            text-shadow: 0 0 30px rgba(13, 148, 136, 0.2);
+            opacity: 0;
+            transition: opacity 1s ease 0.4s, transform 1s ease 0.4s;
+            white-space: nowrap;
+            text-transform: uppercase;
+        }
+        #curtainOverlay.open #curtainSub {
+            opacity: 1;
+            transform: translate(-50%, 0px);
+        }
+
+        /* Kilauan cahaya menyapu */
+        #lightSweep {
+            position: absolute;
+            top: -50%;
+            left: -10%;
+            width: 30%;
+            height: 200%;
+            background: linear-gradient(90deg,
+                    transparent 0%,
+                    rgba(13, 148, 136, 0.08) 30%,
+                    rgba(255, 255, 255, 0.12) 50%,
+                    rgba(13, 148, 136, 0.08) 70%,
+                    transparent 100%);
+            transform: rotate(20deg) translateX(-200%);
+            z-index: 15;
+            pointer-events: none;
+            animation: sweepGlow 2.5s ease-in-out forwards;
+            animation-delay: 0.3s;
+        }
+        @keyframes sweepGlow {
+            0% {
+                transform: rotate(20deg) translateX(-200%);
+                opacity: 0;
+            }
+            20% {
+                opacity: 1;
+            }
+            80% {
+                opacity: 1;
+            }
+            100% {
+                transform: rotate(20deg) translateX(600%);
+                opacity: 0;
+            }
+        }
+
+        /* Bintang latar belakang */
+        .bg-stars {
+            position: absolute;
+            inset: 0;
+            z-index: 0;
+            background-image:
+                radial-gradient(2px 2px at 10% 20%, rgba(255, 255, 255, 0.2), transparent),
+                radial-gradient(2px 2px at 30% 70%, rgba(255, 255, 255, 0.15), transparent),
+                radial-gradient(3px 3px at 50% 10%, rgba(255, 255, 255, 0.25), transparent),
+                radial-gradient(2px 2px at 70% 50%, rgba(255, 255, 255, 0.2), transparent),
+                radial-gradient(3px 3px at 90% 80%, rgba(255, 255, 255, 0.2), transparent),
+                radial-gradient(2px 2px at 15% 90%, rgba(255, 255, 255, 0.15), transparent),
+                radial-gradient(2px 2px at 85% 15%, rgba(255, 255, 255, 0.25), transparent),
+                radial-gradient(4px 4px at 45% 55%, rgba(255, 255, 255, 0.1), transparent);
+            background-size: 200px 200px;
+            opacity: 0.5;
+            animation: twinkle 4s ease-in-out infinite alternate;
+        }
+        @keyframes twinkle {
+            0%,
+            100% {
+                opacity: 0.3;
+            }
+            50% {
+                opacity: 0.7;
+            }
+        }
+
+        /* Tombol skip */
+        #skipBtn {
+            position: absolute;
+            bottom: 40px;
+            right: 40px;
+            z-index: 40;
+            padding: 10px 24px;
+            border-radius: 40px;
+            background: rgba(255, 255, 255, 0.06);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(13, 148, 136, 0.2);
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.8rem;
+            font-weight: 500;
+            letter-spacing: 0.08em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            pointer-events: auto;
+            opacity: 0.6;
+            text-transform: uppercase;
+        }
+        #skipBtn:hover {
+            background: rgba(13, 148, 136, 0.15);
+            border-color: rgba(13, 148, 136, 0.5);
+            opacity: 1;
+            transform: scale(1.05);
+        }
+        #skipBtn:active {
+            transform: scale(0.95);
+        }
+
+        /* ============================================================
+           MAIN CONTENT – semua konten asli tetap utuh
+           ============================================================ */
         .gradient-text {
             background: linear-gradient(135deg, #0d9488 0%, #2563eb 100%);
             -webkit-background-clip: text;
@@ -54,14 +328,23 @@
             backdrop-filter: blur(12px);
             border: 1px solid rgba(226, 232, 240, 0.8);
         }
-        /* Animasi Latar Belakang Bergerak Halus (Floating Blobs) */
         @keyframes floatSlow {
-            0%, 100% { transform: translateY(0px) translateX(0px) scale(1); }
-            50% { transform: translateY(-25px) translateX(20px) scale(1.08); }
+            0%,
+            100% {
+                transform: translateY(0px) translateX(0px) scale(1);
+            }
+            50% {
+                transform: translateY(-25px) translateX(20px) scale(1.08);
+            }
         }
         @keyframes floatReverse {
-            0%, 100% { transform: translateY(0px) translateX(0px) scale(1); }
-            50% { transform: translateY(30px) translateX(-25px) scale(0.92); }
+            0%,
+            100% {
+                transform: translateY(0px) translateX(0px) scale(1);
+            }
+            50% {
+                transform: translateY(30px) translateX(-25px) scale(0.92);
+            }
         }
         .animate-float-slow {
             animation: floatSlow 9s ease-in-out infinite;
@@ -69,267 +352,482 @@
         .animate-float-reverse {
             animation: floatReverse 11s ease-in-out infinite;
         }
+
+        #mainContent {
+            opacity: 0;
+            transition: opacity 0.8s ease 0.3s;
+        }
+        #mainContent.reveal {
+            opacity: 1;
+        }
+
+        @media (max-width: 640px) {
+            #curtainTitle {
+                font-size: clamp(2.2rem, 14vw, 3.8rem);
+                white-space: normal;
+                line-height: 1.1;
+            }
+            #curtainSub {
+                font-size: 0.6rem;
+                letter-spacing: 0.2em;
+                top: calc(50% + 3rem);
+                white-space: normal;
+            }
+            #skipBtn {
+                bottom: 20px;
+                right: 20px;
+                padding: 6px 16px;
+                font-size: 0.6rem;
+            }
+        }
     </style>
 </head>
+
 <body class="bg-slate-50 font-sans text-slate-800 antialiased flex flex-col min-h-screen">
 
-    <!-- Header / Navbar -->
-    <header class="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b border-slate-200/80">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
-            <!-- Brand Logo -->
-            <a href="index.html" class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-600 to-blue-600 flex items-center justify-center text-white shadow-md shadow-brand-500/20">
-                    <i class="fa-solid fa-chart-line text-lg"></i>
-                </div>
-                <div>
-                    <span class="font-bold text-xl tracking-tight text-slate-900">EVA<span class="text-brand-600">AI</span></span>
-                    <span class="hidden sm:inline-block text-xs font-medium text-slate-400 border-l border-slate-300 ml-2 pl-2">Kemnaker Productivity Platform</span>
-                </div>
-            </a>
+    <!-- ============================================================
+    OPENING OVERLAY – animasi geser modern bertema biru/teal
+    ============================================================ -->
+    <div id="curtainOverlay">
+        <!-- Bintang latar -->
+        <div class="bg-stars"></div>
 
-            <!-- Navigation Links -->
-            <nav class="hidden md:flex items-center gap-8">
-                <a href="#features" class="text-sm font-semibold text-slate-600 hover:text-brand-600 transition">Fitur Utama</a>
-                <a href="#demo" class="text-sm font-semibold text-slate-600 hover:text-brand-600 transition">Simulasi EVA</a>
-                <a href="#chat-section" class="text-sm font-semibold text-slate-600 hover:text-brand-600 transition">Asisten AI</a>
-                <a href="http://127.0.0.1:8000/docs" target="_blank" class="text-sm font-semibold text-slate-600 hover:text-brand-600 transition flex items-center gap-1">
-                    API Docs <i class="fa-solid fa-arrow-up-right-from-square text-xs opacity-70"></i>
-                </a>
-            </nav>
-
-            <!-- Action Buttons -->
-            <div class="flex items-center gap-3">
-                <a href="login.html" class="px-4 py-2 text-sm font-semibold text-slate-700 hover:text-brand-600 transition">
-                    Masuk
-                </a>
-                <a href="#demo" class="px-5 py-2.5 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-brand-600 to-blue-600 hover:from-brand-700 hover:to-blue-700 shadow-lg shadow-brand-500/25 transition transform active:scale-95">
-                    Mulai Analisis
-                </a>
-            </div>
+        <!-- Panel kiri -->
+        <div id="panelLeft" class="slide-panel">
+            <div class="panel-pattern"></div>
+            <div class="glow-circle"></div>
+            <div class="glow-circle"></div>
+            <div class="glow-circle"></div>
         </div>
-    </header>
 
-    <!-- Main Content Area -->
-    <main class="flex-grow">
-        <!-- Hero Section dengan Animasi Latar Belakang Bergerak -->
-        <section class="relative py-20 lg:py-28 overflow-hidden bg-gradient-to-b from-slate-100/80 via-white to-slate-50">
-            <!-- Elemen Latar Belakang Animasi Bergerak (Floating Blobs) -->
-            <div class="absolute inset-0 overflow-hidden pointer-events-none z-0">
-                <div class="absolute -top-28 -left-28 w-[450px] h-[450px] bg-teal-400/20 rounded-full blur-3xl animate-float-slow"></div>
-                <div class="absolute top-1/3 -right-28 w-[450px] h-[450px] bg-blue-500/15 rounded-full blur-3xl animate-float-reverse"></div>
-                <div class="absolute -bottom-20 left-1/3 w-[400px] h-[400px] bg-brand-500/15 rounded-full blur-3xl animate-float-slow" style="animation-delay: 2s;"></div>
+        <!-- Panel kanan -->
+        <div id="panelRight" class="slide-panel">
+            <div class="panel-pattern"></div>
+            <div class="glow-circle"></div>
+            <div class="glow-circle"></div>
+            <div class="glow-circle"></div>
+        </div>
+
+        <!-- Canvas partikel -->
+        <canvas id="sparkleCanvas"></canvas>
+
+        <!-- Kilauan cahaya -->
+        <div id="lightSweep"></div>
+
+        <!-- Judul -->
+        <div id="curtainTitle">EVA</div>
+        <div id="curtainSub">Analytics &amp; Productivity Platform</div>
+
+        <!-- Tombol skip -->
+        <button id="skipBtn" onclick="closeCurtain()">
+            <i class="fa-regular fa-circle-play mr-2"></i> Lewati
+        </button>
+    </div>
+
+    <!-- ============================================================
+    KONTEN UTAMA – semua fitur dan teks asli
+    ============================================================ -->
+    <div id="mainContent" class="flex flex-col min-h-screen">
+
+        <!-- Header / Navbar -->
+        <header class="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b border-slate-200/80">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+                <a href="#" class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-600 to-blue-600 flex items-center justify-center text-white shadow-md shadow-brand-500/20">
+                        <i class="fa-solid fa-chart-line text-lg"></i>
+                    </div>
+                    <div>
+                        <span class="font-bold text-xl tracking-tight text-slate-900">EVA<span class="text-brand-600">Platform</span></span>
+                        <span class="hidden sm:inline-block text-xs font-medium text-slate-400 border-l border-slate-300 ml-2 pl-2">EVA Platform</span>
+                    </div>
+                </a>
+                <nav class="hidden md:flex items-center gap-8">
+                    <a href="#features" class="text-sm font-semibold text-slate-600 hover:text-brand-600 transition">Fitur Utama</a>
+                    <a href="#demo" class="text-sm font-semibold text-slate-600 hover:text-brand-600 transition">Simulasi EVA</a>
+                    <a href="#chat-section" class="text-sm font-semibold text-slate-600 hover:text-brand-600 transition">Asisten EVA</a>
+                    <a href="http://127.0.0.1:8000/docs" target="_blank" class="text-sm font-semibold text-slate-600 hover:text-brand-600 transition flex items-center gap-1">
+                        API Docs <i class="fa-solid fa-arrow-up-right-from-square text-xs opacity-70"></i>
+                    </a>
+                </nav>
+                <div class="flex items-center gap-3">
+                    <a href="login.html" class="px-4 py-2 text-sm font-semibold text-slate-700 hover:text-brand-600 transition">
+                        Masuk
+                    </a>
+                    <a href="#demo" class="px-5 py-2.5 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-brand-600 to-blue-600 hover:from-brand-700 hover:to-blue-700 shadow-lg shadow-brand-500/25 transition transform active:scale-95">
+                        Mulai Analisis
+                    </a>
+                </div>
             </div>
+        </header>
 
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-                <div class="max-w-3xl mx-auto text-center">
-                    <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-brand-50 border border-brand-200 text-brand-700 text-xs font-semibold mb-6 shadow-sm">
-                        <span class="w-2 h-2 rounded-full bg-brand-500 animate-pulse"></span>
-                        Platform Terintegrasi AI Gemini & FastAPI
-                    </div>
-                    <h1 class="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-slate-900 tracking-tight leading-[1.15] mb-6">
-                        Analisis EVA & Rekomendasi <span class="gradient-text">Produktivitas Tenaga Kerja</span>
-                    </h1>
-                    <p class="text-lg sm:text-xl text-slate-600 mb-8 leading-relaxed">
-                        Ukur nilai tambah ekonomi (Economic Value Added) perusahaan Anda secara akurat dan dapatkan rekomendasi strategis preskriptif berbasis kecerdasan buatan.
-                    </p>
-                    <div class="flex flex-col sm:flex-row justify-center items-center gap-4">
-                        <a href="#demo" class="w-full sm:w-auto px-7 py-3.5 rounded-xl font-bold text-white bg-slate-900 hover:bg-slate-800 shadow-xl transition flex items-center justify-center gap-2">
-                            <i class="fa-solid fa-calculator"></i> Coba Kalkulator EVA
-                        </a>
-                        <a href="#chat-section" class="w-full sm:w-auto px-7 py-3.5 rounded-xl font-bold text-slate-700 bg-white border border-slate-300 hover:bg-slate-50 transition flex items-center justify-center gap-2">
-                            <i class="fa-solid fa-comments text-brand-600"></i> Konsultasi AI
-                        </a>
-                    </div>
+        <!-- Main Content Area -->
+        <main class="flex-grow">
+            <!-- Hero Section dengan Animasi Latar Belakang Bergerak -->
+            <section class="relative py-20 lg:py-28 overflow-hidden bg-gradient-to-b from-slate-100/80 via-white to-slate-50">
+                <div class="absolute inset-0 overflow-hidden pointer-events-none z-0">
+                    <div class="absolute -top-28 -left-28 w-[450px] h-[450px] bg-teal-400/20 rounded-full blur-3xl animate-float-slow"></div>
+                    <div class="absolute top-1/3 -right-28 w-[450px] h-[450px] bg-blue-500/15 rounded-full blur-3xl animate-float-reverse"></div>
+                    <div class="absolute -bottom-20 left-1/3 w-[400px] h-[400px] bg-brand-500/15 rounded-full blur-3xl animate-float-slow" style="animation-delay: 2s;"></div>
                 </div>
 
-                <!-- Highlight Metrics Banner -->
-                <div class="mt-16 grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
-                    <div class="glass-card p-6 rounded-2xl shadow-sm text-center">
-                        <div class="w-12 h-12 rounded-xl bg-teal-100 text-teal-600 flex items-center justify-center mx-auto mb-3 text-xl">
-                            <i class="fa-solid fa-bolt"></i>
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+                    <div class="max-w-3xl mx-auto text-center">
+                        <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-brand-50 border border-brand-200 text-brand-700 text-xs font-semibold mb-6 shadow-sm">
+                            <span class="w-2 h-2 rounded-full bg-brand-500 animate-pulse"></span>
+                            Platform Terintegrasi
                         </div>
-                        <h3 class="font-bold text-slate-900 text-lg">Kalkulasi Instan</h3>
-                        <p class="text-xs text-slate-500 mt-1">Perhitungan NOPAT & Capital Charge secara real-time</p>
+                        <h1 class="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-slate-900 tracking-tight leading-[1.15] mb-6">
+                            Analisis EVA <br><span class="gradient-text">(Economic Value Added)</span>
+                        </h1>
+                        <p class="text-lg sm:text-xl text-slate-600 mb-8 leading-relaxed">
+                            Ukur nilai tambah ekonomi (Economic Value Added) perusahaan Anda secara akurat dan dapatkan rekomendasi strategis preskriptif berbasis kecerdasan buatan.
+                        </p>
+                        <div class="flex flex-col sm:flex-row justify-center items-center gap-4">
+                            <a href="#demo" class="w-full sm:w-auto px-7 py-3.5 rounded-xl font-bold text-white bg-slate-900 hover:bg-slate-800 shadow-xl transition flex items-center justify-center gap-2">
+                                <i class="fa-solid fa-calculator"></i> Coba Kalkulator EVA
+                            </a>
+                            <a href="#chat-section" class="w-full sm:w-auto px-7 py-3.5 rounded-xl font-bold text-slate-700 bg-white border border-slate-300 hover:bg-slate-50 transition flex items-center justify-center gap-2">
+                                <i class="fa-solid fa-comments text-brand-600"></i> Konsultasi
+                            </a>
+                        </div>
                     </div>
-                    <div class="glass-card p-6 rounded-2xl shadow-sm text-center">
-                        <div class="w-12 h-12 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center mx-auto mb-3 text-xl">
-                            <i class="fa-solid fa-brain"></i>
+
+                    <div class="mt-16 grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
+                        <div class="glass-card p-6 rounded-2xl shadow-sm text-center">
+                            <div class="w-12 h-12 rounded-xl bg-teal-100 text-teal-600 flex items-center justify-center mx-auto mb-3 text-xl">
+                                <i class="fa-solid fa-bolt"></i>
+                            </div>
+                            <h3 class="font-bold text-slate-900 text-lg">Kalkulasi Instan</h3>
+                            <p class="text-xs text-slate-500 mt-1">Perhitungan NOPAT & Capital Charge secara real-time</p>
                         </div>
-                        <h3 class="font-bold text-slate-900 text-lg">Rekomendasi Preskriptif</h3>
-                        <p class="text-xs text-slate-500 mt-1">Solusi efisiensi & pelatihan kerja spesifik matriks EVA</p>
-                    </div>
-                    <div class="glass-card p-6 rounded-2xl shadow-sm text-center">
-                        <div class="w-12 h-12 rounded-xl bg-indigo-100 text-indigo-600 flex items-center justify-center mx-auto mb-3 text-xl">
-                            <i class="fa-solid fa-robot"></i>
+                        <div class="glass-card p-6 rounded-2xl shadow-sm text-center">
+                            <div class="w-12 h-12 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center mx-auto mb-3 text-xl">
+                                <i class="fa-solid fa-brain"></i>
+                            </div>
+                            <h3 class="font-bold text-slate-900 text-lg">Rekomendasi Preskriptif</h3>
+                            <p class="text-xs text-slate-500 mt-1">Solusi efisiensi & pelatihan kerja spesifik matriks EVA</p>
                         </div>
-                        <h3 class="font-bold text-slate-900 text-lg">Chat Contextual AI</h3>
-                        <p class="text-xs text-slate-500 mt-1">Diskusi interaktif berkonteks data keuangan perusahaan</p>
+                        <div class="glass-card p-6 rounded-2xl shadow-sm text-center">
+                            <div class="w-12 h-12 rounded-xl bg-indigo-100 text-indigo-600 flex items-center justify-center mx-auto mb-3 text-xl">
+                                <i class="fa-solid fa-robot"></i>
+                            </div>
+                            <h3 class="font-bold text-slate-900 text-lg">Chat Contextual</h3>
+                            <p class="text-xs text-slate-500 mt-1">Diskusi interaktif berkonteks data keuangan perusahaan</p>
+                        </div>
                     </div>
                 </div>
-            </div>
-        </section>
+            </section>
 
-        <!-- Live Demo / Interactive Calculator Section -->
-        <section id="demo" class="min-h-[calc(100vh-5rem)] py-8 bg-white border-y border-slate-200 flex flex-col justify-center">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
-                <div class="mb-6 text-center">
-                    <h2 class="text-2xl sm:text-3xl font-bold text-slate-900">Uji Coba Endpoint Backend (Live Interactive)</h2>
-                    <p class="text-slate-600 mt-1 text-sm">Masukan data finansial perusahaan Anda untuk menguji integrasi API FastAPI secara langsung.</p>
-                </div>
+            <!-- Live Demo / Interactive Calculator Section -->
+            <section id="demo" class="min-h-[calc(100vh-5rem)] py-8 bg-white border-y border-slate-200 flex flex-col justify-center">
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
+                    <div class="mb-6 text-center">
+                        <h2 class="text-2xl sm:text-3xl font-bold text-slate-900">Uji Coba Endpoint Backend (Live Interactive)</h2>
+                        <p class="text-slate-600 mt-1 text-sm">Masukan data finansial perusahaan Anda untuk menguji integrasi API FastAPI secara langsung.</p>
+                    </div>
 
-                <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
-                    <!-- Form Input Card -->
-                    <div class="lg:col-span-5 bg-slate-50 p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col">
-                        <h3 class="text-base font-bold text-slate-900 mb-4 flex items-center gap-2">
-                            <i class="fa-solid fa-file-invoice-dollar text-brand-600"></i> Form Input Finansial
-                        </h3>
-                                
-                        <!-- Form Input Finansial -->
-                        <form id="evaForm" onsubmit="handleCalculate(event)" class="space-y-4">
+                    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
+                        <!-- Form Input Card -->
+                        <div class="lg:col-span-5 bg-slate-50 p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col">
+                            <h3 class="text-base font-bold text-slate-900 mb-4 flex items-center gap-2">
+                                <i class="fa-solid fa-file-invoice-dollar text-brand-600"></i> Form Input Finansial
+                            </h3>
+
+                            <form id="evaForm" onsubmit="handleCalculate(event)" class="space-y-4">
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">Nama Perusahaan</label>
+                                    <input type="text" id="company_name" value="PT Mitra Produktif" required class="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-sm">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">Periode Laporan</label>
+                                    <input type="text" id="period" value="Q1 2026" required class="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-sm">
+                                </div>
+                                <div class="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">EBIT (Rp)</label>
+                                        <input type="number" id="ebit" value="2000000000" required class="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-sm">
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">Tarif Pajak (0.22 = 22%)</label>
+                                        <input type="number" step="0.01" id="tax_rate" value="0.22" min="0" max="1" required class="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-sm">
+                                    </div>
+                                </div>
+                                <div class="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">Invested Capital (Rp)</label>
+                                        <input type="number" id="invested_capital" value="10000000000" required class="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-sm">
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">WACC (0.10 = 10%)</label>
+                                        <input type="number" step="0.01" id="wacc" value="0.10" min="0" max="1" required class="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-sm">
+                                    </div>
+                                </div>
+                                <button type="submit" id="btnSubmit" class="w-full py-3 px-4 mt-2 rounded-xl text-sm font-bold text-white bg-teal-600 hover:bg-teal-700 transition">
+                                    Hitung & Minta Rekomendasi
+                                </button>
+                            </form>
+                        </div>
+
+                        <!-- Output / Result Card -->
+                        <div class="lg:col-span-7 bg-slate-900 text-white p-6 rounded-2xl shadow-xl flex flex-col justify-between">
                             <div>
-                                <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">Nama Perusahaan</label>
-                                <input type="text" id="company_name" value="PT Mitra Produktif Kemnaker" required class="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-sm">
+                                <div class="flex items-center justify-between pb-4 border-b border-slate-800">
+                                    <span class="text-xs font-bold uppercase tracking-widest text-slate-400">Hasil Analisis & Narasi</span>
+                                    <span id="statusBadge" class="px-3 py-1 rounded-full text-xs font-bold bg-slate-800 text-slate-400">Belum dihitung</span>
+                                </div>
+                                <div id="resultContent" class="mt-6 space-y-4 text-slate-300">
+                                    <p class="text-slate-400 text-sm italic">Klik tombol "Hitung & Minta Rekomendasi" di sebelah kiri untuk melihat hasil kalkulasi EVA dan narasi preskriptif dari backend FastAPI.</p>
+                                </div>
                             </div>
+                            <div class="pt-6 border-t border-slate-800 flex justify-between items-center text-xs text-slate-400">
+                                <span>Endpoint: <code class="bg-slate-800 px-2 py-1 rounded text-teal-400">POST /api/ai/recommend</code></span>
+                                <span id="responseStatus">Status: Idle</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
 
+            <!-- Chat Section Container -->
+            <section id="chat-section" class="w-full max-w-5xl mx-auto px-4 py-6 min-h-[calc(100vh-5rem)] flex items-center justify-center">
+                <div class="bg-slate-900 text-white rounded-2xl shadow-xl overflow-hidden border border-slate-800 flex flex-col w-full h-[calc(100vh-12rem)] max-h-[750px] min-h-[500px]">
+
+                    <!-- Header Chat -->
+                    <div class="px-4 py-3 sm:px-6 sm:py-4 bg-slate-800/80 border-b border-slate-700/60 flex items-center justify-between">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-teal-600 flex items-center justify-center font-bold text-white text-sm sm:text-base shadow-md">
+                                Rekomendasi
+                            </div>
                             <div>
-                                <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">Periode Laporan</label>
-                                <input type="text" id="period" value="Q1 2026" required class="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-sm">
-                            </div>
-
-                            <div class="grid grid-cols-2 gap-4">
-                                <div>
-                                    <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">EBIT (Rp)</label>
-                                    <input type="number" id="ebit" value="2000000000" required class="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-sm">
-                                </div>
-                                <div>
-                                    <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">Tarif Pajak (0.22 = 22%)</label>
-                                    <input type="number" step="0.01" id="tax_rate" value="0.22" min="0" max="1" required class="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-sm">
+                                <h3 class="font-semibold text-sm sm:text-base text-slate-100 leading-tight">Gemini Productivity Assistant</h3>
+                                <div class="flex items-center space-x-1.5 mt-0.5">
+                                    <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                                    <span class="text-xs text-slate-400" id="chatStatusText">Online / Ready</span>
                                 </div>
                             </div>
-
-                            <div class="grid grid-cols-2 gap-4">
-                                <div>
-                                    <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">Invested Capital (Rp)</label>
-                                    <input type="number" id="invested_capital" value="10000000000" required class="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-sm">
-                                </div>
-                                <div>
-                                    <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">WACC (0.10 = 10%)</label>
-                                    <input type="number" step="0.01" id="wacc" value="0.10" min="0" max="1" required class="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-sm">
-                                </div>
-                            </div>
-
-                            <button type="submit" id="btnSubmit" class="w-full py-3 px-4 mt-2 rounded-xl text-sm font-bold text-white bg-teal-600 hover:bg-teal-700 transition">
-                                Hitung & Minta Rekomendasi AI
-                            </button>
-                        </form>
-                    </div>
-
-                    <!-- Output / Result Card -->
-                    <div class="lg:col-span-7 bg-slate-900 text-white p-6 rounded-2xl shadow-xl flex flex-col justify-between">
-                        <div>
-                            <div class="flex items-center justify-between pb-4 border-b border-slate-800">
-                                <span class="text-xs font-bold uppercase tracking-widest text-slate-400">Hasil Analisis & Narasi AI</span>
-                                <span id="statusBadge" class="px-3 py-1 rounded-full text-xs font-bold bg-slate-800 text-slate-400">Belum dihitung</span>
-                            </div>
-
-                            <div id="resultContent" class="mt-6 space-y-4 text-slate-300">
-                                <p class="text-slate-400 text-sm italic">Klik tombol "Hitung & Minta Rekomendasi AI" di sebelah kiri untuk melihat hasil kalkulasi EVA dan narasi preskriptif dari backend FastAPI.</p>
-                            </div>
                         </div>
-
-                        <div class="pt-6 border-t border-slate-800 flex justify-between items-center text-xs text-slate-400">
-                            <span>Endpoint: <code class="bg-slate-800 px-2 py-1 rounded text-teal-400">POST /api/ai/recommend</code></span>
-                            <span id="responseStatus">Status: Idle</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- Chat Section Container -->
-        <section id="chat-section" class="w-full max-w-5xl mx-auto px-4 py-6 min-h-[calc(100vh-5rem)] flex items-center justify-center">
-            <div class="bg-slate-900 text-white rounded-2xl shadow-xl overflow-hidden border border-slate-800 flex flex-col w-full h-[calc(100vh-12rem)] max-h-[750px] min-h-[500px]">
-                
-                <!-- Header Chat -->
-                <div class="px-4 py-3 sm:px-6 sm:py-4 bg-slate-800/80 border-b border-slate-700/60 flex items-center justify-between">
-                    <div class="flex items-center space-x-3">
-                        <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-teal-600 flex items-center justify-center font-bold text-white text-sm sm:text-base shadow-md">
-                            AI
-                        </div>
-                        <div>
-                            <h3 class="font-semibold text-sm sm:text-base text-slate-100 leading-tight">Gemini Productivity Assistant</h3>
-                            <div class="flex items-center space-x-1.5 mt-0.5">
-                                <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-                                <span class="text-xs text-slate-400" id="chatStatusText">Online / Ready</span>
-                            </div>
-                        </div>
-                    </div>
-                    <button onclick="clearChatHistory()" class="text-xs text-slate-400 hover:text-rose-400 transition flex items-center space-x-1">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
-                        <span class="hidden sm:inline">Bersihkan Chat</span>
-                    </button>
-                </div>
-
-                <!-- Chat Area Scrollable -->
-                <div id="chatMessages" class="flex-1 p-4 sm:p-6 overflow-y-auto space-y-4 scroll-smooth">
-                    <!-- Pesan Pembuka AI -->
-                    <div class="flex items-start space-x-3 max-w-[85%] sm:max-w-[75%]">
-                        <div class="w-8 h-8 rounded-full bg-teal-600/30 text-teal-400 flex items-center justify-center font-bold text-xs flex-shrink-0">
-                            AI
-                        </div>
-                        <div class="bg-slate-800 border border-slate-700/60 rounded-2xl rounded-tl-none p-3.5 sm:p-4 text-slate-200 text-xs sm:text-sm leading-relaxed shadow-sm">
-                            Halo! Saya asisten virtual produktivitas Kemnaker. Ada yang bisa saya bantu terkait simulasi EVA atau strategi produktivitas perusahaan Anda?
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Warning Limit Bar (Hidden by default) -->
-                <div id="limitWarningBar" class="hidden bg-amber-500/10 border-t border-amber-500/20 px-4 py-2.5 text-center text-xs text-amber-300 flex items-center justify-between">
-                    <span>Batas chat gratis tercapai.</span>
-                    <a href="/login" class="font-bold underline hover:text-amber-200 ml-2">Login untuk Lanjut Chat →</a>
-                </div>
-
-                <!-- Form Input Chat -->
-                <form id="chatForm" onsubmit="handleSendMessage(event)" class="p-3 sm:p-4 bg-slate-800/50 border-t border-slate-700/60">
-                    <div class="flex items-center space-x-2">
-                        <input 
-                            type="text" 
-                            id="chatInput" 
-                            placeholder="Ketik pertanyaan Anda di sini..." 
-                            autocomplete="off"
-                            class="flex-1 bg-slate-900 border border-slate-700 text-slate-100 rounded-xl px-4 py-2.5 sm:py-3 text-xs sm:text-sm focus:outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500 disabled:opacity-50 disabled:cursor-not-allowed"
-                        >
-                        <button 
-                            type="submit" 
-                            id="btnSendChat"
-                            class="bg-teal-600 hover:bg-teal-500 text-white font-semibold px-4 py-2.5 sm:py-3 rounded-xl text-xs sm:text-sm transition flex items-center space-x-1.5 disabled:opacity-50 disabled:cursor-not-allowed flex-shrink-0"
-                        >
-                            <span>Kirim</span>
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9-7-9-7-9 7 9 7zm0 0v-8"/></svg>
+                        <button onclick="clearChatHistory()" class="text-xs text-slate-400 hover:text-rose-400 transition flex items-center space-x-1">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                            <span class="hidden sm:inline">Bersihkan Chat</span>
                         </button>
                     </div>
-                </form>
 
-            </div>
-        </section>
-    </main>
+                    <!-- Chat Area Scrollable -->
+                    <div id="chatMessages" class="flex-1 p-4 sm:p-6 overflow-y-auto space-y-4 scroll-smooth">
+                        <div class="flex items-start space-x-3 max-w-[85%] sm:max-w-[75%]">
+                            <div class="w-8 h-8 rounded-full bg-teal-600/30 text-teal-400 flex items-center justify-center font-bold text-xs flex-shrink-0">
+                                Rekomendasi
+                            </div>
+                            <div class="bg-slate-800 border border-slate-700/60 rounded-2xl rounded-tl-none p-3.5 sm:p-4 text-slate-200 text-xs sm:text-sm leading-relaxed shadow-sm">
+                                Halo! Saya asisten virtual EVA. Ada yang bisa saya bantu terkait simulasi EVA atau strategi produktivitas perusahaan Anda?
+                            </div>
+                        </div>
+                    </div>
 
-    <!-- Footer -->
-    <footer class="bg-slate-950 text-slate-400 py-8 border-t border-slate-800 text-sm">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row justify-between items-center gap-4">
-            <div class="flex items-center gap-2">
-                <span class="font-bold text-white">EVA AI Service</span>
-                <span>— Platform Kemitraan Produktivitas Ketenagakerjaan</span>
-            </div>
-            <div>
-                © 2026 Kemnaker RI Partner Platform. All rights reserved.
-            </div>
-        </div>
-    </footer>
+                    <!-- Warning Limit Bar -->
+                    <div id="limitWarningBar" class="hidden bg-amber-500/10 border-t border-amber-500/20 px-4 py-2.5 text-center text-xs text-amber-300 flex items-center justify-between">
+                        <span>Batas chat gratis tercapai.</span>
+                        <a href="/login" class="font-bold underline hover:text-amber-200 ml-2">Login untuk Lanjut Chat →</a>
+                    </div>
 
-    <!-- JavaScript Integrasi Backend FastAPI -->
+                    <!-- Form Input Chat -->
+                    <form id="chatForm" onsubmit="handleSendMessage(event)" class="p-3 sm:p-4 bg-slate-800/50 border-t border-slate-700/60">
+                        <div class="flex items-center space-x-2">
+                            <input type="text" id="chatInput" placeholder="Ketik pertanyaan Anda di sini..." autocomplete="off" class="flex-1 bg-slate-900 border border-slate-700 text-slate-100 rounded-xl px-4 py-2.5 sm:py-3 text-xs sm:text-sm focus:outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500 disabled:opacity-50 disabled:cursor-not-allowed" />
+                            <button type="submit" id="btnSendChat" class="bg-teal-600 hover:bg-teal-500 text-white font-semibold px-4 py-2.5 sm:py-3 rounded-xl text-xs sm:text-sm transition flex items-center space-x-1.5 disabled:opacity-50 disabled:cursor-not-allowed flex-shrink-0">
+                                <span>Kirim</span>
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9-7-9-7-9 7 9 7zm0 0v-8" /></svg>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </section>
+        </main>
+
+        <!-- Footer -->
+        <footer class="bg-slate-950 text-slate-400 py-8 border-t border-slate-800 text-sm">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row justify-between items-center gap-4">
+                <div class="flex items-center gap-2">
+                    <span class="font-bold text-white">EVA Service</span>
+                    <span>— Platform Economic Value Added</span>
+                </div>
+                <div>© 2026 EVA Platform. All rights reserved.</div>
+            </div>
+        </footer>
+    </div>
+
+    <!-- ============================================================
+    JAVASCRIPT – Fungsi asli + kontrol animasi + partikel
+    ============================================================ -->
     <script>
-        // State Management
+        // =============================================================
+        // 1. OPENING ANIMATION – kontrol
+        // =============================================================
+        let opened = false;
+
+        function openCurtain() {
+            if (opened) return;
+            opened = true;
+            const overlay = document.getElementById('curtainOverlay');
+            overlay.classList.add('open');
+
+            setTimeout(() => {
+                overlay.classList.add('hidden');
+                document.getElementById('mainContent').classList.add('reveal');
+            }, 2100);
+        }
+
+        function closeCurtain() {
+            if (!opened) {
+                openCurtain();
+            } else {
+                document.getElementById('curtainOverlay').classList.add('hidden');
+                document.getElementById('mainContent').classList.add('reveal');
+            }
+        }
+
+        // =============================================================
+        // 2. PARTIKEL GEMERLAP (Canvas) – tema biru/teal
+        // =============================================================
+        (function initSparkles() {
+            const canvas = document.getElementById('sparkleCanvas');
+            const ctx = canvas.getContext('2d');
+            let W, H;
+            let particles = [];
+            const MAX_PARTICLES = 200;
+            let animId = null;
+            let started = false;
+
+            function resize() {
+                const rect = canvas.parentElement.getBoundingClientRect();
+                canvas.width = rect.width;
+                canvas.height = rect.height;
+                W = canvas.width;
+                H = canvas.height;
+            }
+            resize();
+            window.addEventListener('resize', resize);
+
+            class Particle {
+                constructor() {
+                    this.reset(true);
+                }
+                reset(initial = false) {
+                    const angle = Math.random() * Math.PI * 2;
+                    const dist = initial ? Math.random() * 80 : 0;
+                    this.x = W / 2 + Math.cos(angle) * dist;
+                    this.y = H / 2 + Math.sin(angle) * dist;
+                    const a = Math.random() * Math.PI * 2;
+                    const speed = 0.5 + Math.random() * 2.5;
+                    this.vx = Math.cos(a) * speed * (0.5 + Math.random() * 0.9);
+                    this.vy = Math.sin(a) * speed * (0.5 + Math.random() * 0.9);
+                    this.size = 1.5 + Math.random() * 5;
+                    this.life = 1;
+                    this.decay = 0.002 + Math.random() * 0.007;
+                    this.glow = 0.5 + Math.random() * 0.5;
+                    // Warna biru/teal/putih
+                    const hue = 180 + Math.random() * 40; // 180-220 (cyan ke biru)
+                    this.color = `hsla(${hue}, 80%, 70%, `;
+                    this.alpha = 0.7 + Math.random() * 0.3;
+                }
+                update() {
+                    this.x += this.vx;
+                    this.y += this.vy;
+                    this.vx *= 0.992;
+                    this.vy *= 0.992;
+                    this.life -= this.decay;
+                    this.alpha = Math.max(0, this.life * 0.9);
+                    this.x += (Math.random() - 0.5) * 0.3;
+                    this.y += (Math.random() - 0.5) * 0.3;
+                }
+                draw(ctx) {
+                    if (this.alpha <= 0.01) return;
+                    const rad = this.size * (0.4 + 0.6 * this.life);
+                    const grad = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, rad * 2.5);
+                    const hue = 180 + Math.random() * 40;
+                    grad.addColorStop(0, `hsla(${hue}, 80%, 85%, ${this.alpha * this.glow})`);
+                    grad.addColorStop(0.5, `hsla(${hue}, 70%, 60%, ${this.alpha * 0.3})`);
+                    grad.addColorStop(1, `hsla(${hue}, 70%, 40%, 0)`);
+                    ctx.beginPath();
+                    ctx.arc(this.x, this.y, rad * 2.5, 0, Math.PI * 2);
+                    ctx.fillStyle = grad;
+                    ctx.fill();
+                    // inti terang
+                    ctx.beginPath();
+                    ctx.arc(this.x, this.y, rad * 0.5, 0, Math.PI * 2);
+                    ctx.fillStyle = `rgba(255,255,255,${this.alpha * 0.7})`;
+                    ctx.fill();
+                }
+            }
+
+            function spawnBurst(count) {
+                for (let i = 0; i < count; i++) {
+                    if (particles.length >= MAX_PARTICLES) break;
+                    particles.push(new Particle());
+                }
+            }
+
+            function animateParticles() {
+                ctx.clearRect(0, 0, W, H);
+                for (let i = particles.length - 1; i >= 0; i--) {
+                    const p = particles[i];
+                    p.update();
+                    if (p.life <= 0 || p.alpha <= 0.01 || p.x < -50 || p.x > W + 50 || p.y < -50 || p.y > H + 50) {
+                        particles.splice(i, 1);
+                        continue;
+                    }
+                    p.draw(ctx);
+                }
+                if (particles.length < 70 && opened === false) {
+                    spawnBurst(3);
+                }
+                animId = requestAnimationFrame(animateParticles);
+            }
+
+            function startParticles() {
+                if (started) return;
+                started = true;
+                for (let i = 0; i < 150; i++) {
+                    const p = new Particle();
+                    const angle = Math.random() * Math.PI * 2;
+                    const dist = 20 + Math.random() * 160;
+                    p.x = W / 2 + Math.cos(angle) * dist;
+                    p.y = H / 2 + Math.sin(angle) * dist;
+                    const a = Math.random() * Math.PI * 2;
+                    const speed = 0.4 + Math.random() * 2.8;
+                    p.vx = Math.cos(a) * speed * (0.5 + Math.random() * 1.2);
+                    p.vy = Math.sin(a) * speed * (0.5 + Math.random() * 1.2);
+                    p.life = 0.6 + Math.random() * 0.6;
+                    p.decay = 0.001 + Math.random() * 0.006;
+                    particles.push(p);
+                }
+                animateParticles();
+            }
+
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', startParticles);
+            } else {
+                startParticles();
+            }
+
+            // override openCurtain untuk tetap jalankan partikel
+            const origOpen = openCurtain;
+            openCurtain = function() {
+                origOpen();
+            };
+            window._sparkleResize = resize;
+        })();
+
+        // =============================================================
+        // 3. BUKA OTOMATIS setelah 1,8 detik
+        // =============================================================
+        setTimeout(() => {
+            openCurtain();
+        }, 1800);
+
+        // =============================================================
+        // 4. FUNGSI ASLI – State & API Integration (tetap utuh)
+        // =============================================================
         let chatHistory = [];
         let currentEvaContext = null;
         const MAX_FREE_MESSAGES = 100;
@@ -393,36 +891,34 @@
                 const data = await response.json();
                 currentEvaContext = data.eva_result;
 
-                const formattedEva = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(data.eva_result.eva);
+                const formattedEva = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(data
+                    .eva_result.eva);
                 const evaVal = data.eva_result.eva;
 
                 let colorClass = 'text-amber-400';
-                if (evaVal > 0) {
-                    colorClass = 'text-emerald-400';
-                } else if (evaVal < 0) {
-                    colorClass = 'text-rose-400';
-                }
+                if (evaVal > 0) colorClass = 'text-emerald-400';
+                else if (evaVal < 0) colorClass = 'text-rose-400';
 
                 resultContent.innerHTML = `
-                    <div class="p-4 bg-slate-800 rounded-xl space-y-3">
-                        <div class="flex justify-between items-center">
-                            <span class="text-xs text-slate-400">Nilai EVA</span>
-                            <span class="font-bold text-lg ${colorClass}">${formattedEva} (${data.eva_result.status})</span>
+                        <div class="p-4 bg-slate-800 rounded-xl space-y-3">
+                            <div class="flex justify-between items-center">
+                                <span class="text-xs text-slate-400">Nilai EVA</span>
+                                <span class="font-bold text-lg ${colorClass}">${formattedEva} (${data.eva_result.status})</span>
+                            </div>
+                            <div>
+                                <span class="text-xs text-teal-400 font-bold uppercase">Fokus Strategis</span>
+                                <p class="text-sm font-semibold">${data.fokus_rekomendasi}</p>
+                            </div>
+                            <div>
+                                <span class="text-xs text-teal-400 font-bold uppercase">Aksi Produktivitas</span>
+                                <p class="text-sm text-slate-300">${data.aksi_produktivitas}</p>
+                            </div>
+                            <div class="pt-2 border-t border-slate-700">
+                                <span class="text-xs text-teal-400 font-bold uppercase">Narasi AI Gemini</span>
+                                <p class="text-sm text-slate-200 mt-1 leading-relaxed">${data.narasi_ai}</p>
+                            </div>
                         </div>
-                        <div>
-                            <span class="text-xs text-teal-400 font-bold uppercase">Fokus Strategis</span>
-                            <p class="text-sm font-semibold">${data.fokus_rekomendasi}</p>
-                        </div>
-                        <div>
-                            <span class="text-xs text-teal-400 font-bold uppercase">Aksi Produktivitas</span>
-                            <p class="text-sm text-slate-300">${data.aksi_produktivitas}</p>
-                        </div>
-                        <div class="pt-2 border-t border-slate-700">
-                            <span class="text-xs text-teal-400 font-bold uppercase">Narasi AI Gemini</span>
-                            <p class="text-sm text-slate-200 mt-1 leading-relaxed">${data.narasi_ai}</p>
-                        </div>
-                    </div>
-                `;
+                    `;
             } catch (err) {
                 resultContent.innerHTML = `<p class="text-rose-400 text-sm">Gagal memproses data: ${err.message}</p>`;
             } finally {
@@ -482,45 +978,45 @@
             const container = document.getElementById('chatMessages');
             const isUser = role === 'user';
             const messageId = 'msg-' + Date.now() + '-' + Math.floor(Math.random() * 1000);
-            
+
             const wrapper = document.createElement('div');
             wrapper.className = `group flex items-start space-x-2.5 ${isUser ? 'justify-end' : ''} max-w-[92%] sm:max-w-[85%] ${isUser ? 'ml-auto' : ''}`;
 
-            const formattedContent = isUser 
-                ? escapeHtml(content) 
-                : marked.parse(content);
+            const formattedContent = isUser ?
+                escapeHtml(content) :
+                marked.parse(content);
 
             const avatar = isUser ? '' : `
-                <div class="w-8 h-8 rounded-full bg-teal-600/30 text-teal-400 flex items-center justify-center font-bold text-xs flex-shrink-0 mt-1">
-                    AI
-                </div>
-            `;
+                    <div class="w-8 h-8 rounded-full bg-teal-600/30 text-teal-400 flex items-center justify-center font-bold text-xs flex-shrink-0 mt-1">
+                        Rekomendasi
+                    </div>
+                `;
 
             const actionButtons = isUser ? `
-                <button onclick="editUserMessage('${escapeForAttribute(content)}')" title="Edit prompt" class="opacity-0 group-hover:opacity-100 transition p-1 text-slate-400 hover:text-teal-400 self-center">
-                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/>
-                    </svg>
-                </button>
-            ` : `
-                <button onclick="copyToClipboard('${messageId}', this)" title="Salin pesan" class="opacity-0 group-hover:opacity-100 transition p-1 text-slate-400 hover:text-teal-400 self-start mt-2">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
-                    </svg>
-                </button>
-            `;
+                    <button onclick="editUserMessage('${escapeForAttribute(content)}')" title="Edit prompt" class="opacity-0 group-hover:opacity-100 transition p-1 text-slate-400 hover:text-teal-400 self-center">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/>
+                        </svg>
+                    </button>
+                ` : `
+                    <button onclick="copyToClipboard('${messageId}', this)" title="Salin pesan" class="opacity-0 group-hover:opacity-100 transition p-1 text-slate-400 hover:text-teal-400 self-start mt-2">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+                        </svg>
+                    </button>
+                `;
 
-            const bubbleClass = isUser 
-                ? 'bg-teal-600 text-white rounded-2xl rounded-tr-none px-4 py-3 text-xs sm:text-sm leading-relaxed shadow-sm' 
-                : 'bg-slate-800 border border-slate-700/60 text-slate-200 rounded-2xl rounded-tl-none px-4 py-3 text-xs sm:text-sm leading-relaxed shadow-sm prose prose-invert max-w-none prose-p:my-1 prose-ul:my-1 prose-ol:my-1 prose-li:my-0.5 prose-strong:text-teal-300';
+            const bubbleClass = isUser ?
+                'bg-teal-600 text-white rounded-2xl rounded-tr-none px-4 py-3 text-xs sm:text-sm leading-relaxed shadow-sm' :
+                'bg-slate-800 border border-slate-700/60 text-slate-200 rounded-2xl rounded-tl-none px-4 py-3 text-xs sm:text-sm leading-relaxed shadow-sm prose prose-invert max-w-none prose-p:my-1 prose-ul:my-1 prose-ol:my-1 prose-li:my-0.5 prose-strong:text-teal-300';
 
             wrapper.innerHTML = `
-                ${isUser ? actionButtons : avatar}
-                <div id="${messageId}" class="${bubbleClass}">
-                    ${formattedContent}
-                </div>
-                ${isUser ? '' : actionButtons}
-            `;
+                    ${isUser ? actionButtons : avatar}
+                    <div id="${messageId}" class="${bubbleClass}">
+                        ${formattedContent}
+                    </div>
+                    ${isUser ? '' : actionButtons}
+                `;
 
             container.appendChild(wrapper);
             container.scrollTop = container.scrollHeight;
@@ -531,10 +1027,10 @@
             navigator.clipboard.writeText(textToCopy).then(() => {
                 const originalIcon = btnElement.innerHTML;
                 btnElement.innerHTML = `
-                    <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
-                    </svg>
-                `;
+                        <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                        </svg>
+                    `;
                 setTimeout(() => {
                     btnElement.innerHTML = originalIcon;
                 }, 2000);
@@ -559,15 +1055,15 @@
             wrapper.id = loadingId;
             wrapper.className = 'flex items-start space-x-3 max-w-[85%] sm:max-w-[75%]';
             wrapper.innerHTML = `
-                <div class="w-8 h-8 rounded-full bg-teal-600/30 text-teal-400 flex items-center justify-center font-bold text-xs flex-shrink-0">
-                    AI
-                </div>
-                <div class="bg-slate-800 border border-slate-700/60 rounded-2xl rounded-tl-none px-4 py-3 text-slate-400 flex items-center space-x-1.5">
-                    <span class="w-2 h-2 bg-teal-400 rounded-full animate-bounce" style="animation-delay: 0ms;"></span>
-                    <span class="w-2 h-2 bg-teal-400 rounded-full animate-bounce" style="animation-delay: 150ms;"></span>
-                    <span class="w-2 h-2 bg-teal-400 rounded-full animate-bounce" style="animation-delay: 300ms;"></span>
-                </div>
-            `;
+                    <div class="w-8 h-8 rounded-full bg-teal-600/30 text-teal-400 flex items-center justify-center font-bold text-xs flex-shrink-0">
+                        Rekomendasi
+                    </div>
+                    <div class="bg-slate-800 border border-slate-700/60 rounded-2xl rounded-tl-none px-4 py-3 text-slate-400 flex items-center space-x-1.5">
+                        <span class="w-2 h-2 bg-teal-400 rounded-full animate-bounce" style="animation-delay: 0ms;"></span>
+                        <span class="w-2 h-2 bg-teal-400 rounded-full animate-bounce" style="animation-delay: 150ms;"></span>
+                        <span class="w-2 h-2 bg-teal-400 rounded-full animate-bounce" style="animation-delay: 300ms;"></span>
+                    </div>
+                `;
 
             container.appendChild(wrapper);
             container.scrollTop = container.scrollHeight;
@@ -583,20 +1079,30 @@
             chatHistory = [];
             const container = document.getElementById('chatMessages');
             container.innerHTML = `
-                <div class="flex items-start space-x-3 max-w-[85%] sm:max-w-[75%]">
-                    <div class="w-8 h-8 rounded-full bg-teal-600/30 text-teal-400 flex items-center justify-center font-bold text-xs flex-shrink-0">AI</div>
-                    <div class="bg-slate-800 border border-slate-700/60 rounded-2xl rounded-tl-none p-3.5 sm:p-4 text-slate-200 text-xs sm:text-sm leading-relaxed shadow-sm">
-                        Riwayat obrolan dibersihkan. Ada yang ingin Anda konsultasikan kembali?
+                    <div class="flex items-start space-x-3 max-w-[85%] sm:max-w-[75%]">
+                        <div class="w-8 h-8 rounded-full bg-teal-600/30 text-teal-400 flex items-center justify-center font-bold text-xs flex-shrink-0">Rekomendasi</div>
+                        <div class="bg-slate-800 border border-slate-700/60 rounded-2xl rounded-tl-none p-3.5 sm:p-4 text-slate-200 text-xs sm:text-sm leading-relaxed shadow-sm">
+                            Riwayat obrolan dibersihkan. Ada yang ingin Anda konsultasikan kembali?
+                        </div>
                     </div>
-                </div>
-            `;
+                `;
         }
 
         function escapeHtml(str) {
-            return str.replace(/[&<>"']/g, (m) => ({
-                '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;'
-            })[m]);
+            return str.replace(/[&<>"']/g, (m) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;',
+                "'": '&#039;' })[m]);
         }
+
+        // override closeCurtain
+        const origClose = closeCurtain;
+        closeCurtain = function() {
+            if (!opened) {
+                openCurtain();
+            } else {
+                document.getElementById('curtainOverlay').classList.add('hidden');
+                document.getElementById('mainContent').classList.add('reveal');
+            }
+        };
     </script>
 </body>
 </html>
