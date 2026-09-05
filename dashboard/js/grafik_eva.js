@@ -20,6 +20,9 @@ function populateYearFilter() {
         }
     });
 
+    // Urutkan descending (tahun terbaru di atas)
+    years.sort((a, b) => b.localeCompare(a));
+
     select.innerHTML = '';
     years.forEach(year => {
         const option = document.createElement('option');
@@ -28,25 +31,63 @@ function populateYearFilter() {
         select.appendChild(option);
     });
 
-    Array.from(select.options).forEach(opt => opt.selected = true);
+    // Pilih maksimal 5 tahun terbaru
+    const options = Array.from(select.options);
+    const maxSelect = 5;
+    const toSelect = options.slice(0, maxSelect);
+    toSelect.forEach(opt => opt.selected = true);
+    
+    updateSelectedYearsInfo();
+}
+
+// ===== UPDATE INFO TAHUN TERPILIH =====
+function updateSelectedYearsInfo() {
+    const select = document.getElementById('filterTahun');
+    const selected = Array.from(select.selectedOptions).map(opt => opt.value);
+    const info = document.getElementById('selectedYearsInfo');
+    if (selected.length > 0) {
+        info.textContent = 'Tahun terpilih: ' + selected.join(', ');
+    } else {
+        info.textContent = 'Belum ada tahun terpilih';
+    }
 }
 
 // ===== RESET FILTER =====
 function resetFilterGrafik() {
     const select = document.getElementById('filterTahun');
-    Array.from(select.options).forEach(opt => opt.selected = true);
+    const options = Array.from(select.options);
+    const maxSelect = 5;
+    const toSelect = options.slice(0, maxSelect);
+    toSelect.forEach(opt => opt.selected = true);
+    updateSelectedYearsInfo();
     applyFilterGrafik();
 }
 
 // ===== APPLY FILTER =====
 function applyFilterGrafik() {
     const select = document.getElementById('filterTahun');
-    const selectedYears = Array.from(select.selectedOptions).map(opt => opt.value);
+    let selectedYears = Array.from(select.selectedOptions).map(opt => opt.value);
     
     if (selectedYears.length === 0) {
         alert('Pilih minimal 1 tahun!');
         return;
     }
+
+    // Batasi maksimal 5 tahun (ambil 5 tahun terbaru)
+    const allYears = Array.from(select.options).map(opt => opt.value);
+    const sortedAll = [...allYears].sort((a, b) => b.localeCompare(a));
+    const latest5 = sortedAll.slice(0, 5);
+    
+    // Filter selectedYears yang termasuk dalam latest5
+    selectedYears = selectedYears.filter(year => latest5.includes(year));
+    if (selectedYears.length === 0) {
+        selectedYears = latest5;
+        Array.from(select.options).forEach(opt => {
+            opt.selected = selectedYears.includes(opt.value);
+        });
+    }
+    
+    updateSelectedYearsInfo();
 
     const panels = document.querySelectorAll('.year-panel:not([data-year-id="template"])');
     const dataTahun = [];
@@ -256,7 +297,10 @@ function renderGroup2(grid, data) {
                         ticks: { color: 'white', callback: function(v) { return v.toLocaleString('id-ID'); } },
                         grid: { color: 'rgba(255,255,255,0.1)' }
                     },
-                    x: { ticks: { color: 'white' }, grid: { color: 'rgba(255,255,255,0.1)' } }
+                    x: { 
+                        ticks: { color: 'white' },
+                        grid: { color: 'rgba(255,255,255,0.1)' }
+                    }
                 }
             }
         });
@@ -304,7 +348,10 @@ function renderGroup3(grid, data) {
                         ticks: { color: 'white', callback: function(v) { return v.toLocaleString('id-ID'); } },
                         grid: { color: 'rgba(255,255,255,0.1)' }
                     },
-                    x: { ticks: { color: 'white' }, grid: { color: 'rgba(255,255,255,0.1)' } }
+                    x: { 
+                        ticks: { color: 'white' },
+                        grid: { color: 'rgba(255,255,255,0.1)' }
+                    }
                 }
             }
         });
@@ -355,7 +402,10 @@ function renderGroup4(grid, data) {
                         },
                         grid: { color: 'rgba(255,255,255,0.1)' }
                     },
-                    x: { ticks: { color: 'white' }, grid: { color: 'rgba(255,255,255,0.1)' } }
+                    x: { 
+                        ticks: { color: 'white' },
+                        grid: { color: 'rgba(255,255,255,0.1)' }
+                    }
                 }
             }
         });

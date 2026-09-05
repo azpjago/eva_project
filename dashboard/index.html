@@ -190,19 +190,29 @@
     </div>
 
     <!-- Filter Tahun -->
-    <div class="bg-slate-800 rounded-2xl p-4 border border-slate-700 flex flex-wrap items-center gap-4">
+<div class="bg-slate-800 rounded-2xl p-4 border border-slate-700">
+    <div class="flex flex-wrap items-center gap-4">
         <label class="text-sm font-semibold text-white">Pilih Tahun:</label>
-        <select id="filterTahun" multiple class="bg-slate-900 border border-slate-600 rounded-lg px-3 py-2 text-white text-sm focus:ring-2 focus:ring-teal-500 min-w-[200px] max-h-32 overflow-y-auto">
-            <!-- Opsi akan diisi oleh JavaScript -->
-        </select>
+        <div class="relative">
+            <select id="filterTahun" multiple 
+                    class="bg-slate-900 border border-slate-600 rounded-lg px-3 py-2 text-white text-sm focus:ring-2 focus:ring-teal-500 min-w-[200px] max-h-32 overflow-y-auto appearance-none">
+                <!-- Opsi akan diisi oleh JavaScript -->
+            </select>
+            <div class="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
+                <i class="fa-solid fa-chevron-down text-slate-400"></i>
+            </div>
+        </div>
         <button onclick="applyFilterGrafik()" class="px-4 py-2 bg-teal-500 hover:bg-teal-400 text-slate-950 font-bold rounded-lg text-sm transition">
             <i class="fa-solid fa-filter"></i> Tampilkan
         </button>
         <button onclick="resetFilterGrafik()" class="px-4 py-2 bg-slate-700 hover:bg-slate-600 text-white font-bold rounded-lg text-sm transition">
             <i class="fa-solid fa-undo"></i> Reset
         </button>
-        <span class="text-xs text-slate-400 ml-auto">Pilih 1-5 tahun (Ctrl+klik untuk multi-select)</span>
+        <span class="text-xs text-slate-400 ml-auto">Maksimal 5 tahun terbaru akan ditampilkan</span>
     </div>
+    <!-- Informasi tahun yang dipilih -->
+    <div id="selectedYearsInfo" class="mt-2 text-xs text-slate-400"></div>
+</div>
 
     <!-- Container Grafik -->
     <div id="grafikContainer" class="space-y-8">
