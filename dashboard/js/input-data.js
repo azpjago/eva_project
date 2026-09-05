@@ -95,9 +95,9 @@ function generateYearPanelHTML(yearId) {
                     <input type="number" min="0" data-group="bahan_digunakan" oninput="recomputeTotals()" placeholder="0" class="w-full px-3 py-2.5 rounded-lg bg-slate-900 border border-slate-700 text-base md:text-sm text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
                 </div>
                 <div>
-                    <label class="block text-xs font-semibold text-slate-400 mb-1.5">Bahan Baku (Rp)</label>
-                    <input type="number" min="0" data-group="bahan_digunakan" oninput="recomputeTotals()" placeholder="0" class="w-full px-3 py-2.5 rounded-lg bg-slate-900 border border-slate-700 text-base md:text-sm text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
-                </div>
+    <label class="block text-xs font-semibold text-slate-400 mb-1.5">Bahan Baku (Rp)</label>
+    <input type="number" min="0" data-group="bahan_digunakan" data-field="bahan_baku" oninput="recomputeTotals()" placeholder="0" class="w-full px-3 py-2.5 rounded-lg bg-slate-900 border border-slate-700 text-base md:text-sm text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
+</div>
                 <div>
                     <label class="block text-xs font-semibold text-slate-400 mb-1.5">Bahan Pengemas (Rp)</label>
                     <input type="number" min="0" data-group="bahan_digunakan" oninput="recomputeTotals()" placeholder="0" class="w-full px-3 py-2.5 rounded-lg bg-slate-900 border border-slate-700 text-base md:text-sm text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
