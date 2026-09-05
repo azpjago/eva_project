@@ -6,7 +6,6 @@
     <title>Dashboard — EVA Platform</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="js/grafik_eva.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -71,8 +70,11 @@
             <a href="#" id="navGrafik" onclick="switchView('grafik-eva'); return false;" class="block px-4 py-3 text-slate-400 hover:bg-slate-800 hover:text-slate-200 rounded-xl font-semibold text-sm flex items-center gap-3 transition">
                 <i class="fa-solid fa-chart-bar w-5"></i> Grafik EVA
             </a>
+            <a href="#" id="navRasio" onclick="switchView('rasio-produktivitas'); return false;" class="block px-4 py-3 text-slate-400 hover:bg-slate-800 hover:text-slate-200 rounded-xl font-semibold text-sm flex items-center gap-3 transition">
+                <i class="fa-solid fa-table w-5"></i> Rasio Produktivitas
+            </a>
         </div>
-
+        
         <!-- Area Konten -->
         <div class="lg:col-span-9 space-y-6">
             <!-- View Ringkasan -->
@@ -219,6 +221,44 @@
         <!-- Grafik akan dirender oleh JavaScript -->
     </div>
 </div>
+<!-- ===== VIEW: RASIO PRODUKTIVITAS ===== -->
+<div id="view-rasio-produktivitas" class="hidden space-y-6 fade-in">
+    <div class="bg-gradient-to-r from-slate-800 to-slate-800/50 rounded-2xl p-6 border border-slate-700 relative overflow-hidden">
+        <div class="absolute -right-20 -top-20 w-64 h-64 bg-teal-500/10 rounded-full blur-3xl"></div>
+        <h1 class="text-2xl font-bold text-white mb-2 relative z-10">📊 Rasio Produktivitas</h1>
+        <p class="text-slate-400 text-sm relative z-10">Analisis rasio produktivitas tenaga kerja, modal, profitabilitas, dan pendukung.</p>
+    </div>
+
+    <!-- Filter Tahun -->
+    <div class="bg-slate-800 rounded-2xl p-4 border border-slate-700">
+        <div class="flex flex-wrap items-center gap-4">
+            <label class="text-sm font-semibold text-white">Pilih Tahun (maks 3):</label>
+            <div class="relative">
+                <select id="filterTahunRasio" multiple 
+                        class="bg-slate-900 border border-slate-600 rounded-lg px-3 py-2 text-white text-sm focus:ring-2 focus:ring-teal-500 min-w-[200px] max-h-32 overflow-y-auto">
+                </select>
+            </div>
+            <button onclick="applyFilterRasio()" class="px-4 py-2 bg-teal-500 hover:bg-teal-400 text-slate-950 font-bold rounded-lg text-sm transition">
+                <i class="fa-solid fa-filter"></i> Tampilkan
+            </button>
+            <button onclick="resetFilterRasio()" class="px-4 py-2 bg-slate-700 hover:bg-slate-600 text-white font-bold rounded-lg text-sm transition">
+                <i class="fa-solid fa-undo"></i> Reset
+            </button>
+            <span id="infoTahunRasio" class="text-xs text-slate-400 ml-auto">Minimal 2 tahun</span>
+        </div>
+        <div id="selectedTahunRasioInfo" class="mt-2 text-xs text-slate-400"></div>
+    </div>
+
+    <!-- Loading -->
+    <div id="loadingRasio" class="hidden text-center text-slate-400 py-8">
+        <i class="fa-solid fa-spinner animate-spin text-2xl"></i> Menganalisis data...
+    </div>
+
+    <!-- Container Tabel -->
+    <div id="rasioContainer" class="space-y-8">
+        <!-- Tabel akan dirender oleh JavaScript -->
+    </div>
+</div>
         </div>
     </main>
 
@@ -228,5 +268,7 @@
     <script src="js/ringkasan.js"></script>
     <script src="js/input-data.js"></script>
     <script src="js/asisten-ai.js"></script>
+    <script src="js/grafik_eva.js"></script>
+    <script src="js/rasio_produktivitas.js"></script>
 </body>
 </html>

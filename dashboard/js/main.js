@@ -22,12 +22,19 @@ function switchView(view) {
     document.getElementById('view-input-data').classList.toggle('hidden', view !== 'input-data');
     document.getElementById('view-asisten-ai').classList.toggle('hidden', view !== 'asisten-ai');
     document.getElementById('view-grafik-eva').classList.toggle('hidden', view !== 'grafik-eva');
+     document.getElementById('view-rasio-produktivitas').classList.toggle('hidden', view !== 'rasio-produktivitas');
 
     // Update active class di sidebar
     document.getElementById('navRingkasan').className = view === 'ringkasan' ? NAV_ACTIVE : NAV_INACTIVE;
     document.getElementById('navInputData').className = view === 'input-data' ? NAV_ACTIVE : NAV_INACTIVE;
     document.getElementById('navAsistenAI').className = view === 'asisten-ai' ? NAV_ACTIVE : NAV_INACTIVE;
     document.getElementById('navGrafik').className = view === 'grafik-eva' ? NAV_ACTIVE : NAV_INACTIVE;
+    document.getElementById('navRasio').className = view === 'rasio-produktivitas' ? NAV_ACTIVE : NAV_INACTIVE;
+    if (view === 'rasio-produktivitas') {
+        if (typeof initRasio === 'function') {
+            initRasio();
+        }
+    }
 }
 
 // ===== TAMPILKAN NAMA PENGGUNA =====

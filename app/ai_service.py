@@ -83,3 +83,33 @@ def chat_reply(message: str, history: list[ChatMessage], eva_context: EvaResult 
     except Exception as e:
         logger.error(f"Error pada chat_reply: {e}", exc_info=True)
         return f"Terjadi kesalahan koneksi ke AI: {str(e)}"
+        
+def analyze_ratio_trend(data_tahun, ratios):
+    """
+    Menganalisis tren rasio menggunakan AI.
+    """
+    # Ini adalah placeholder, nanti bisa diganti dengan panggilan ke LLM
+    analyses = {}
+    for r in ratios:
+        values = r.get("values", [])
+        label = r.get("label", "")
+        years = r.get("years", [])
+        if len(values) < 2:
+            analyses[r["id"]] = "Data tidak cukup untuk analisis."
+            continue
+        # Buat prompt sederhana
+        prompt = f"Analisis tren rasio {label} selama tahun {', '.join(years)} dengan nilai {values}. Berikan interpretasi singkat."
+        # Panggil LLM (contoh)
+        try:
+            # response = llm.generate(prompt)  # implementasi sesuai LLM Anda
+            # Untuk sementara, buat analisis sederhana
+            first, last = values[0], values[-1]
+            if last > first:
+                analyses[r["id"]] = f"Rasio meningkat dari {first:.2f} ke {last:.2f}. Indikasi peningkatan efisiensi."
+            elif last < first:
+                analyses[r["id"]] = f"Rasio menurun dari {first:.2f} ke {last:.2f}. Perlu evaluasi strategi."
+            else:
+                analyses[r["id"]] = f"Rasio stabil di {first:.2f}. Pertahankan kinerja."
+        except:
+            analyses[r["id"]] = "Analisis AI sedang sibuk, coba lagi nanti."
+    return analyses

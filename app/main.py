@@ -294,6 +294,45 @@ def edit_chat_message(msg_id: int, req: ChatMsgSend, db: Session = Depends(get_d
 
     return send_chat_message(req, db, current_user)
 
+# ===== ENDPOINT ANALISIS RASIO PRODUKTIVITAS (BARU) =====
+# Import tambahan (tidak mengubah yang sudah ada)
+from typing import List, Dict, Any
+from app.ai_service import analyze_ratio_trend  # Anda perlu tambahkan fungsi ini di ai_service.py
+
+@app.post("/api/ai/analyze-ratio", response_model=Dict[str, Any])
+def analyze_ratios(req: Dict[str, Any], current_user: User = Depends(get_current_user)):
+    """
+    Menganalisis rasio produktivitas menggunakan AI.
+    Request body: {
+        "data_tahun": [{"tahun": "2020", "nilaiTambah": 100, "penjualan": 200, ...}],
+        "ratios": [{"id": "nilai_tambah_per_tenaga", "label": "...", "values": [...], "growth": [...], "years": [...]}]
+    }
+    Return: {"analyses": {"ratio_id": "analisis teks"}}
+    """
+    try:
+        data_tahun = req.get("data_tahun", [])
+        ratios = req.get("ratios", [])
+        # Panggil fungsi analisis dari ai_service
+        analyses = analyze_ratio_trend(data_tahun, ratios)
+        return {"analyses": analyses}
+    except Exception as e:
+        # Fallback: analisis sederhana
+        analyses = {}
+        for r in ratios:
+            values = r.get("values", [])
+            if len(values) < 2:
+                analyses[r["id"]] = "Data tidak cukup untuk analisis."
+            else:
+                first = values[0]
+                last = values[-1]
+                if last > first:
+                    analyses[r["id"]] = "Meningkat. Indikasi positif, efisiensi meningkat."
+                elif last < first:
+                    analyses[r["id"]] = "Menurun. Perlu evaluasi untuk meningkatkan efisiensi."
+                else:
+                    analyses[r["id"]] = "Stabil. Pertahankan kinerja."
+        return {"analyses": analyses}
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)
