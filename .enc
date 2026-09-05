@@ -1,6 +1,6 @@
 # Copy file ini jadi .env dan isi dengan API key kamu dari Google AI Studio.
 # JANGAN commit file .env (sudah ada di .gitignore).
-GEMINI_API_KEY=
+GEMINI_API_KEY= YOUR_API_KEY_HERE
 
 # Opsional — ganti model kalau perlu (default: gemini-2.5-flash)
-# GEMINI_MODEL=gemini-2.5-flash
+# GEMINI_MODEL=gemini-6.5-flash

@@ -3,7 +3,9 @@ from fastapi import Depends, FastAPI, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from fastapi.security import OAuth2PasswordBearer
+from fastapi.staticfiles import StaticFiles
 from sqlalchemy.orm import Session
+from pathlib import Path
 
 from app.ai_service import chat_reply, generate_recommendation_narrative
 from app.database import Base, engine, get_db
@@ -41,6 +43,20 @@ app.add_middleware(
 Base.metadata.create_all(bind=engine)
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/auth/login")
 
+# ===== BASE DIRECTORY =====
+BASE_DIR = Path(__file__).resolve().parent.parent  # karena main.py di dalam folder app/
+
+# ===== MOUNT STATIC FILES =====
+# Mount folder dashboard (jika ada)
+dashboard_path = BASE_DIR / "dashboard"
+if dashboard_path.exists() and dashboard_path.is_dir():
+    app.mount("/dashboard", StaticFiles(directory=str(dashboard_path), html=True), name="dashboard")
+
+# Mount folder static (jika ada)
+static_path = BASE_DIR / "static"
+if static_path.exists() and static_path.is_dir():
+    app.mount("/static", StaticFiles(directory=str(static_path)), name="static")
+
 # --- DEPENDENCY CEK TOKEN ---
 def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)):
     try:
@@ -56,24 +72,66 @@ def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(
         raise HTTPException(status_code=401, detail="User tidak ditemukan")
     return user
 
+# ===== ROUTE HALAMAN UTAMA =====
 @app.get("/", include_in_schema=False)
 def read_index():
-    return FileResponse("index.html")
+    index_path = BASE_DIR / "index.html"
+    if index_path.exists():
+        return FileResponse(index_path)
+    return {"message": "EVA AI Platform API"}
 
 @app.get("/login", include_in_schema=False)
 @app.get("/login.html", include_in_schema=False)
 def read_login():
-    return FileResponse("login.html")
+    login_path = BASE_DIR / "login.html"
+    if login_path.exists():
+        return FileResponse(login_path)
+    raise HTTPException(status_code=404, detail="Login page not found")
 
 @app.get("/register", include_in_schema=False)
 @app.get("/register.html", include_in_schema=False)
 def read_register():
-    return FileResponse("register.html")
+    register_path = BASE_DIR / "register.html"
+    if register_path.exists():
+        return FileResponse(register_path)
+    raise HTTPException(status_code=404, detail="Register page not found")
 
 @app.get("/dashboard", include_in_schema=False)
 def read_dashboard():
-    return FileResponse("dashboard.html")
+    """Halaman Dashboard - menggunakan index.html di folder dashboard"""
+    dashboard_index = BASE_DIR / "dashboard" / "index.html"
+    if dashboard_index.exists():
+        return FileResponse(dashboard_index)
+    
+    # Fallback ke dashboard.html di root (jika ada)
+    fallback = BASE_DIR / "dashboard.html"
+    if fallback.exists():
+        return FileResponse(fallback)
+    
+    raise HTTPException(status_code=404, detail="Dashboard not found")
 
+# ===== SERVE FILE STATIC LAINNYA (FALLBACK) =====
+@app.get("/{file_path:path}", include_in_schema=False)
+def serve_static_files(file_path: str):
+    """Serve semua file HTML, CSS, JS, dan assets lainnya"""
+    # Cek di root directory
+    root_file = BASE_DIR / file_path
+    if root_file.exists() and root_file.is_file():
+        return FileResponse(root_file)
+    
+    # Cek di folder dashboard
+    dashboard_file = BASE_DIR / "dashboard" / file_path
+    if dashboard_file.exists() and dashboard_file.is_file():
+        return FileResponse(dashboard_file)
+    
+    # Cek di folder static (jika ada)
+    static_file = BASE_DIR / "static" / file_path
+    if static_file.exists() and static_file.is_file():
+        return FileResponse(static_file)
+    
+    raise HTTPException(status_code=404, detail="File not found")
+
+# ===== API ENDPOINTS =====
 @app.get("/health")
 def health() -> dict:
     return {"status": "ok", "service": "EVA Analysis & AI Recommendation API"}
@@ -109,6 +167,7 @@ def chat(req: ChatRequest) -> ChatResponse:
     ]
     return ChatResponse(reply=reply, history=updated_history)
 
+# ===== AUTH ENDPOINTS (tanpa is_active) =====
 @app.post("/api/auth/register", response_model=TokenResponse)
 def register(user_data: UserRegister, db: Session = Depends(get_db)):
     existing_user = db.query(User).filter(User.email == user_data.email).first()
@@ -133,10 +192,9 @@ def login(credentials: UserLogin, db: Session = Depends(get_db)):
     token = create_access_token({"sub": str(user.id), "email": user.email})
     return TokenResponse(access_token=token, user_name=user.full_name)
 
-# --- ENDPOINT BARU UNTUK DATABASE EVA ---
+# ===== EVA RECORDS ENDPOINTS =====
 @app.post("/api/eva/save", response_model=list[EvaRecordResponse])
 def save_eva_records(records: list[EvaRecordCreate], db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
-    # Hapus data riwayat lama pengguna ini, lalu timpa dengan data array terbaru dari dashboard
     db.query(EvaRecord).filter(EvaRecord.user_id == current_user.id).delete()
     
     saved_records = []
@@ -160,20 +218,16 @@ def save_eva_records(records: list[EvaRecordCreate], db: Session = Depends(get_d
 def get_eva_history(db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     return db.query(EvaRecord).filter(EvaRecord.user_id == current_user.id).all()
 
-
-# --- TAMBAHAN ENDPOINT DASHBOARD & CHAT YANG DISAMAKAN DENGAN AI_SERVICE ---
-from app.prompts import get_status_from_ratio, RECOMMENDATION_MATRIX
+# ===== AI DASHBOARD & CHAT ENDPOINTS =====
+from app.prompts import get_status_from_ratio
 from app.schemas import DashboardContext, DashboardRecommendation, ChatMsgSend, ChatMsgResponse
 from app.models import ChatMessage as DBChatMessage
-from app.ai_service import generate_recommendation_narrative, chat_reply
-from app.schemas import EvaResult
 
 @app.post("/api/ai/dashboard-recommend", response_model=DashboardRecommendation)
 def get_dashboard_recommendation(data: DashboardContext, current_user: User = Depends(get_current_user)):
     status = get_status_from_ratio(data.nilai_tambah, data.total_investasi)
     matrix = RECOMMENDATION_MATRIX[status]
     
-    # Buat objek dummy EvaResult agar bisa memanfaatkan generator narasi yang sudah stabil di ai_service
     dummy_eva = EvaResult(
         company_name="Perusahaan Pengguna",
         period=data.period,
@@ -209,18 +263,13 @@ def clear_chat_history(db: Session = Depends(get_db), current_user: User = Depen
 
 @app.post("/api/ai/chat/send", response_model=ChatMsgResponse)
 def send_chat_message(req: ChatMsgSend, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
-    # 1. Simpan pesan user ke database
     user_msg = DBChatMessage(user_id=current_user.id, role="user", content=req.content)
     db.add(user_msg)
     db.commit()
 
-    # 2. Ambil riwayat percakapan dari database
     db_history = db.query(DBChatMessage).filter(DBChatMessage.user_id == current_user.id).order_by(DBChatMessage.created_at.asc()).all()
-    
-    # Konversi format database ke format ChatMessage schema yang diterima oleh chat_reply di ai_service
     history_for_ai = [ChatMessage(role=h.role, content=h.content) for h in db_history[:-1]]
 
-    # Buat konteks EVA sementara untuk dikirim ke AI
     status_eko = get_status_from_ratio(req.nilai_tambah_context, req.investasi_context)
     eva_ctx = EvaResult(
         company_name="Analisis Dashboard",
@@ -233,13 +282,11 @@ def send_chat_message(req: ChatMsgSend, db: Session = Depends(get_db), current_u
         capital_charge=0
     )
 
-    # 3. Dapatkan balasan menggunakan fungsi terpusat chat_reply yang sudah terbukti stabil
     try:
         ai_text = chat_reply(req.content, history_for_ai, eva_ctx)
     except Exception as e:
         ai_text = "Maaf, koneksi ke AI sedang terganggu."
 
-    # 4. Simpan balasan AI ke database
     ai_msg = DBChatMessage(user_id=current_user.id, role="model", content=ai_text)
     db.add(ai_msg)
     db.commit()
@@ -257,3 +304,7 @@ def edit_chat_message(msg_id: int, req: ChatMsgSend, db: Session = Depends(get_d
     db.commit()
 
     return send_chat_message(req, db, current_user)
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=8000)

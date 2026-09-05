@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Dashboard — EVA AI Platform</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- CSS -->
+    <link rel="stylesheet" href="css/style.css">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Plus Jakarta Sans', 'sans-serif'] }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-slate-900 font-sans text-slate-100 antialiased min-h-screen flex flex-col">
+
+    <!-- Proteksi Halaman -->
+    <script>
+        if (!localStorage.getItem('eva_token')) {
+            window.location.href = '/login';
+        }
+    </script>
+
+    <!-- Navbar -->
+    <nav class="bg-slate-950 border-b border-slate-800 px-6 py-4 flex justify-between items-center sticky top-0 z-50">
+        <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-teal-500 to-blue-600 flex items-center justify-center text-white shadow-lg shadow-teal-500/20">
+                <i class="fa-solid fa-chart-line text-lg"></i>
+            </div>
+            <span class="font-extrabold text-xl text-white tracking-tight">EVA<span class="text-teal-400">AI</span></span>
+        </div>
+
+        <div class="flex items-center gap-6">
+            <div class="text-sm text-slate-400">
+                Halo, <span id="userNameDisplay" class="font-bold text-white">Pengguna</span>
+            </div>
+            <button onclick="handleLogout()" class="text-xs px-4 py-2 bg-rose-500/10 text-rose-400 border border-rose-500/20 hover:bg-rose-500/20 hover:border-rose-500/40 rounded-lg transition flex items-center gap-2 font-semibold">
+                <i class="fa-solid fa-arrow-right-from-bracket"></i> Keluar
+            </button>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="flex-1 max-w-7xl w-full mx-auto p-6 lg:p-8 grid grid-cols-1 lg:grid-cols-12 gap-8">
+
+        <!-- Sidebar -->
+        <div class="lg:col-span-3 space-y-2 lg:sticky lg:top-24 self-start">
+            <a href="#" id="navRingkasan" onclick="switchView('ringkasan'); return false;" class="block px-4 py-3 bg-teal-500/10 text-teal-400 rounded-xl border border-teal-500/20 font-semibold text-sm flex items-center gap-3 transition">
+                <i class="fa-solid fa-house w-5"></i> Ringkasan
+            </a>
+            <a href="#" id="navInputData" onclick="switchView('input-data'); return false;" class="block px-4 py-3 text-slate-400 hover:bg-slate-800 hover:text-slate-200 rounded-xl font-semibold text-sm flex items-center gap-3 transition">
+                <i class="fa-solid fa-calculator w-5"></i> Kalkulator EVA
+            </a>
+            <a href="#" id="navAsistenAI" onclick="switchView('asisten-ai'); return false;" class="block px-4 py-3 text-slate-400 hover:bg-slate-800 hover:text-slate-200 rounded-xl font-semibold text-sm flex items-center gap-3 transition">
+                <i class="fa-solid fa-robot w-5"></i> Asisten AI
+            </a>
+            <a href="#" class="block px-4 py-3 text-slate-400 hover:bg-slate-800 hover:text-slate-200 rounded-xl font-semibold text-sm flex items-center gap-3 transition">
+                <i class="fa-solid fa-clock-rotate-left w-5"></i> Riwayat Analisis
+            </a>
+        </div>
+
+        <!-- Area Konten -->
+        <div class="lg:col-span-9 space-y-6">
+            <!-- View Ringkasan -->
+            <div id="view-ringkasan" class="space-y-6 fade-in">
+                <div class="bg-gradient-to-r from-slate-800 to-slate-800/50 rounded-2xl p-6 border border-slate-700 relative overflow-hidden">
+                    <div class="absolute -right-20 -top-20 w-64 h-64 bg-teal-500/10 rounded-full blur-3xl"></div>
+                    <h1 class="text-2xl font-bold text-white mb-2 relative z-10">Ringkasan Analisis EVA</h1>
+                    <p class="text-slate-400 text-sm relative z-10">Visualisasi data dari hasil perhitungan Kalkulator EVA Anda akan tampil secara otomatis di bawah ini.</p>
+                </div>
+                <div id="ringkasan-content"></div>
+            </div>
+
+            <!-- View Input Data -->
+            <div id="view-input-data" class="hidden space-y-6 fade-in">
+                <div class="bg-gradient-to-r from-slate-800 to-slate-800/50 rounded-2xl p-6 border border-slate-700 relative overflow-hidden">
+                    <div class="absolute -right-20 -top-20 w-64 h-64 bg-teal-500/10 rounded-full blur-3xl"></div>
+                    <h1 class="text-2xl font-bold text-white mb-2 relative z-10">Input Data Nilai Tambah</h1>
+                    <p class="text-slate-400 text-sm relative z-10">Input data laporan keuangan per tahun. Jangan lupa tekan Simpan Analisis jika sudah selesai.</p>
+                </div>
+
+                <div id="yearTabs" class="bg-slate-800 rounded-2xl border border-slate-700 overflow-hidden">
+                    <div id="yearTabsList" class="flex items-center gap-2 overflow-x-auto min-h-[64px] px-4"></div>
+                </div>
+
+                <div id="emptyYearState" class="bg-slate-800/70 rounded-2xl border border-dashed border-slate-600 px-6 py-12 text-center">
+                    <div class="w-14 h-14 mx-auto mb-4 rounded-2xl bg-teal-500/10 border border-teal-500/20 text-teal-400 flex items-center justify-center">
+                        <i class="fa-solid fa-plus text-xl"></i>
+                    </div>
+                    <h2 class="text-lg font-bold text-white mb-2">Belum Ada Data Keuangan</h2>
+                    <p class="text-sm text-slate-400 max-w-md mx-auto mb-5">Tambahkan data keuangan pertama. Setelah dibuat, judul tab dapat langsung Anda ubah menjadi tahun yang sesuai.</p>
+                    <button type="button" onclick="addYear()" class="px-6 py-3 rounded-xl bg-teal-500 hover:bg-teal-400 text-slate-950 font-bold text-sm transition inline-flex items-center gap-2">
+                        <i class="fa-solid fa-plus"></i> Tambah Data Keuangan
+                    </button>
+                </div>
+
+                <div id="yearPanels" class="space-y-6 hidden">
+                    <!-- Template Panel akan di-load dari JS -->
+                </div>
+            </div>
+
+            <!-- View Asisten AI -->
+            <div id="view-asisten-ai" class="hidden space-y-6 fade-in">
+                <div class="bg-slate-800 p-4 rounded-2xl border border-slate-700 flex flex-col sm:flex-row justify-between items-center gap-4">
+                    <div>
+                        <h1 class="text-xl font-bold text-white flex items-center gap-2">
+                            <i class="fa-solid fa-robot text-teal-400"></i> Pusat Asisten AI & Produktivitas
+                        </h1>
+                        <p class="text-xs text-slate-400 mt-0.5">Pilih mode tampilan untuk analisis strategis atau konsultasi obrolan mendalam.</p>
+                    </div>
+                    <div class="flex items-center bg-slate-900 p-1.5 rounded-xl border border-slate-700">
+                        <button type="button" id="btnTabRekomendasi" onclick="switchAITab('rekomendasi')" class="px-4 py-2 rounded-lg text-xs font-bold transition bg-teal-500 text-slate-950 shadow-md">
+                            <i class="fa-solid fa-chart-pie mr-1.5"></i> Rekomendasi Produktivitas
+                        </button>
+                        <button type="button" id="btnTabChat" onclick="switchAITab('chat')" class="px-4 py-2 rounded-lg text-xs font-bold transition text-slate-400 hover:text-white">
+                            <i class="fa-solid fa-comments mr-1.5"></i> Chat Konsultasi AI
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Panel Rekomendasi -->
+                <div id="aiPanelRekomendasi" class="space-y-6 fade-in">
+                    <div class="bg-gradient-to-r from-teal-950/40 via-slate-800 to-slate-800 rounded-2xl p-6 sm:p-8 border border-teal-500/30 shadow-xl relative overflow-hidden">
+                        <div class="absolute -right-20 -top-20 w-64 h-64 bg-teal-500/10 rounded-full blur-3xl pointer-events-none"></div>
+                        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6 pb-4 border-b border-slate-700/80">
+                            <div>
+                                <span class="text-xs font-bold uppercase tracking-wider text-teal-400 bg-teal-500/10 px-3 py-1 rounded-full border border-teal-500/20">Analisis Preskriptif</span>
+                                <h2 class="text-2xl font-extrabold text-white mt-2">Hasil Evaluasi & Strategi Perusahaan</h2>
+                            </div>
+                            <button onclick="loadRecommendation()" class="px-4 py-2 bg-slate-700 hover:bg-slate-600 rounded-xl text-xs font-semibold text-white transition flex items-center gap-2 shadow-sm">
+                                <i class="fa-solid fa-rotate"></i> Perbarui Data Analisis
+                            </button>
+                        </div>
+                        <div id="ai-rekomendasi-konten" class="text-sm text-slate-200 space-y-4">
+                            <div class="flex items-center justify-center py-12 text-slate-400 gap-2">
+                                <i class="fa-solid fa-spinner animate-spin text-teal-400 text-lg"></i> Menganalisis data keuangan Anda...
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Panel Chat -->
+                <div id="aiPanelChat" class="hidden space-y-4 fade-in">
+                    <div class="bg-slate-800 rounded-2xl border border-slate-700 overflow-hidden shadow-2xl flex flex-col h-[calc(100vh-14rem)] min-h-[550px]">
+                        <div class="px-6 py-4 bg-slate-900/80 border-b border-slate-700 flex justify-between items-center">
+                            <div class="flex items-center gap-3">
+                                <div class="w-9 h-9 rounded-xl bg-teal-500/20 border border-teal-500/50 flex items-center justify-center text-teal-400 font-bold">
+                                    <i class="fa-solid fa-robot"></i>
+                                </div>
+                                <div>
+                                    <h3 class="font-bold text-sm text-white">Ruang Diskusi Strategis AI</h3>
+                                    <p class="text-[11px] text-slate-400">Terintegrasi otomatis dengan konteks data finansial aktif Anda.</p>
+                                </div>
+                            </div>
+                            <button onclick="clearChat()" class="text-xs px-3.5 py-2 bg-rose-500/10 text-rose-400 border border-rose-500/20 rounded-xl hover:bg-rose-500/20 transition flex items-center gap-2 font-semibold">
+                                <i class="fa-solid fa-trash-can"></i> Hapus Riwayat Chat
+                            </button>
+                        </div>
+                        <div id="chat-box" class="flex-1 overflow-y-auto p-6 space-y-6 bg-slate-900/30"></div>
+                        <div class="p-4 bg-slate-900 border-t border-slate-700 flex gap-3 items-end">
+                            <textarea id="chat-input" class="flex-1 bg-slate-800 border border-slate-600 rounded-xl px-4 py-3 text-white text-sm focus:ring-2 focus:ring-teal-500 outline-none resize-none shadow-inner" rows="1" placeholder="Ketik pertanyaan mendalam mengenai strategi efisiensi atau pengembangan SDM... (Shift+Enter untuk baris baru)"></textarea>
+                            <input type="hidden" id="edit-msg-id" value="">
+                            <button onclick="sendChat()" id="btn-send-chat" class="px-5 h-12 rounded-xl bg-teal-500 hover:bg-teal-400 text-slate-950 font-bold transition flex items-center justify-center gap-2 shrink-0 shadow-lg shadow-teal-500/20">
+                                <span>Kirim</span> <i class="fa-solid fa-paper-plane text-xs"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- JavaScript -->
+    <script src="js/main.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/ringkasan.js"></script>
+    <script src="js/input-data.js"></script>
+    <script src="js/asisten-ai.js"></script>
+</body>
+</html>
