@@ -20,12 +20,14 @@
         }
     </script>
 </head>
-<body class="bg-slate-900 font-sans text-slate-800 antialiased min-h-screen flex items-center justify-center p-4 relative overflow-hidden">
+<!-- PERBAIKAN: tambahkan overflow-y-auto dan min-h-screen tetap, tapi ubah menjadi h-screen untuk memaksa scroll -->
+<body class="bg-slate-900 font-sans text-slate-800 antialiased h-screen overflow-y-auto flex items-center justify-center p-4 relative">
 
     <div class="absolute -top-40 -left-40 w-96 h-96 bg-teal-500/20 rounded-full blur-3xl"></div>
     <div class="absolute -bottom-40 -right-40 w-96 h-96 bg-blue-500/20 rounded-full blur-3xl"></div>
 
-    <div class="w-full max-w-md relative z-10">
+    <!-- PERBAIKAN: tambahkan py-8 untuk memberikan ruang scroll -->
+    <div class="w-full max-w-md relative z-10 py-8">
         <div class="text-center mb-8">
             <a href="/" class="inline-flex items-center gap-3 mb-3">
                 <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-teal-500 to-blue-600 flex items-center justify-center text-white shadow-lg shadow-teal-500/30">
@@ -58,6 +60,7 @@
                         </span>
                         <input type="email" id="email" placeholder="nama@perusahaan.com" required class="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-300 focus:ring-2 focus:ring-teal-500 focus:border-teal-500 text-sm transition">
                     </div>
+                    <div id="emailValidationMessage" class="text-[11px] mt-1.5 ml-1 hidden"></div>
                 </div>
 
                 <div>
@@ -77,6 +80,24 @@
                             <i class="fa-solid fa-lock text-sm"></i>
                         </span>
                         <input type="password" id="confirmPassword" placeholder="Ulangi kata sandi" required minlength="8" class="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-300 focus:ring-2 focus:ring-teal-500 focus:border-teal-500 text-sm transition">
+                    </div>
+                </div>
+
+                <!-- CAPTCHA Section -->
+                <div class="bg-slate-50 rounded-xl p-4 border border-slate-200">
+                    <div class="flex items-center justify-between gap-4">
+                        <div class="flex-1">
+                            <div class="flex items-center gap-3">
+                                <span id="captchaText" class="text-2xl font-bold text-slate-700 select-none bg-white px-4 py-2 rounded-lg border border-slate-300 min-w-[120px] text-center font-mono tracking-wider"></span>
+                                <button type="button" onclick="generateCaptcha()" class="text-slate-400 hover:text-teal-600 transition" title="Refresh CAPTCHA">
+                                    <i class="fa-solid fa-rotate text-lg"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mt-3">
+                        <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Verifikasi Keamanan</label>
+                        <input type="text" id="captchaInput" placeholder="Masukkan kode di atas" required class="w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-teal-500 focus:border-teal-500 text-sm transition">
                     </div>
                 </div>
 
@@ -100,21 +121,162 @@
     </div>
 
     <script>
+        // CAPTCHA Functions
+        let currentCaptcha = '';
+
+        function generateCaptcha() {
+            const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+            let captcha = '';
+            for (let i = 0; i < 6; i++) {
+                captcha += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            currentCaptcha = captcha;
+            document.getElementById('captchaText').textContent = captcha;
+            document.getElementById('captchaInput').value = '';
+        }
+
+        // Email Validation Functions
+        function validateEmailFormat(email) {
+            const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+            return emailRegex.test(email);
+        }
+
+        function checkEmailDomain(email) {
+            const domain = email.split('@')[1];
+            if (!domain) return { valid: false, message: 'Domain email tidak valid' };
+
+            const commonDomains = {
+                'gmail.com': ['gmail.com', 'gmail.co', 'gmail.cm', 'gmail.c', 'gmal.com'],
+                'yahoo.com': ['yahoo.com', 'yahoo.co', 'yaho.com'],
+                'outlook.com': ['outlook.com', 'outlook.co', 'outlool.com'],
+                'hotmail.com': ['hotmail.com', 'hotmail.co', 'hotmal.com'],
+                'email.com': ['email.com', 'emai.com'],
+                'mail.com': ['mail.com', 'mail.co'],
+                'yandex.com': ['yandex.com', 'yandex.ru'],
+                'protonmail.com': ['protonmail.com', 'proton.me'],
+                'icloud.com': ['icloud.com', 'me.com', 'mac.com'],
+                'live.com': ['live.com', 'live.co'],
+                'msn.com': ['msn.com', 'msn.co'],
+                'aol.com': ['aol.com', 'aol.co'],
+                'comcast.net': ['comcast.net', 'comcast.com'],
+                'sbcglobal.net': ['sbcglobal.net', 'sbcglobal.com'],
+                'verizon.net': ['verizon.net', 'verizon.com'],
+                'att.net': ['att.net', 'att.com'],
+                'cox.net': ['cox.net', 'cox.com']
+            };
+
+            for (const [correctDomain, variations] of Object.entries(commonDomains)) {
+                if (variations.includes(domain)) {
+                    if (domain !== correctDomain) {
+                        return { 
+                            valid: false, 
+                            message: `Apakah Anda bermaksud menggunakan @${correctDomain}?`,
+                            suggestion: correctDomain
+                        };
+                    }
+                    return { valid: true };
+                }
+            }
+
+            if (domain.length > 3 && !domain.includes('.')) {
+                return { valid: false, message: 'Domain email harus memiliki ekstensi (contoh: .com, .co.id)' };
+            }
+
+            if (!/^[a-zA-Z0-9.-]+$/.test(domain)) {
+                return { valid: false, message: 'Domain email mengandung karakter tidak valid' };
+            }
+
+            return { valid: true };
+        }
+
+        // Real-time email validation
+        document.getElementById('email').addEventListener('blur', function() {
+            const email = this.value.trim();
+            const validationMsg = document.getElementById('emailValidationMessage');
+
+            if (!email) {
+                validationMsg.classList.add('hidden');
+                this.classList.remove('border-rose-500', 'border-emerald-500');
+                return;
+            }
+
+            if (!validateEmailFormat(email)) {
+                validationMsg.className = 'text-[11px] mt-1.5 ml-1 text-rose-600 block';
+                validationMsg.innerHTML = '<i class="fa-solid fa-circle-exclamation"></i> Format email tidak valid';
+                this.classList.remove('border-emerald-500');
+                this.classList.add('border-rose-500');
+                return;
+            }
+
+            const domainCheck = checkEmailDomain(email);
+            if (!domainCheck.valid) {
+                validationMsg.className = 'text-[11px] mt-1.5 ml-1 text-amber-600 block';
+                validationMsg.innerHTML = `<i class="fa-solid fa-triangle-exclamation"></i> ${domainCheck.message}`;
+                this.classList.remove('border-emerald-500');
+                this.classList.add('border-amber-500');
+            } else {
+                validationMsg.className = 'text-[11px] mt-1.5 ml-1 text-emerald-600 block';
+                validationMsg.innerHTML = '<i class="fa-solid fa-circle-check"></i> Format email valid';
+                this.classList.remove('border-rose-500', 'border-amber-500');
+                this.classList.add('border-emerald-500');
+            }
+        });
+
+        // Real-time CAPTCHA input validation
+        document.getElementById('captchaInput').addEventListener('input', function() {
+            const value = this.value.toUpperCase();
+            if (value !== this.value) {
+                this.value = value;
+            }
+            if (value === currentCaptcha) {
+                this.classList.remove('border-rose-500');
+                this.classList.add('border-emerald-500');
+            } else if (value.length > 0) {
+                this.classList.remove('border-emerald-500');
+                this.classList.add('border-rose-500');
+            } else {
+                this.classList.remove('border-rose-500', 'border-emerald-500');
+                this.classList.add('border-slate-300');
+            }
+        });
+
+        generateCaptcha();
+
         async function handleRegister(e) {
             e.preventDefault();
             const btn = document.getElementById('btnRegister');
             const errorAlert = document.getElementById('errorAlert');
             const fullName = document.getElementById('fullName').value.trim();
-            const email = document.getElementById('email').value;
+            const email = document.getElementById('email').value.trim();
             const password = document.getElementById('password').value;
             const confirmPassword = document.getElementById('confirmPassword').value;
+            const captchaInput = document.getElementById('captchaInput').value.trim().toUpperCase();
 
             errorAlert.classList.add('hidden');
 
-            // Validasi kecocokan kata sandi di sisi klien
+            if (!validateEmailFormat(email)) {
+                errorAlert.className = "p-3 rounded-xl text-xs font-medium bg-rose-100 text-rose-700 border border-rose-300 block";
+                errorAlert.innerHTML = `<i class="fa-solid fa-triangle-exclamation"></i> Format email tidak valid`;
+                return;
+            }
+
+            const domainCheck = checkEmailDomain(email);
+            if (!domainCheck.valid) {
+                errorAlert.className = "p-3 rounded-xl text-xs font-medium bg-amber-100 text-amber-700 border border-amber-300 block";
+                errorAlert.innerHTML = `<i class="fa-solid fa-triangle-exclamation"></i> ${domainCheck.message}`;
+                return;
+            }
+
             if (password !== confirmPassword) {
                 errorAlert.className = "p-3 rounded-xl text-xs font-medium bg-rose-100 text-rose-700 border border-rose-300 block";
                 errorAlert.innerHTML = `<i class="fa-solid fa-triangle-exclamation"></i> Kata sandi dan konfirmasi tidak sama.`;
+                return;
+            }
+
+            if (captchaInput !== currentCaptcha) {
+                errorAlert.className = "p-3 rounded-xl text-xs font-medium bg-rose-100 text-rose-700 border border-rose-300 block";
+                errorAlert.innerHTML = `<i class="fa-solid fa-triangle-exclamation"></i> Kode CAPTCHA tidak sesuai. Silakan coba lagi.`;
+                generateCaptcha();
                 return;
             }
 
@@ -135,7 +297,6 @@
                 const data = await response.json();
                 if (!response.ok) throw new Error(data.detail || 'Pendaftaran gagal.');
 
-                // Simpan token & user ke localStorage — langsung login setelah daftar
                 localStorage.setItem('eva_token', data.access_token);
                 localStorage.setItem('eva_user_name', data.user_name);
                 localStorage.removeItem('eva_guest_chat_count');
@@ -152,6 +313,7 @@
                 errorAlert.textContent = err.message;
                 btn.disabled = false;
                 btn.innerHTML = `<span>Daftar Sekarang</span> <i class="fa-solid fa-arrow-right text-xs"></i>`;
+                generateCaptcha();
             }
         }
     </script>
