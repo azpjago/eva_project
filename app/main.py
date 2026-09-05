@@ -46,10 +46,20 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/auth/login")
 # ===== BASE DIRECTORY =====
 BASE_DIR = Path(__file__).resolve().parent.parent  # karena main.py di dalam folder app/
 
-# ===== MOUNT STATIC FILES =====
-# Mount folder dashboard (jika ada)
+# ===== MOUNT STATIC FILES (TANPA CATCH-ALL) =====
+# Mount folder dashboard untuk CSS, JS, dan aset lainnya
 dashboard_path = BASE_DIR / "dashboard"
 if dashboard_path.exists() and dashboard_path.is_dir():
+    # Mount subfolder CSS dan JS secara terpisah agar path-nya sesuai
+    css_path = dashboard_path / "css"
+    if css_path.exists() and css_path.is_dir():
+        app.mount("/css", StaticFiles(directory=str(css_path)), name="css")
+    
+    js_path = dashboard_path / "js"
+    if js_path.exists() and js_path.is_dir():
+        app.mount("/js", StaticFiles(directory=str(js_path)), name="js")
+    
+    # Mount root dashboard untuk index.html dan file lainnya (opsional)
     app.mount("/dashboard", StaticFiles(directory=str(dashboard_path), html=True), name="dashboard")
 
 # Mount folder static (jika ada)
@@ -103,35 +113,13 @@ def read_dashboard():
     if dashboard_index.exists():
         return FileResponse(dashboard_index)
     
-    # Fallback ke dashboard.html di root (jika ada)
     fallback = BASE_DIR / "dashboard.html"
     if fallback.exists():
         return FileResponse(fallback)
     
     raise HTTPException(status_code=404, detail="Dashboard not found")
 
-# ===== SERVE FILE STATIC LAINNYA (FALLBACK) =====
-@app.get("/{file_path:path}", include_in_schema=False)
-def serve_static_files(file_path: str):
-    """Serve semua file HTML, CSS, JS, dan assets lainnya"""
-    # Cek di root directory
-    root_file = BASE_DIR / file_path
-    if root_file.exists() and root_file.is_file():
-        return FileResponse(root_file)
-    
-    # Cek di folder dashboard
-    dashboard_file = BASE_DIR / "dashboard" / file_path
-    if dashboard_file.exists() and dashboard_file.is_file():
-        return FileResponse(dashboard_file)
-    
-    # Cek di folder static (jika ada)
-    static_file = BASE_DIR / "static" / file_path
-    if static_file.exists() and static_file.is_file():
-        return FileResponse(static_file)
-    
-    raise HTTPException(status_code=404, detail="File not found")
-
-# ===== API ENDPOINTS =====
+# ===== API ENDPOINTS (SEMUA ROUTE API DILETAKKAN DI SINI) =====
 @app.get("/health")
 def health() -> dict:
     return {"status": "ok", "service": "EVA Analysis & AI Recommendation API"}
@@ -167,7 +155,7 @@ def chat(req: ChatRequest) -> ChatResponse:
     ]
     return ChatResponse(reply=reply, history=updated_history)
 
-# ===== AUTH ENDPOINTS (tanpa is_active) =====
+# ===== AUTH ENDPOINTS =====
 @app.post("/api/auth/register", response_model=TokenResponse)
 def register(user_data: UserRegister, db: Session = Depends(get_db)):
     existing_user = db.query(User).filter(User.email == user_data.email).first()
@@ -216,7 +204,8 @@ def save_eva_records(records: list[EvaRecordCreate], db: Session = Depends(get_d
 
 @app.get("/api/eva/history", response_model=list[EvaRecordResponse])
 def get_eva_history(db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
-    return db.query(EvaRecord).filter(EvaRecord.user_id == current_user.id).all()
+    records = db.query(EvaRecord).filter(EvaRecord.user_id == current_user.id).all()
+    return records
 
 # ===== AI DASHBOARD & CHAT ENDPOINTS =====
 from app.prompts import get_status_from_ratio

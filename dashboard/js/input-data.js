@@ -18,7 +18,10 @@ function generateYearPanelHTML(yearId) {
                 <span class="font-bold text-white text-sm flex items-center gap-2">
                     <i class="fa-solid fa-cart-shopping w-4 text-teal-400"></i> Penjualan
                 </span>
-                <i class="fa-solid fa-chevron-down text-slate-500 text-xs chevron"></i>
+                <span class="flex items-center gap-3">
+                    <span class="text-xs text-slate-400">Total: <span data-total="penjualan" class="text-teal-400 font-bold">Rp0</span></span>
+                    <i class="fa-solid fa-chevron-down text-slate-500 text-xs chevron"></i>
+                </span>
             </summary>
             <div class="px-5 pb-5 grid grid-cols-1 md:grid-cols-2 gap-4 border-t border-slate-700 pt-4">
                 <div>
@@ -344,25 +347,35 @@ function generateYearPanelHTML(yearId) {
             </div>
         </details>
 
-        <!-- Laba -->
+        <!-- ===== LABA (AUTO GENERATED) ===== -->
         <details class="bg-slate-800 rounded-2xl border border-slate-700 overflow-hidden">
             <summary class="cursor-pointer list-none flex items-center justify-between px-5 py-4 select-none">
                 <span class="font-bold text-white text-sm flex items-center gap-2">
-                    <i class="fa-solid fa-sack-dollar w-4 text-teal-400"></i> Laba
+                    <i class="fa-solid fa-sack-dollar w-4 text-teal-400"></i> Laba (Otomatis)
                 </span>
                 <span class="flex items-center gap-3">
-                    <span class="text-xs text-slate-400">Total: <span data-total="laba" class="text-teal-400 font-bold">Rp0</span></span>
+                    <span class="text-xs text-slate-400">Bersih: <span data-total="laba" class="text-teal-400 font-bold">Rp0</span></span>
                     <i class="fa-solid fa-chevron-down text-slate-500 text-xs chevron"></i>
                 </span>
             </summary>
-            <div class="px-5 pb-5 grid grid-cols-1 md:grid-cols-2 gap-4 border-t border-slate-700 pt-4">
+            <div class="px-5 pb-5 grid grid-cols-1 md:grid-cols-3 gap-4 border-t border-slate-700 pt-4">
                 <div>
-                    <label class="block text-xs font-semibold text-slate-400 mb-1.5">Laba Bersih (Rp)</label>
-                    <input type="number" min="0" data-group="laba" oninput="recomputeTotals()" placeholder="0" class="w-full px-3 py-2.5 rounded-lg bg-slate-900 border border-slate-700 text-base md:text-sm text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
+                    <label class="block text-xs font-semibold text-slate-400 mb-1.5">Laba Kotor (Rp)</label>
+                    <input type="text" data-field="laba_kotor" readonly 
+                           class="w-full px-3 py-2.5 rounded-lg bg-slate-800/50 border border-slate-600 text-base md:text-sm text-slate-300 cursor-not-allowed" 
+                           placeholder="Auto">
                 </div>
                 <div>
                     <label class="block text-xs font-semibold text-slate-400 mb-1.5">Laba Operasi (Rp)</label>
-                    <input type="number" min="0" data-group="laba" oninput="recomputeTotals()" placeholder="0" class="w-full px-3 py-2.5 rounded-lg bg-slate-900 border border-slate-700 text-base md:text-sm text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
+                    <input type="text" data-field="laba_operasi" readonly 
+                           class="w-full px-3 py-2.5 rounded-lg bg-slate-800/50 border border-slate-600 text-base md:text-sm text-slate-300 cursor-not-allowed" 
+                           placeholder="Auto">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-400 mb-1.5">Laba Bersih (Rp)</label>
+                    <input type="text" data-field="laba_bersih" readonly 
+                           class="w-full px-3 py-2.5 rounded-lg bg-slate-800/50 border border-slate-600 text-base md:text-sm text-slate-300 cursor-not-allowed" 
+                           placeholder="Auto">
                 </div>
             </div>
         </details>
@@ -385,15 +398,15 @@ function generateYearPanelHTML(yearId) {
                 </div>
                 <div>
                     <label class="block text-xs font-semibold text-slate-400 mb-1.5">Jumlah Jam Kerja (jam)</label>
-                    <input type="number" min="0" data-field="jumlah_jam_kerja" placeholder="0" class="w-full px-3 py-2.5 rounded-lg bg-slate-900 border border-slate-700 text-base md:text-sm text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
+                    <input type="number" min="0" data-field="jumlah_jam_kerja" oninput="recomputeTotals()" placeholder="0" class="w-full px-3 py-2.5 rounded-lg bg-slate-900 border border-slate-700 text-base md:text-sm text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
                 </div>
                 <div>
                     <label class="block text-xs font-semibold text-slate-400 mb-1.5">Jumlah Jam Lembur (jam)</label>
-                    <input type="number" min="0" data-field="jumlah_jam_lembur" placeholder="0" class="w-full px-3 py-2.5 rounded-lg bg-slate-900 border border-slate-700 text-base md:text-sm text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
+                    <input type="number" min="0" data-field="jumlah_jam_lembur" oninput="recomputeTotals()" placeholder="0" class="w-full px-3 py-2.5 rounded-lg bg-slate-900 border border-slate-700 text-base md:text-sm text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
                 </div>
                 <div>
                     <label class="block text-xs font-semibold text-slate-400 mb-1.5">Total Jam Kerja (jam)</label>
-                    <input type="number" min="0" data-field="total_jam_kerja" placeholder="0" class="w-full px-3 py-2.5 rounded-lg bg-slate-900 border border-slate-700 text-base md:text-sm text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
+                    <input type="number" data-field="total_jam_kerja" readonly class="w-full px-3 py-2.5 rounded-lg bg-slate-800/50 border border-slate-600 text-base md:text-sm text-slate-300 cursor-not-allowed" placeholder="Otomatis">
                 </div>
             </div>
         </div>
@@ -646,7 +659,6 @@ function addYear() {
     const panelsContainer = document.getElementById('yearPanels');
     const newPanelHTML = generateYearPanelHTML(newYearId);
     
-    // Insert new panel before the hidden template (if exists)
     const templatePanel = panelsContainer.querySelector('.year-panel[data-year-id="template"]');
     if (templatePanel) {
         templatePanel.insertAdjacentHTML('beforebegin', newPanelHTML);
@@ -654,7 +666,6 @@ function addYear() {
         panelsContainer.insertAdjacentHTML('beforeend', newPanelHTML);
     }
 
-    // Remove hidden class from new panel
     const newPanel = document.querySelector(`.year-panel[data-year-id="${newYearId}"]`);
     newPanel.classList.remove('hidden');
 
@@ -688,13 +699,45 @@ function setResult(panel, key, value) {
     }
 }
 
+// ===== FUNGSI PERHITUNGAN LABA OTOMATIS =====
+function calculateProfits(panel) {
+    // Ambil total penjualan
+    const penjualan = sumGroup(panel, 'penjualan');
+    
+    // Biaya operasional (masuk laba operasi)
+    const biayaOperasional = 
+        sumGroup(panel, 'biaya_tenaga_kerja') +
+        sumGroup(panel, 'bahan_digunakan') +
+        sumGroup(panel, 'overhead_produksi') +
+        sumGroup(panel, 'biaya_administrasi') +
+        sumGroup(panel, 'penyusutan');
+    
+    // Biaya non-operasional (tidak masuk laba operasi)
+    const biayaNonOperasional = 
+        sumGroup(panel, 'bunga_pinjaman') +
+        sumGroup(panel, 'pajak');
+    
+    // Laba Kotor = Penjualan - Bahan Digunakan
+    const labaKotor = penjualan - sumGroup(panel, 'bahan_digunakan');
+    
+    // Laba Operasi = Penjualan - Biaya Operasional
+    const labaOperasi = penjualan - biayaOperasional;
+    
+    // Laba Bersih = Laba Operasi - Biaya Non-Operasional
+    const labaBersih = labaOperasi - biayaNonOperasional;
+    
+    return { labaKotor, labaOperasi, labaBersih };
+}
+
 function recomputeTotals(panel = getYearPanel()) {
     if (!panel) return;
 
+    // Hitung total per kelompok
     const totals = Object.fromEntries(
         CURRENCY_GROUPS.map(group => [group, sumGroup(panel, group)])
     );
 
+    // Update total per kategori di summary
     CURRENCY_GROUPS.forEach(group => {
         const totalEl = panel.querySelector(`[data-total="${group}"]`);
         if (totalEl) {
@@ -702,6 +745,7 @@ function recomputeTotals(panel = getYearPanel()) {
         }
     });
 
+    // Hitung Nilai Tambah
     const nilaiTambah =
         (totals.penjualan || 0) -
         (totals.bahan_digunakan || 0) -
@@ -714,6 +758,42 @@ function recomputeTotals(panel = getYearPanel()) {
     setResult(panel, 'biaya_administrasi', totals.biaya_administrasi);
     setResult(panel, 'total_nilai_tambah', nilaiTambah);
     setResult(panel, 'total_ringkasan', nilaiTambah);
+
+    // ===== LABA OTOMATIS =====
+    const profit = calculateProfits(panel);
+    const labaKotorInput = panel.querySelector('input[data-field="laba_kotor"]');
+    const labaOperasiInput = panel.querySelector('input[data-field="laba_operasi"]');
+    const labaBersihInput = panel.querySelector('input[data-field="laba_bersih"]');
+    if (labaKotorInput) labaKotorInput.value = formatRupiah(profit.labaKotor);
+    if (labaOperasiInput) labaOperasiInput.value = formatRupiah(profit.labaOperasi);
+    if (labaBersihInput) labaBersihInput.value = formatRupiah(profit.labaBersih);
+
+    // Update total laba di summary (pakai laba bersih)
+    const totalLabaEl = panel.querySelector('[data-total="laba"]');
+    if (totalLabaEl) {
+        totalLabaEl.textContent = formatRupiah(profit.labaBersih);
+    }
+
+    // ===== TOTAL INVESTASI OTOMATIS DARI AKTIVA (TAPI BISA DIEDIT) =====
+    const totalAktiva = sumGroup(panel, 'aktiva');
+    const investasiInput = panel.querySelector('input[data-field="total_investasi"]');
+    if (investasiInput) {
+        const currentVal = parseFloat(investasiInput.value) || 0;
+        // Hanya isi otomatis jika belum diubah manual (nilai 0 atau sama dengan total aktiva)
+        if (currentVal === 0 || currentVal === totalAktiva) {
+            investasiInput.value = totalAktiva; // langsung angka, bukan format Rupiah
+        }
+    }
+
+    // ===== TOTAL JAM KERJA OTOMATIS =====
+    const jamKerjaInput = panel.querySelector('input[data-field="jumlah_jam_kerja"]');
+    const jamLemburInput = panel.querySelector('input[data-field="jumlah_jam_lembur"]');
+    const totalJamKerjaInput = panel.querySelector('input[data-field="total_jam_kerja"]');
+    if (totalJamKerjaInput) {
+        const jamKerja = parseFloat(jamKerjaInput?.value) || 0;
+        const jamLembur = parseFloat(jamLemburInput?.value) || 0;
+        totalJamKerjaInput.value = jamKerja + jamLembur;
+    }
 
     updateRingkasanView();
 }
@@ -730,6 +810,107 @@ function resetInputData() {
 }
 
 // ===== DATABASE INTEGRATION =====
+// ===== LOAD DATA FROM SERVER =====
+async function loadDataFromServer() {
+    const token = localStorage.getItem('eva_token');
+    if (!token) {
+        console.warn("Token tidak ditemukan, lewati load data.");
+        return;
+    }
+
+    try {
+        console.log("📡 Mengambil data dari /api/eva/history...");
+        const response = await fetch('/api/eva/history', {
+            headers: { 
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            }
+        });
+
+        console.log("📊 Response status:", response.status);
+
+        if (response.status === 401) {
+            console.warn("Token tidak valid atau expired. Redirect ke login.");
+            localStorage.removeItem('eva_token');
+            window.location.href = '/login';
+            return;
+        }
+
+        if (response.status === 404) {
+            console.error("❌ Endpoint /api/eva/history tidak ditemukan (404). Periksa backend.");
+            // Tampilkan pesan ke user (opsional)
+            // alert("Endpoint history belum tersedia. Silakan hubungi admin.");
+            return;
+        }
+
+        if (!response.ok) {
+            const errorText = await response.text();
+            console.error("❌ Gagal load data:", response.status, errorText);
+            return;
+        }
+
+        const data = await response.json();
+        console.log("✅ Data dari server:", data);
+
+        if (!data || data.length === 0) {
+            console.log("ℹ️ Tidak ada data history.");
+            return;
+        }
+
+        // Hapus semua panel kecuali template
+        document.querySelectorAll('.year-panel:not([data-year-id="template"])').forEach(p => p.remove());
+        for (let key in yearMeta) delete yearMeta[key];
+        yearCount = 0;
+
+        data.forEach((record) => {
+            yearCount += 1;
+            const newYearId = `year-${yearCount}`;
+            yearMeta[newYearId] = { title: record.year_title };
+
+            const panelsContainer = document.getElementById('yearPanels');
+            const newPanelHTML = generateYearPanelHTML(newYearId);
+            
+            const templatePanel = panelsContainer.querySelector('.year-panel[data-year-id="template"]');
+            if (templatePanel) {
+                templatePanel.insertAdjacentHTML('beforebegin', newPanelHTML);
+            } else {
+                panelsContainer.insertAdjacentHTML('beforeend', newPanelHTML);
+            }
+
+            const newPanel = document.querySelector(`.year-panel[data-year-id="${newYearId}"]`);
+            newPanel.classList.remove('hidden');
+
+            try {
+                const inputValues = JSON.parse(record.raw_data);
+                const numberInputs = newPanel.querySelectorAll('input[type="number"]');
+                numberInputs.forEach((inp, idx) => {
+                    if (idx < inputValues.length) {
+                        inp.value = inputValues[idx] || '';
+                    }
+                });
+            } catch (e) {
+                console.error("❌ Gagal mem-parsing raw_data", e);
+            }
+
+            recomputeTotals(newPanel);
+        });
+
+        const firstId = Object.keys(yearMeta)[0];
+        if (firstId) {
+            activeYearId = firstId;
+        }
+        
+        renderYearTabs();
+        if (activeYearId) activateYear(activeYearId);
+        updateRingkasanView();
+
+    } catch (err) {
+        console.error("❌ Error saat load data:", err);
+        // Tampilkan pesan error di console saja, tidak ganggu user
+    }
+}
+
+// ===== SAVE DATA TO SERVER =====
 async function saveDataToServer() {
     const token = localStorage.getItem('eva_token');
     if (!token) {
@@ -744,15 +925,23 @@ async function saveDataToServer() {
     btn.disabled = true;
 
     const activePanels = document.querySelectorAll('.year-panel:not([data-year-id="template"])');
+    if (activePanels.length === 0) {
+        alert("Tidak ada data keuangan untuk disimpan.");
+        btn.disabled = false;
+        btn.innerHTML = originalContent;
+        return;
+    }
+
     const payload = [];
 
     activePanels.forEach(panel => {
         const yearId = panel.dataset.yearId;
         const title = yearMeta[yearId]?.title || "Tahun Baru";
         
-        const inputValues = Array.from(panel.querySelectorAll('input[type="number"]')).map(inp => inp.value);
+        // Ambil semua input number (kecuali yang readonly laba karena tidak ada di number)
+        const inputValues = Array.from(panel.querySelectorAll('input[type="number"]')).map(inp => inp.value || '');
         const totalEl = panel.querySelector('[data-result="total_nilai_tambah"]');
-        const nilaiTambah = totalEl ? parseFloat(totalEl.textContent.replace(/Rp|\./g, '')) || 0 : 0;
+        const nilaiTambah = totalEl ? parseFloat(totalEl.textContent.replace(/Rp|\./g, '').trim()) || 0 : 0;
 
         payload.push({
             year_title: title,
@@ -760,6 +949,8 @@ async function saveDataToServer() {
             nilai_tambah: nilaiTambah
         });
     });
+
+    console.log("📤 Payload yang dikirim:", payload);
 
     try {
         const response = await fetch('/api/eva/save', {
@@ -770,76 +961,29 @@ async function saveDataToServer() {
             },
             body: JSON.stringify(payload)
         });
-        
-        if (!response.ok) {
-            const errData = await response.json();
-            throw new Error(errData.detail || "Gagal menyimpan data ke server");
+
+        const responseText = await response.text();
+        console.log("📥 Response status:", response.status);
+        console.log("📄 Response body:", responseText);
+
+        let data;
+        try {
+            data = JSON.parse(responseText);
+        } catch (e) {
+            data = { detail: responseText };
         }
-        alert("Data analisis berhasil disimpan ke database!");
+
+        if (!response.ok) {
+            throw new Error(data.detail || `Gagal menyimpan data (status ${response.status})`);
+        }
+        
+        alert("✅ Data analisis berhasil disimpan ke database!");
+        updateRingkasanView();
     } catch (err) {
-        alert("Error: " + err.message);
+        console.error("❌ Error saat menyimpan:", err);
+        alert("❌ Error: " + err.message);
     } finally {
         btn.disabled = false;
         btn.innerHTML = originalContent;
-    }
-}
-
-async function loadDataFromServer() {
-    const token = localStorage.getItem('eva_token');
-    if (!token) return;
-
-    try {
-        const response = await fetch('/api/eva/history', {
-            headers: { 'Authorization': `Bearer ${token}` }
-        });
-        if (!response.ok) return;
-        
-        const data = await response.json();
-        
-        if (data && data.length > 0) {
-            for (let key in yearMeta) delete yearMeta[key];
-            document.querySelectorAll('.year-panel:not([data-year-id="template"])').forEach(p => p.remove());
-            yearCount = 0;
-
-            data.forEach((record) => {
-                yearCount += 1;
-                const newYearId = `year-${yearCount}`;
-                yearMeta[newYearId] = { title: record.year_title };
-
-                const panelsContainer = document.getElementById('yearPanels');
-                const newPanelHTML = generateYearPanelHTML(newYearId);
-                
-                const templatePanel = panelsContainer.querySelector('.year-panel[data-year-id="template"]');
-                if (templatePanel) {
-                    templatePanel.insertAdjacentHTML('beforebegin', newPanelHTML);
-                } else {
-                    panelsContainer.insertAdjacentHTML('beforeend', newPanelHTML);
-                }
-
-                const newPanel = document.querySelector(`.year-panel[data-year-id="${newYearId}"]`);
-                newPanel.classList.remove('hidden');
-
-                try {
-                    const inputValues = JSON.parse(record.raw_data);
-                    newPanel.querySelectorAll('input[type="number"]').forEach((inp, idx) => {
-                        inp.value = inputValues[idx] !== undefined ? inputValues[idx] : '';
-                    });
-                } catch (e) {
-                    console.error("Gagal mem-parsing raw_data", e);
-                }
-
-                recomputeTotals(newPanel);
-            });
-
-            const firstId = Object.keys(yearMeta)[0];
-            if (firstId) {
-                activeYearId = firstId;
-            }
-            
-            renderYearTabs();
-            if (activeYearId) activateYear(activeYearId);
-        }
-    } catch (err) {
-        console.error("Gagal memuat riwayat data:", err);
     }
 }
