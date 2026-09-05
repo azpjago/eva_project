@@ -1,0 +1,11 @@
+[33mcommit 548022c22c1c0bb375da12ad54b284d77944f56f[m
+Author: azp.jago <nicolaaspelupessy@gmail.com>
+Date:   Sat Sep 5 14:13:48 2026 +0700
+
+    fix: fixing the code
+
+ app/main.py                |  43 [32m+++[m[31m----[m
+ dashboard/index.html       |   6 [32m+[m[31m-[m
+ dashboard/js/input-data.js | 304 [32m+++++++++++++++++++++++++++++++++[m[31m------------[m
+ eva_app.db                 | Bin [31m36864[m -> [32m36864[m bytes
+ 4 files changed, 243 insertions(+), 110 deletions(-)
