@@ -596,7 +596,7 @@
                     <div class="px-4 py-3 sm:px-6 sm:py-4 bg-slate-800/80 border-b border-slate-700/60 flex items-center justify-between">
                         <div class="flex items-center space-x-3">
                             <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-teal-600 flex items-center justify-center font-bold text-white text-sm sm:text-base shadow-md">
-                                Rekomendasi
+                                EVA
                             </div>
                             <div>
                                 <h3 class="font-semibold text-sm sm:text-base text-slate-100 leading-tight">Gemini Productivity Assistant</h3>
@@ -616,7 +616,7 @@
                     <div id="chatMessages" class="flex-1 p-4 sm:p-6 overflow-y-auto space-y-4 scroll-smooth">
                         <div class="flex items-start space-x-3 max-w-[85%] sm:max-w-[75%]">
                             <div class="w-8 h-8 rounded-full bg-teal-600/30 text-teal-400 flex items-center justify-center font-bold text-xs flex-shrink-0">
-                                Rekomendasi
+                                EVA
                             </div>
                             <div class="bg-slate-800 border border-slate-700/60 rounded-2xl rounded-tl-none p-3.5 sm:p-4 text-slate-200 text-xs sm:text-sm leading-relaxed shadow-sm">
                                 Halo! Saya asisten virtual EVA. Ada yang bisa saya bantu terkait simulasi EVA atau strategi produktivitas perusahaan Anda?
@@ -923,7 +923,7 @@
                 resultContent.innerHTML = `<p class="text-rose-400 text-sm">Gagal memproses data: ${err.message}</p>`;
             } finally {
                 btn.disabled = false;
-                btn.innerHTML = `Hitung & Minta Rekomendasi AI`;
+                btn.innerHTML = `Hitung & Minta Rekomendasi EVA`;
             }
         }
 
@@ -988,7 +988,7 @@
 
             const avatar = isUser ? '' : `
                     <div class="w-8 h-8 rounded-full bg-teal-600/30 text-teal-400 flex items-center justify-center font-bold text-xs flex-shrink-0 mt-1">
-                        Rekomendasi
+                        EVA
                     </div>
                 `;
 
@@ -1056,7 +1056,7 @@
             wrapper.className = 'flex items-start space-x-3 max-w-[85%] sm:max-w-[75%]';
             wrapper.innerHTML = `
                     <div class="w-8 h-8 rounded-full bg-teal-600/30 text-teal-400 flex items-center justify-center font-bold text-xs flex-shrink-0">
-                        Rekomendasi
+                        EVA
                     </div>
                     <div class="bg-slate-800 border border-slate-700/60 rounded-2xl rounded-tl-none px-4 py-3 text-slate-400 flex items-center space-x-1.5">
                         <span class="w-2 h-2 bg-teal-400 rounded-full animate-bounce" style="animation-delay: 0ms;"></span>
@@ -1080,7 +1080,7 @@
             const container = document.getElementById('chatMessages');
             container.innerHTML = `
                     <div class="flex items-start space-x-3 max-w-[85%] sm:max-w-[75%]">
-                        <div class="w-8 h-8 rounded-full bg-teal-600/30 text-teal-400 flex items-center justify-center font-bold text-xs flex-shrink-0">Rekomendasi</div>
+                        <div class="w-8 h-8 rounded-full bg-teal-600/30 text-teal-400 flex items-center justify-center font-bold text-xs flex-shrink-0">EVA</div>
                         <div class="bg-slate-800 border border-slate-700/60 rounded-2xl rounded-tl-none p-3.5 sm:p-4 text-slate-200 text-xs sm:text-sm leading-relaxed shadow-sm">
                             Riwayat obrolan dibersihkan. Ada yang ingin Anda konsultasikan kembali?
                         </div>
