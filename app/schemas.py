@@ -23,21 +23,28 @@ class TokenResponse(BaseModel):
     token_type: str = "bearer"
     user_name: str
 
-class NarasumberSaranCreate(BaseModel):
+class RasioDialogSend(BaseModel):
     ratio_id: str
     years_key: str
-    narasumber_name: Optional[str] = None
-    saran_text: str
+    content: str
+    # Konteks rasio dikirim dari frontend agar AI tahu apa yang sedang dibahas
+    ratio_label: Optional[str] = None
+    ratio_deskripsi: Optional[str] = None
+    years: Optional[list] = None
+    values: Optional[list] = None
+    analysis_summary: Optional[str] = None
 
 
-class NarasumberSaranResponse(BaseModel):
+class RasioDialogResponse(BaseModel):
     id: int
     ratio_id: str
     years_key: str
-    narasumber_name: Optional[str]
-    saran_text: str
+    role: str
+    content: str
     created_at: datetime
-    updated_at: datetime
+
+    class Config:
+        from_attributes = True
 
 class Config:
     from_attributes = True
