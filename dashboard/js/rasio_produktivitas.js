@@ -621,12 +621,12 @@ function showRasioDetail(ratioId) {
     const recs = (Array.isArray(a.recommendations) ? a.recommendations : [])
         .map(r => safeText(r, '')).filter(x => x);
     const recsHtml = recs.length > 0
-        ? `<ul class="space-y-2">${recs.map(r => `
-            <li class="flex items-start gap-2 text-sm text-slate-200">
-                <i class="fa-solid fa-lightbulb text-amber-400 mt-1"></i>
-                <span>${r}</span>
-            </li>`).join('')}</ul>`
-        : '<p class="text-sm text-slate-400 italic">Belum ada saran spesifik.</p>';
+    ? `<ol class="space-y-2.5">${recs.map((r, i) => `
+        <li class="flex items-start gap-2 text-sm text-slate-200">
+            <span class="shrink-0 w-5 h-5 rounded-full bg-amber-500/20 text-amber-400 text-[11px] font-bold flex items-center justify-center mt-0.5">${i + 1}</span>
+            <span>${r}</span>
+        </li>`).join('')}</ol>`
+    : '<p class="text-sm text-slate-400 italic">Belum ada saran spesifik.</p>';
 
     const oldModal = document.getElementById('rasioDetailModal');
     if (oldModal) oldModal.remove();
