@@ -10,7 +10,7 @@ from pathlib import Path
 from app.ai_service import chat_reply, generate_recommendation_narrative
 from app.database import Base, engine, get_db
 from app.eva_calculator import calculate_eva
-from app.models import User, EvaRecord
+from app.models import User, EvaRecord, RasioDialog
 from app.prompts import RECOMMENDATION_MATRIX
 from app.schemas import (
     ChatMessage,
