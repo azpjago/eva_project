@@ -348,6 +348,8 @@ async function analyzeRatios(allRatios, dataTahun) {
         });
         if (!response.ok) throw new Error('AI analysis failed: ' + response.status);
         const result = await response.json();
+        console.log('🔍 Response AI mentah:', result);       // ← DEBUG LOG
+        console.log('🔍 Analyses:', result.analyses);        // ← DEBUG LOG
         return result.analyses || {};
     } catch (err) {
         console.error('❌ AI error:', err);
@@ -402,6 +404,18 @@ function analyzeTrend(values) {
     return `${trend} (Growth: ${growths.join(', ')})`;
 }
 
+function safeText(v, defaultVal = '-') {
+    if (v === null || v === undefined) return defaultVal;
+    if (typeof v === 'string') return v.trim() || defaultVal;
+    if (typeof v === 'number') return String(v);
+    if (Array.isArray(v)) return v.map(x => safeText(x, '')).filter(Boolean).join(' ') || defaultVal;
+    if (typeof v === 'object') {
+        // Gabungkan semua string value
+        return Object.values(v).map(x => safeText(x, '')).filter(Boolean).join(' ') || defaultVal;
+    }
+    return String(v);
+}
+
 // ===== RENDER TABEL =====
 function renderRasioTable(allRatios, analyses) {
     const container = document.getElementById('rasioContainer');
@@ -451,7 +465,7 @@ function renderRasioTable(allRatios, analyses) {
 
         ratios.forEach((ratio) => {
             const analysis = analyses[ratio.ratioId] || {};
-            const shortText = analysis.short || '-';
+            const shortText = safeText(analysis.short, '-');
             const status = analysis.status || 'positif';
             const trend = analysis.trend || 'stabil';
 
@@ -565,7 +579,9 @@ function showRasioDetail(ratioId) {
                     : a.status === 'warning' ? 'bg-amber-500/10 border-amber-500/30'
                     : 'bg-rose-500/10 border-rose-500/30';
 
-    const recs = (a.recommendations || []).filter(x => x && x.trim());
+    const recs = (Array.isArray(a.recommendations) ? a.recommendations : [])
+    .map(r => safeText(r, ''))
+    .filter(x => x);
     const recsHtml = recs.length > 0
         ? `<ul class="space-y-2">${recs.map(r => `
             <li class="flex items-start gap-2 text-sm text-slate-200">
@@ -613,7 +629,7 @@ function showRasioDetail(ratioId) {
                         <i class="fa-solid fa-magnifying-glass-chart text-teal-400"></i> Analisis Mendalam
                     </h4>
                     <p class="text-sm text-slate-200 leading-relaxed bg-slate-900/50 p-3 rounded-lg border border-slate-700">
-                        ${a.detailed || a.short || '-'}
+                        ${safeText(a.detailed || a.short, '-')}
                     </p>
                 </div>
 
