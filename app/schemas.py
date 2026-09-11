@@ -102,6 +102,7 @@ class EvaRecordBase(BaseModel):
     year_title: str
     raw_data: str
     nilai_tambah: float
+    bonus_persen: float = 0.0
 
 class EvaRecordCreate(EvaRecordBase):
     pass
