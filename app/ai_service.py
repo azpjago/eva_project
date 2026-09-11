@@ -275,3 +275,218 @@ ATURAN PENTING:
     except Exception as e:
         logger.error(f"Error pada analyze_ratio_trend: {e}", exc_info=True)
         return build_fallback()
+
+def _analyze_severity(values: list, growth_rates: list) -> dict:
+    """
+    Klasifikasikan tingkat keparahan berdasarkan growth dan volatilitas.
+    """
+    if len(values) < 2:
+        return {"level": "unknown", "pct_change": 0, "max_value": 0, "min_value": 0}
+
+    first, last = values[0], values[-1]
+    max_val = max(values)
+    min_val = min(values)
+
+    # Total perubahan dari awal ke akhir
+    pct_change = ((last - first) / first * 100) if first != 0 else 0
+
+    # Volatilitas (standar deviasi perubahan growth)
+    if len(growth_rates) > 1:
+        avg_growth = sum(growth_rates[1:]) / (len(growth_rates) - 1)
+    else:
+        avg_growth = 0
+
+    abs_pct = abs(pct_change)
+    if abs_pct < 5:
+        level = "mild"
+    elif abs_pct < 15:
+        level = "moderate"
+    else:
+        level = "severe"
+
+    return {
+        "level": level,
+        "pct_change": round(pct_change, 2),
+        "max_value": round(max_val, 4),
+        "min_value": round(min_val, 4),
+        "first": round(first, 4),
+        "last": round(last, 4),
+        "avg_growth": round(avg_growth, 2),
+        "gap_to_max": round(((max_val - last) / max_val * 100), 2) if max_val > 0 else 0,
+    }
+
+
+def _build_smart_recommendations(ratio_id: str, trend: str, values: list, growth_rates: list) -> list:
+    """
+    Buat rekomendasi JELAS & TERUKUR dengan target, KPI, dan timeframe.
+    Menggunakan data historis sebagai benchmark (nilai tertinggi = best-in-class).
+    """
+    sev = _analyze_severity(values, growth_rates)
+    level = sev["level"]
+    pct_change = sev["pct_change"]
+    max_val = sev["max_value"]
+    last_val = sev["last"]
+    gap_to_max = sev["gap_to_max"]
+
+    # Target minimal (kembali ke level tertinggi = benchmark realistis karena pernah dicapai)
+    target_min = max_val
+    target_pct = gap_to_max
+
+    # ===== TREN NAIK (PERTAHANKAN + TINGKATKAN) =====
+    if trend == "naik":
+        base = [
+            f"📊 **Target**: Pertahankan rasio minimal di level {last_val:.2f}, targetkan pertumbuhan +5% dalam 6 bulan ke depan (≥ {last_val * 1.05:.2f}).",
+            f"📅 **KPI Monitoring**: Evaluasi rasio per kuartal. Alert jika turun >3% dari kuartal sebelumnya.",
+            f"🏆 **Benchmark Internal**: Level tertinggi yang pernah dicapai: {max_val:.2f}. Jadikan standar minimum operasional.",
+        ]
+        # Tambahan sesuai jenis rasio
+        specific = {
+            "nilai_tambah_per_tenaga": [
+                "👥 **Aksi SDM**: Adakan program pelatihan teknis lanjutan 40 jam/tahun untuk setiap tenaga kerja.",
+                "💰 **Aksi Insentif**: Terapkan bonus produktivitas dengan formula: bonus = 2% × (kenaikan Nilai Tambah/Tenaga dari baseline).",
+            ],
+            "nilai_tambah_per_jam": [
+                "⏱️ **Aksi Operasional**: Audit utilisasi jam kerja — targetkan idle time < 5% per shift.",
+                "🔄 **Aksi Proses**: Implementasikan lean manufacturing untuk mengurangi waktu non-produktif.",
+            ],
+            "nilai_tambah_per_biaya_tk": [
+                "💵 **Aksi Efisiensi**: Jaga rasio tetap ≥ 3.0 — jika turun < 3.0, review struktur kompensasi.",
+                "📈 **Aksi Investasi SDM**: Alokasikan 2-3% dari biaya TK untuk pelatihan guna menjaga ROI tenaga kerja.",
+            ],
+            "biaya_tk_per_jam": [
+                "⚖️ **Aksi Keseimbangan**: Pastikan kenaikan upah/jam ≤ kenaikan produktivitas/jam (growth produktivitas ≥ growth upah).",
+                "📊 **Aksi Monitoring**: Benchmark gaji/jam vs rata-rata industri — jangan melebihi 110% rata-rata industri.",
+            ],
+            "penjualan_per_investasi": [
+                f"💼 **Target**: Tingkatkan ke ≥ {max_val * 1.1:.2f} (naik 10% dari benchmark).",
+                "📈 **Aksi Penjualan**: Alokasikan ulang modal ke lini produk dengan ROI tertinggi.",
+            ],
+            "nilai_tambah_per_investasi": [
+                "🎯 **Target**: Jaga efisiensi modal ≥ level saat ini, target +5% YoY.",
+                "🔧 **Aksi Modal**: Audit aset per semester — divestasi aset dengan kontribusi < 5% nilai tambah.",
+            ],
+            "investasi_per_tenaga": [
+                "🏗️ **Aksi Utilisasi**: Pastikan setiap tenaga kerja mengelola aset dengan output/jam stabil.",
+                "📚 **Aksi Pelatihan**: Pelatihan operasional alat berat/mesin minimal 20 jam/tahun per operator.",
+            ],
+            "laba_per_penjualan": [
+                "💰 **Target Margin**: Jaga net profit margin ≥ level saat ini, target +1% per tahun.",
+                "📉 **Aksi Biaya**: Kurangi biaya operasional non-esensial sebesar 2-3% dari total penjualan.",
+            ],
+            "laba_per_nilai_tambah": [
+                "🎯 **Target Konversi**: Jaga konversi nilai tambah → laba ≥ 15%.",
+                "🔍 **Aksi**: Audit setiap tahap produksi untuk deteksi kebocoran nilai.",
+            ],
+            "laba_per_investasi": [
+                f"📈 **Target ROI**: Jaga ROI ≥ level saat ini ({last_val:.2f}%), target +2% YoY.",
+                "💡 **Aksi**: Reinvestasikan 30% laba bersih untuk ekspansi lini bisnis paling profitable.",
+            ],
+            "nilai_tambah_per_penjualan": [
+                "🏭 **Target**: Jaga rasio ≥ 40% (indikasi efisiensi produksi tinggi).",
+                "🔧 **Aksi**: Kurangi waste bahan baku hingga < 3% dari total pembelian.",
+            ],
+            "nilai_tambah_per_bahan_baku": [
+                "🧪 **Aksi Inovasi**: Kembangkan minimal 1 inisiatif inovasi produk per semester.",
+                "💼 **Aksi Supplier**: Negosiasi kontrak jangka panjang dengan supplier utama untuk harga lebih stabil.",
+            ],
+            "nilai_tambah_per_biaya_tk_v2": [
+                "🚀 **Target Multiplier**: Jaga rasio ≥ 3.0 (setiap Rp1 biaya TK menghasilkan ≥ Rp3 nilai tambah).",
+                "👥 **Aksi**: Terapkan sistem reward berbasis output untuk menjaga pengganda tetap tinggi.",
+            ],
+        }
+        return base + specific.get(ratio_id, [])
+
+    # ===== TREN TURUN (PERBAIKAN TERUKUR) =====
+    elif trend == "turun":
+        # Base rekomendasi dengan target recovery
+        base = [
+            f"🎯 **Target Pemulihan**: Kembalikan rasio ke level {target_min:.2f} dalam {6 if level == 'mild' else 9 if level == 'moderate' else 12} bulan (kenaikan +{target_pct:.1f}% dari posisi saat ini {last_val:.2f}).",
+            f"📅 **KPI Monitoring**: Evaluasi bulanan dengan target kenaikan +2% per bulan hingga tercapai level target.",
+            f"⚠️ **Early Warning**: Jika rasio turun lagi >5% dalam 3 bulan, lakukan audit menyeluruh pada proses terkait.",
+        ]
+
+        # Severity-specific actions
+        if level == "severe":
+            base.append(f"🚨 **Tindakan Darurat**: Total penurunan {abs(pct_change):.1f}% — bentuk tim task force lintas divisi untuk investigasi akar masalah dalam 30 hari.")
+        elif level == "moderate":
+            base.append(f"🔧 **Tindakan Segera**: Penurunan {abs(pct_change):.1f}% — review proses bisnis terkait dalam 60 hari.")
+
+        # Specific per rasio
+        specific = {
+            "nilai_tambah_per_tenaga": [
+                f"👥 **Aksi SDM**: Audit produktivitas per individu. Target: naikkan output per tenaga kerja minimal +5% dalam 6 bulan.",
+                "🎓 **Aksi Pelatihan**: Reskilling untuk 100% tenaga kerja dengan output < rata-rata tim, selesai dalam 3 bulan.",
+                "⚙️ **Aksi Proses**: Identifikasi 3 proses paling menghambat produktivitas, perbaiki dalam 90 hari.",
+            ],
+            "nilai_tambah_per_jam": [
+                f"⏱️ **Aksi Jam Kerja**: Turunkan idle time dari rata-rata saat ini ke < 5% dalam 3 bulan.",
+                "📊 **Aksi Pengukuran**: Pasang time-tracking di semua lini produksi, review mingguan.",
+                "🔄 **Aksi Rebalancing**: Redistribusi beban kerja — pastikan tidak ada divisi dengan utilasi < 70%.",
+            ],
+            "nilai_tambah_per_biaya_tk": [
+                f"💵 **Aksi Struktur Biaya**: Evaluasi seluruh komponen biaya TK — target: turunkan biaya non-produktif sebesar 10% dalam 6 bulan.",
+                "📈 **Aksi Output**: Tingkatkan nilai tambah minimal +8% dalam 6 bulan tanpa menambah biaya TK.",
+                "⚖️ **Aksi Rasio**: Target rasio kembali ke ≥ 3.0 dalam 9 bulan.",
+            ],
+            "biaya_tk_per_jam": [
+                f"⏰ **Aksi Overtime**: Batasi lembur maksimal 10% dari jam kerja reguler dalam 3 bulan.",
+                "📋 **Aksi Penjadwalan**: Optimalkan shift kerja sesuai beban — target: turunkan biaya TK/jam sebesar 5-8% dalam 6 bulan.",
+                "🎯 **Aksi Produktivitas**: Targetkan output per jam naik +5% untuk mengimbangi biaya TK/jam.",
+            ],
+            "penjualan_per_investasi": [
+                f"📊 **Target Utilisasi**: Tingkatkan utilisasi kapasitas produksi dari saat ini ke minimal 85% dalam 6 bulan.",
+                "💼 **Aksi Penjualan**: Targetkan kenaikan penjualan +10% dalam 6 bulan tanpa tambahan investasi.",
+                "🔍 **Aksi Audit Aset**: Identifikasi 20% aset dengan kontribusi terendah — optimalkan atau divestasi.",
+            ],
+            "nilai_tambah_per_investasi": [
+                f"📉 **Aksi Efisiensi Modal**: Turunkan modal kerja tidak produktif sebesar 15% dalam 6 bulan.",
+                "🎯 **Target**: Kembalikan rasio ke level {target_min:.2f} dalam 12 bulan.",
+                "🔧 **Aksi**: Implementasikan sistem monitoring ROI per unit aset, review kuartalan.",
+            ],
+            "investasi_per_tenaga": [
+                f"👷 **Aksi SDM**: Evaluasi apakah jumlah tenaga kerja sudah sebanding dengan total aset yang dikelola.",
+                "📚 **Aksi Kompetensi**: Pelatihan manajemen aset untuk semua supervisor, selesai dalam 3 bulan.",
+                "🏗️ **Target**: Naikkan output per tenaga kerja minimal +7% dalam 6 bulan.",
+            ],
+            "laba_per_penjualan": [
+                f"💰 **Target Margin**: Kembalikan net profit margin ke ≥ {target_min:.2f}% dalam 9 bulan.",
+                "✂️ **Aksi Cost Cutting**: Identifikasi 5 biaya terbesar — target: potong 5-10% per pos dalam 6 bulan.",
+                "💲 **Aksi Pricing**: Evaluasi harga jual produk dengan margin terendah — naikkan atau discontinue.",
+            ],
+            "laba_per_nilai_tambah": [
+                f"🔍 **Aksi Deteksi Kebocoran**: Audit setiap tahap produksi — target: identifikasi minimal 3 titik kebocoran nilai dalam 60 hari.",
+                "🎯 **Target**: Kembalikan konversi nilai tambah ke laba ≥ {target_min:.2f}% dalam 9 bulan.",
+                "📊 **Aksi Monitoring**: Buat dashboard konversi real-time, review mingguan.",
+            ],
+            "laba_per_investasi": [
+                f"📉 **Aksi ROI**: Hentikan atau restrukturisasi investasi dengan ROI < 5% dalam 6 bulan.",
+                "🎯 **Target**: Kembalikan ROI ke ≥ {target_min:.2f}% dalam 12 bulan.",
+                "💰 **Aksi Realokasi**: Realokasikan 30% modal dari investasi berkinerja rendah ke lini yang lebih profitable.",
+            ],
+            "nilai_tambah_per_penjualan": [
+                f"🏭 **Aksi Produksi**: Kurangi biaya bahan dan jasa non-esensial sebesar 8% dalam 6 bulan.",
+                "🎯 **Target**: Kembalikan rasio ke ≥ {target_min:.2f}% dalam 9 bulan.",
+                "📊 **Aksi**: Benchmark dengan kompetitor — identifikasi gap efisiensi.",
+            ],
+            "nilai_tambah_per_bahan_baku": [
+                f"💼 **Aksi Supplier**: Negosiasi ulang kontrak dengan top 3 supplier — target: hemat 5-10% dalam 6 bulan.",
+                "♻️ **Aksi Waste Reduction**: Kurangi waste bahan baku dari saat ini ke < 5% dalam 6 bulan.",
+                "🧪 **Aksi Inovasi**: Kembangkan 2 inisiatif inovasi produk per semester untuk tingkatkan nilai tambah.",
+            ],
+            "nilai_tambah_per_biaya_tk_v2": [
+                f"👥 **Aksi Produktivitas**: Naikkan output per tenaga kerja minimal +8% dalam 6 bulan.",
+                f"🎯 **Target**: Kembalikan multiplier ke ≥ {target_min:.2f} dalam 9 bulan.",
+                "📚 **Aksi Pelatihan**: Fokus pelatihan pada 20% tenaga kerja dengan output terendah.",
+            ],
+        }
+        return base + specific.get(ratio_id, [])
+
+    # ===== TREN STABIL =====
+    else:
+        return [
+            f"📊 **Target**: Naikkan rasio +3-5% dari level saat ini ({last_val:.2f}) dalam 6 bulan ke depan.",
+            f"🏆 **Benchmark Internal**: Level tertinggi yang pernah dicapai: {max_val:.2f}. Ada ruang perbaikan +{gap_to_max:.1f}%.",
+            f"📅 **KPI Monitoring**: Review kuartalan dengan target kenaikan minimal +1% per kuartal.",
+            "💡 **Aksi Continuous Improvement**: Adopsi program Kaizen — kumpulkan minimal 5 ide perbaikan per bulan dari tim operasional.",
+            "🎯 **Aksi Benchmarking**: Bandingkan dengan rata-rata industri — identifikasi area gap untuk ditingkatkan.",
+        ]
