@@ -529,3 +529,77 @@ def _build_smart_recommendations(ratio_id: str, trend: str, values: list, growth
             "💡 **Aksi Continuous Improvement**: Adopsi program Kaizen — kumpulkan minimal 5 ide perbaikan per bulan dari tim operasional.",
             "🎯 **Aksi Benchmarking**: Bandingkan dengan rata-rata industri — identifikasi area gap untuk ditingkatkan.",
         ]
+
+def ratio_dialog_reply(
+    message: str,
+    history: list,
+    ratio_context: dict,
+) -> str:
+    """
+    Balas pesan user dalam konteks rasio produktivitas tertentu.
+    
+    Args:
+        message: pesan user
+        history: list dict {"role": "user"|"model", "content": "..."}
+        ratio_context: {
+            "label": "Nilai Tambah / Jumlah Tenaga Kerja",
+            "deskripsi": "...",
+            "years": ["2020", "2021", "2022"],
+            "values": [100, 120, 130],
+            "analysis_summary": "Rasio menurun..."
+        }
+    """
+    client = _get_client()
+
+    label = ratio_context.get("label", "Rasio")
+    deskripsi = ratio_context.get("deskripsi", "")
+    years = ratio_context.get("years", [])
+    values = ratio_context.get("values", [])
+    analysis = ratio_context.get("analysis_summary", "")
+
+    # Susun konteks dalam format tabel sederhana
+    data_str = ""
+    for i, y in enumerate(years):
+        v = values[i] if i < len(values) else "-"
+        data_str += f"  - {y}: {v}\n"
+
+    system_instruction = f"""Anda adalah analis produktivitas senior Kementerian Ketenagakerjaan Indonesia yang sedang berdialog dengan manajer perusahaan.
+
+KONTEKS RASIO YANG SEDANG DIBAHAS:
+- Nama Rasio: {label}
+- Deskripsi: {deskripsi}
+- Data antar tahun:
+{data_str}
+- Analisis terkini: {analysis}
+
+PANDUAN MENJAWAB:
+- Jawab lugas dan fokus pada pertanyaan user, jangan bertele-tele.
+- Sertakan angka spesifik dari data di atas jika relevan.
+- Berikan rekomendasi yang ACTIONABLE (bisa langsung dijalankan), bukan saran generik.
+- Jika user bertanya "kenapa turun?", berikan hipotesis penyebab + cara verifikasinya.
+- Jika user bertanya "apa yang harus dilakukan?", beri 2-3 langkah konkret dengan target terukur.
+- Gunakan Bahasa Indonesia profesional. Maksimal 3-4 paragraf pendek.
+"""
+
+    # Susun contents
+    contents = []
+    for h in history:
+        role = "model" if h.get("role") in ("assistant", "model") else "user"
+        contents.append(types.Content(role=role, parts=[types.Part(text=h.get("content", ""))]))
+    contents.append(types.Content(role="user", parts=[types.Part(text=message)]))
+
+    try:
+        response = client.models.generate_content(
+            model=MODEL_NAME,
+            contents=contents,
+            config=types.GenerateContentConfig(
+                system_instruction=system_instruction,
+                temperature=0.5,
+            ),
+        )
+        if response.text:
+            return response.text.strip()
+        return "Maaf, AI tidak memberikan respon."
+    except Exception as e:
+        logger.error(f"Error pada ratio_dialog_reply: {e}", exc_info=True)
+        return f"Maaf, koneksi ke AI terganggu: {str(e)[:100]}"
