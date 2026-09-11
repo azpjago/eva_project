@@ -1,5 +1,6 @@
 // ===== RASIO PRODUKTIVITAS =====
 let rasioData = [];
+let currentYearsKey = ''; 
 
 // ===== DEFINISI RATIO =====
 const RATIO_GROUPS = [
@@ -228,6 +229,7 @@ async function applyFilterRasio() {
 
     dataTahun.sort((a, b) => a.tahun.localeCompare(b.tahun));
     rasioData = dataTahun;
+    currentYearsKey = dataTahun.map(d => d.tahun).join(',');
 
     document.getElementById('loadingRasio').classList.remove('hidden');
     document.getElementById('rasioContainer').innerHTML = '';
@@ -561,7 +563,6 @@ function showRasioDetail(ratioId) {
         return;
     }
 
-    // Cari data rasio untuk ditampilkan
     let ratioInfo = null;
     RATIO_GROUPS.forEach(g => {
         g.ratios.forEach(r => {
@@ -580,8 +581,7 @@ function showRasioDetail(ratioId) {
                     : 'bg-rose-500/10 border-rose-500/30';
 
     const recs = (Array.isArray(a.recommendations) ? a.recommendations : [])
-    .map(r => safeText(r, ''))
-    .filter(x => x);
+        .map(r => safeText(r, '')).filter(x => x);
     const recsHtml = recs.length > 0
         ? `<ul class="space-y-2">${recs.map(r => `
             <li class="flex items-start gap-2 text-sm text-slate-200">
@@ -590,7 +590,6 @@ function showRasioDetail(ratioId) {
             </li>`).join('')}</ul>`
         : '<p class="text-sm text-slate-400 italic">Belum ada saran spesifik.</p>';
 
-    // Hapus modal lama jika ada
     const oldModal = document.getElementById('rasioDetailModal');
     if (oldModal) oldModal.remove();
 
@@ -599,7 +598,7 @@ function showRasioDetail(ratioId) {
     modal.className = 'fixed inset-0 bg-black/70 backdrop-blur-sm z-[100] flex items-center justify-center p-4 overflow-y-auto';
     modal.onclick = (e) => { if (e.target === modal) modal.remove(); };
     modal.innerHTML = `
-        <div class="bg-slate-800 rounded-2xl max-w-2xl w-full border border-slate-700 shadow-2xl my-8">
+        <div class="bg-slate-800 rounded-2xl max-w-7xl w-full border border-slate-700 shadow-2xl my-8">
             <!-- Header -->
             <div class="flex items-start justify-between p-5 border-b border-slate-700">
                 <div>
@@ -612,34 +611,71 @@ function showRasioDetail(ratioId) {
                 </button>
             </div>
 
-            <!-- Body -->
-            <div class="p-5 space-y-4 max-h-[70vh] overflow-y-auto">
-                <!-- Status -->
-                <div class="${statusBg} border rounded-xl p-3 flex items-center gap-3">
-                    <i class="fa-solid fa-circle-check ${statusColor} text-lg"></i>
+            <!-- Body: 2 kolom -->
+            <div class="grid grid-cols-1 lg:grid-cols-2">
+                <!-- KOLOM KIRI: Analisis -->
+                <div class="p-5 space-y-4 border-b lg:border-b-0 lg:border-r border-slate-700 max-h-[70vh] overflow-y-auto">
+                    <!-- Status -->
+                    <div class="${statusBg} border rounded-xl p-3 flex items-center gap-3">
+                        <i class="fa-solid fa-circle-check ${statusColor} text-lg"></i>
+                        <div>
+                            <div class="text-xs text-slate-400">Status</div>
+                            <div class="font-bold ${statusColor}">${statusLabel}</div>
+                        </div>
+                    </div>
+
+                    <!-- Analisis Mendalam -->
                     <div>
-                        <div class="text-xs text-slate-400">Status</div>
-                        <div class="font-bold ${statusColor}">${statusLabel}</div>
+                        <h4 class="text-sm font-bold text-white mb-2 flex items-center gap-2">
+                            <i class="fa-solid fa-magnifying-glass-chart text-teal-400"></i> Analisis Mendalam
+                        </h4>
+                        <p class="text-sm text-slate-200 leading-relaxed bg-slate-900/50 p-3 rounded-lg border border-slate-700">
+                            ${safeText(a.detailed || a.short, '-')}
+                        </p>
+                    </div>
+
+                    <!-- Saran Perbaikan -->
+                    <div>
+                        <h4 class="text-sm font-bold text-white mb-2 flex items-center gap-2">
+                            <i class="fa-solid fa-lightbulb text-amber-400"></i> Saran Perbaikan
+                        </h4>
+                        <div class="bg-slate-900/50 p-3 rounded-lg border border-slate-700">
+                            ${recsHtml}
+                        </div>
                     </div>
                 </div>
 
-                <!-- Analisis Mendalam -->
-                <div>
-                    <h4 class="text-sm font-bold text-white mb-2 flex items-center gap-2">
-                        <i class="fa-solid fa-magnifying-glass-chart text-teal-400"></i> Analisis Mendalam
-                    </h4>
-                    <p class="text-sm text-slate-200 leading-relaxed bg-slate-900/50 p-3 rounded-lg border border-slate-700">
-                        ${safeText(a.detailed || a.short, '-')}
-                    </p>
-                </div>
+                <!-- KOLOM KANAN: Dialog AI -->
+                <div class="flex flex-col max-h-[70vh]">
+                    <!-- Header dialog -->
+                    <div class="px-5 py-3 border-b border-slate-700 flex items-center justify-between bg-slate-900/30">
+                        <div class="flex items-center gap-2">
+                            <i class="fa-solid fa-robot text-teal-400"></i>
+                            <span class="text-sm font-bold text-white">Diskusi dengan AI</span>
+                        </div>
+                        <button onclick="clearRasioDialog('${ratioId}')" 
+                                class="text-xs px-2.5 py-1 bg-rose-500/10 text-rose-400 border border-rose-500/20 hover:bg-rose-500/20 rounded-lg transition flex items-center gap-1">
+                            <i class="fa-solid fa-trash-can text-[10px]"></i> Clear
+                        </button>
+                    </div>
 
-                <!-- Saran Perbaikan -->
-                <div>
-                    <h4 class="text-sm font-bold text-white mb-2 flex items-center gap-2">
-                        <i class="fa-solid fa-lightbulb text-amber-400"></i> Saran Perbaikan
-                    </h4>
-                    <div class="bg-slate-900/50 p-3 rounded-lg border border-slate-700">
-                        ${recsHtml}
+                    <!-- Chat history -->
+                    <div id="rasioDialogHistory" class="flex-1 overflow-y-auto p-5 space-y-3 bg-slate-900/20">
+                        <p class="text-xs text-slate-500 italic text-center">Memuat riwayat...</p>
+                    </div>
+
+                    <!-- Input -->
+                    <div class="p-4 border-t border-slate-700 bg-slate-900/40">
+                        <div class="flex gap-2 items-end">
+                            <textarea id="rasioDialogInput" rows="2"
+                                      placeholder="Tanya AI tentang rasio ini... (misal: kenapa turun? apa solusinya?)"
+                                      class="flex-1 px-3 py-2 bg-slate-800 border border-slate-600 rounded-lg text-sm text-white focus:ring-2 focus:ring-teal-500 outline-none resize-none"
+                                      onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendRasioDialog('${ratioId}');}"></textarea>
+                            <button onclick="sendRasioDialog('${ratioId}')" id="btnSendRasioDialog"
+                                    class="px-4 h-10 bg-teal-500 hover:bg-teal-400 text-slate-950 font-bold rounded-lg text-sm transition flex items-center gap-1.5 shrink-0">
+                                <span>Kirim</span> <i class="fa-solid fa-paper-plane text-xs"></i>
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -654,4 +690,119 @@ function showRasioDetail(ratioId) {
         </div>
     `;
     document.body.appendChild(modal);
+
+    // Simpan ratioId aktif di modal
+    modal.dataset.ratioId = ratioId;
+    loadRasioDialog(ratioId);
+}
+
+// ===== LOAD SARAN NARASUMBER =====
+async function loadNarasumberSaran(ratioId) {
+    const list = document.getElementById('narasumberList');
+    if (!list) return;
+
+    try {
+        const token = localStorage.getItem('eva_token');
+        const url = `/api/rasio/saran/${encodeURIComponent(ratioId)}?years_key=${encodeURIComponent(currentYearsKey)}`;
+        const response = await fetch(url, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (!response.ok) throw new Error('Gagal memuat saran');
+        const data = await response.json();
+
+        if (!data || data.length === 0) {
+            list.innerHTML = '<p class="text-xs text-slate-500 italic">Belum ada saran narasumber untuk rasio ini.</p>';
+            return;
+        }
+
+        list.innerHTML = data.map(s => `
+            <div class="bg-purple-500/5 border border-purple-500/20 rounded-lg p-3 relative group">
+                <div class="flex items-start justify-between gap-2">
+                    <div class="flex-1">
+                        <div class="text-[11px] text-purple-400 font-semibold mb-1">
+                            <i class="fa-solid fa-user-tie"></i> ${s.narasumber_name || 'Anonim'}
+                            <span class="text-slate-500 font-normal ml-2">
+                                ${new Date(s.created_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })}
+                            </span>
+                        </div>
+                        <p class="text-sm text-slate-200 whitespace-pre-wrap">${escapeHtml(s.saran_text)}</p>
+                    </div>
+                    <button onclick="deleteNarasumberSaran(${s.id}, '${ratioId}')"
+                            class="text-slate-500 hover:text-rose-400 transition p-1 opacity-0 group-hover:opacity-100"
+                            title="Hapus saran">
+                        <i class="fa-solid fa-trash-can text-xs"></i>
+                    </button>
+                </div>
+            </div>
+        `).join('');
+    } catch (err) {
+        console.error('Error load saran:', err);
+        list.innerHTML = '<p class="text-xs text-rose-400 italic">Gagal memuat saran narasumber.</p>';
+    }
+}
+
+// ===== SIMPAN SARAN NARASUMBER =====
+async function saveNarasumberSaran(ratioId) {
+    const nameInput = document.getElementById('narasumberName');
+    const textInput = document.getElementById('narasumberText');
+    const name = nameInput.value.trim();
+    const text = textInput.value.trim();
+
+    if (!text) {
+        alert('Tulis saran terlebih dahulu.');
+        textInput.focus();
+        return;
+    }
+
+    try {
+        const token = localStorage.getItem('eva_token');
+        const response = await fetch('/api/rasio/saran', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({
+                ratio_id: ratioId,
+                years_key: currentYearsKey,
+                narasumber_name: name || null,
+                saran_text: text
+            })
+        });
+        if (!response.ok) throw new Error('Gagal menyimpan');
+
+        // Clear form
+        nameInput.value = '';
+        textInput.value = '';
+
+        // Reload list
+        await loadNarasumberSaran(ratioId);
+    } catch (err) {
+        console.error('Error save saran:', err);
+        alert('Gagal menyimpan saran: ' + err.message);
+    }
+}
+
+// ===== HAPUS SARAN NARASUMBER =====
+async function deleteNarasumberSaran(saranId, ratioId) {
+    if (!confirm('Hapus saran narasumber ini?')) return;
+    try {
+        const token = localStorage.getItem('eva_token');
+        const response = await fetch(`/api/rasio/saran/${saranId}`, {
+            method: 'DELETE',
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (!response.ok) throw new Error('Gagal menghapus');
+        await loadNarasumberSaran(ratioId);
+    } catch (err) {
+        console.error('Error delete saran:', err);
+        alert('Gagal menghapus saran.');
+    }
+}
+
+// ===== HELPER ESCAPE HTML =====
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
 }
