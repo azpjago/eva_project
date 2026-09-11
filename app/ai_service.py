@@ -114,7 +114,7 @@ def analyze_ratio_trend(data_tahun: list, ratios: list) -> dict:
       "ratio_id": {
         "short": "1-2 kalimat",
         "detailed": "3-5 kalimat analisis",
-        "recommendations": ["saran 1", "saran 2", ...],
+        "recommendations": ["Saran 1", "Saran 2", "Saran 3", "Saran 4", "Saran 5"],
         "trend": "naik" | "turun" | "stabil",
         "status": "positif" | "warning" | "negatif"
       }
@@ -221,7 +221,7 @@ Berikut adalah data rasio produktivitas perusahaan lintas tahun:
 {_json.dumps(prompt_data, ensure_ascii=False, indent=2)}
 
 TUGAS:
-Untuk SETIAP rasio di atas, berikan analisis singkat, analisis mendetail, dan saran perbaikan.
+Untuk SETIAP rasio, berikan analisis singkat, analisis mendetail, dan TEPAT 5 saran perbaikan yang spesifik, terukur, dan actionable.
 Fokus pada: tren (naik/turun/stabil), penyebab potensial, dampak bagi produktivitas, dan rekomendasi aksi nyata.
 
 FORMAT OUTPUT (HARUS JSON VALID, tanpa markdown code fence):
@@ -240,7 +240,7 @@ FORMAT OUTPUT (HARUS JSON VALID, tanpa markdown code fence):
 
 ATURAN PENTING:
 - Field "short" dan "detailed" HARUS berupa STRING (kalimat), BUKAN object atau array.
-- Field "recommendations" HARUS berupa ARRAY of STRING.
+- "recommendations" HARUS ARRAY of STRING (TEPAT 5 saran, masing-masing 1-2 kalimat actionable dengan angka target bila memungkinkan).
 - Field "trend" HARUS salah satu dari: "naik", "turun", "stabil".
 - Field "status" HARUS salah satu dari: "positif", "warning", "negatif".
 - Gunakan Bahasa Indonesia profesional.
@@ -354,6 +354,38 @@ def _analyze_severity(values: list, growth_rates: list) -> dict:
         "gap_to_max": round(((max_val - last) / max_val * 100), 2) if max_val > 0 else 0,
     }
 
+def _ensure_min_5_suggestions(recs: list, trend: str) -> list:
+    """Pastikan minimal 5 saran. Jika kurang, tambahkan saran generik yang relevan."""
+    generic_pool = {
+        "naik": [
+            "📊 Lakukan benchmarking eksternal: bandingkan rasio ini dengan rata-rata industri sejenis untuk memastikan posisi kompetitif.",
+            "🔄 Terapkan siklus PDCA (Plan-Do-Check-Act) untuk menjaga konsistensi perbaikan berkelanjutan.",
+            "📚 Dokumentasikan praktik terbaik (best practice) menjadi SOP tertulis agar dapat direplikasi ke unit lain.",
+            "🎯 Tetapkan target progresif: naikkan rasio +3% per kuartal sebagai bagian dari KPI tahunan.",
+            "🏆 Berikan penghargaan (reward) kepada tim dengan pencapaian rasio tertinggi untuk memotivasi perbaikan berkelanjutan.",
+        ],
+        "turun": [
+            "🔍 Bentuk tim investigasi (task force) untuk mengidentifikasi akar masalah dalam 30 hari.",
+            "📈 Tetapkan KPI pemulihan: target kenaikan +2% per bulan sampai kembali ke benchmark internal.",
+            "🎓 Adakan pelatihan intensif untuk tim operasional terkait proses yang bermasalah.",
+            "🤝 Libatkan konsultan eksternal jika penurunan > 15% untuk audit independen.",
+            "📋 Buat action plan tertulis dengan milestone 30/60/90 hari yang di-review mingguan.",
+        ],
+        "stabil": [
+            "💡 Adopsi program Continuous Improvement: kumpulkan minimal 5 ide perbaikan per bulan dari tim.",
+            "🎯 Tetapkan target progresif: +1% per kuartal untuk mendorong pertumbuhan.",
+            "📊 Lakukan benchmark dengan kompetitor untuk melihat peluang peningkatan.",
+            "🔄 Review proses bisnis secara berkala untuk menemukan titik optimasi.",
+            "📚 Adakan sesi knowledge sharing antar divisi untuk berbagi praktik terbaik.",
+        ],
+    }
+    pool = generic_pool.get(trend, generic_pool["stabil"])
+    i = 0
+    while len(recs) < 5 and i < len(pool):
+        if pool[i] not in recs:
+            recs.append(pool[i])
+        i += 1
+    return recs[:5] if len(recs) >= 5 else recs
 
 def _build_smart_recommendations(ratio_id: str, trend: str, values: list, growth_rates: list) -> list:
     """
@@ -433,7 +465,7 @@ def _build_smart_recommendations(ratio_id: str, trend: str, values: list, growth
                 "👥 **Aksi**: Terapkan sistem reward berbasis output untuk menjaga pengganda tetap tinggi.",
             ],
         }
-        return base + specific.get(ratio_id, [])
+        return _ensure_min_5_suggestions(base + specific.get(ratio_id, []), "naik")
 
     # ===== TREN TURUN (PERBAIKAN TERUKUR) =====
     elif trend == "turun":
@@ -518,17 +550,17 @@ def _build_smart_recommendations(ratio_id: str, trend: str, values: list, growth
                 "📚 **Aksi Pelatihan**: Fokus pelatihan pada 20% tenaga kerja dengan output terendah.",
             ],
         }
-        return base + specific.get(ratio_id, [])
+        return _ensure_min_5_suggestions(base + specific.get(ratio_id, []), "turun")
 
     # ===== TREN STABIL =====
     else:
-        return [
+        return _ensure_min_5_suggestions([
             f"📊 **Target**: Naikkan rasio +3-5% dari level saat ini ({last_val:.2f}) dalam 6 bulan ke depan.",
             f"🏆 **Benchmark Internal**: Level tertinggi yang pernah dicapai: {max_val:.2f}. Ada ruang perbaikan +{gap_to_max:.1f}%.",
             f"📅 **KPI Monitoring**: Review kuartalan dengan target kenaikan minimal +1% per kuartal.",
             "💡 **Aksi Continuous Improvement**: Adopsi program Kaizen — kumpulkan minimal 5 ide perbaikan per bulan dari tim operasional.",
             "🎯 **Aksi Benchmarking**: Bandingkan dengan rata-rata industri — identifikasi area gap untuk ditingkatkan.",
-        ]
+        ], "stabil")
 
 def ratio_dialog_reply(
     message: str,
