@@ -2,6 +2,44 @@
 let rasioData = [];
 let currentYearsKey = ''; 
 
+// ===== INJECT CSS ANIMASI TYPING =====
+(function injectTypingCSS() {
+    if (document.getElementById('rasioTypingCSS')) return;
+    const style = document.createElement('style');
+    style.id = 'rasioTypingCSS';
+    style.textContent = `
+        .typing-dots {
+            display: inline-flex;
+            gap: 4px;
+            align-items: center;
+            padding: 4px 0;
+        }
+        .typing-dots span {
+            width: 7px;
+            height: 7px;
+            background: #14b8a6;
+            border-radius: 50%;
+            display: inline-block;
+            animation: typingBounce 1.4s infinite ease-in-out both;
+        }
+        .typing-dots span:nth-child(1) { animation-delay: 0s; }
+        .typing-dots span:nth-child(2) { animation-delay: 0.2s; }
+        .typing-dots span:nth-child(3) { animation-delay: 0.4s; }
+        @keyframes typingBounce {
+            0%, 80%, 100% { transform: scale(0.6); opacity: 0.5; }
+            40% { transform: scale(1); opacity: 1; }
+        }
+        .pulse-glow {
+            animation: pulseGlow 1.8s ease-in-out infinite;
+        }
+        @keyframes pulseGlow {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(20, 184, 166, 0.4); }
+            50% { box-shadow: 0 0 0 8px rgba(20, 184, 166, 0); }
+        }
+    `;
+    document.head.appendChild(style);
+})();
+
 // ===== DEFINISI RATIO =====
 const RATIO_GROUPS = [
     {
@@ -696,67 +734,96 @@ function showRasioDetail(ratioId) {
     loadRasioDialog(ratioId);
 }
 
-// ===== LOAD SARAN NARASUMBER =====
-async function loadNarasumberSaran(ratioId) {
-    const list = document.getElementById('narasumberList');
-    if (!list) return;
+// ===== LOAD RIWAYAT DIALOG =====
+async function loadRasioDialog(ratioId) {
+    const box = document.getElementById('rasioDialogHistory');
+    if (!box) return;
+    box.innerHTML = '<p class="text-xs text-slate-500 italic text-center">Memuat riwayat...</p>';
 
     try {
         const token = localStorage.getItem('eva_token');
-        const url = `/api/rasio/saran/${encodeURIComponent(ratioId)}?years_key=${encodeURIComponent(currentYearsKey)}`;
+        const url = `/api/rasio/dialog/${encodeURIComponent(ratioId)}?years_key=${encodeURIComponent(currentYearsKey)}`;
         const response = await fetch(url, {
             headers: { 'Authorization': `Bearer ${token}` }
         });
-        if (!response.ok) throw new Error('Gagal memuat saran');
+        if (!response.ok) throw new Error('Gagal memuat');
         const data = await response.json();
 
         if (!data || data.length === 0) {
-            list.innerHTML = '<p class="text-xs text-slate-500 italic">Belum ada saran narasumber untuk rasio ini.</p>';
+            box.innerHTML = `
+                <div class="text-center text-slate-500 text-xs mt-8 flex flex-col items-center gap-2">
+                    <i class="fa-solid fa-comments text-2xl text-slate-600"></i>
+                    <span>Belum ada diskusi. Mulai dengan bertanya ke AI!</span>
+                </div>`;
             return;
         }
 
-        list.innerHTML = data.map(s => `
-            <div class="bg-purple-500/5 border border-purple-500/20 rounded-lg p-3 relative group">
-                <div class="flex items-start justify-between gap-2">
-                    <div class="flex-1">
-                        <div class="text-[11px] text-purple-400 font-semibold mb-1">
-                            <i class="fa-solid fa-user-tie"></i> ${s.narasumber_name || 'Anonim'}
-                            <span class="text-slate-500 font-normal ml-2">
-                                ${new Date(s.created_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })}
-                            </span>
-                        </div>
-                        <p class="text-sm text-slate-200 whitespace-pre-wrap">${escapeHtml(s.saran_text)}</p>
-                    </div>
-                    <button onclick="deleteNarasumberSaran(${s.id}, '${ratioId}')"
-                            class="text-slate-500 hover:text-rose-400 transition p-1 opacity-0 group-hover:opacity-100"
-                            title="Hapus saran">
-                        <i class="fa-solid fa-trash-can text-xs"></i>
-                    </button>
-                </div>
-            </div>
-        `).join('');
+        box.innerHTML = '';
+        data.forEach(msg => appendRasioDialogUI(msg));
+        box.scrollTop = box.scrollHeight;
     } catch (err) {
-        console.error('Error load saran:', err);
-        list.innerHTML = '<p class="text-xs text-rose-400 italic">Gagal memuat saran narasumber.</p>';
+        console.error('Error load dialog:', err);
+        box.innerHTML = '<p class="text-xs text-rose-400 italic text-center">Gagal memuat riwayat.</p>';
     }
 }
 
-// ===== SIMPAN SARAN NARASUMBER =====
-async function saveNarasumberSaran(ratioId) {
-    const nameInput = document.getElementById('narasumberName');
-    const textInput = document.getElementById('narasumberText');
-    const name = nameInput.value.trim();
-    const text = textInput.value.trim();
+// ===== TAMPILKAN SATU PESAN DI DIALOG =====
+function appendRasioDialogUI(msg) {
+    const box = document.getElementById('rasioDialogHistory');
+    if (!box) return;
+    const isUser = msg.role === 'user';
+    const align = isUser ? 'justify-end' : 'justify-start';
+    const bubble = isUser 
+        ? 'bg-teal-600 text-white rounded-br-none' 
+        : 'bg-slate-700 text-slate-100 rounded-bl-none';
+    const icon = isUser ? '' 
+        : '<div class="w-7 h-7 rounded-full bg-teal-500/20 border border-teal-500/40 flex items-center justify-center shrink-0 text-teal-400 mt-0.5"><i class="fa-solid fa-robot text-[10px]"></i></div>';
 
-    if (!text) {
-        alert('Tulis saran terlebih dahulu.');
-        textInput.focus();
-        return;
-    }
+    const parsedText = isUser
+        ? (window.escapeHtmlRasio ? escapeHtmlRasio(msg.content) : msg.content).replace(/\n/g, '<br>')
+        : (typeof marked !== 'undefined' ? marked.parse(msg.content) : msg.content);
+
+    if (box.innerHTML.includes('Belum ada diskusi')) box.innerHTML = '';
+
+    box.innerHTML += `
+        <div class="flex ${align} gap-2 w-full" data-msg-id="${msg.id || ''}">
+            ${icon}
+            <div class="max-w-[85%] p-2.5 rounded-2xl ${bubble} prose prose-invert prose-p:my-1 prose-ul:my-1 text-[13px] shadow-md shadow-slate-900/20">
+                ${parsedText}
+            </div>
+        </div>`;
+    box.scrollTop = box.scrollHeight;
+}
+
+// ===== KIRIM PESAN KE AI =====
+async function sendRasioDialog(ratioId) {
+    const input = document.getElementById('rasioDialogInput');
+    const btn = document.getElementById('btnSendRasioDialog');
+    const text = input.value.trim();
+    if (!text) return;
+
+    // Cari info rasio & analisis
+    let ratioInfo = null;
+    RATIO_GROUPS.forEach(g => {
+        g.ratios.forEach(r => { if (r.id === ratioId) ratioInfo = r; });
+    });
+
+    const a = (window.__rasioAnalyses || {})[ratioId] || {};
+    const years = rasioData.map(d => d.tahun);
+    const values = rasioData.map(d => ratioInfo ? ratioInfo.calc(d) : 0);
+
+    // Tampilkan pesan user langsung (optimistic UI)
+    const box = document.getElementById('rasioDialogHistory');
+    if (box && box.innerHTML.includes('Belum ada diskusi')) box.innerHTML = '';
+    appendRasioDialogUI({ id: 'temp', role: 'user', content: text });
+
+    input.value = '';
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fa-solid fa-spinner animate-spin"></i>';
 
     try {
         const token = localStorage.getItem('eva_token');
-        const response = await fetch('/api/rasio/saran', {
+        const response = await fetch('/api/rasio/dialog', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -765,43 +832,51 @@ async function saveNarasumberSaran(ratioId) {
             body: JSON.stringify({
                 ratio_id: ratioId,
                 years_key: currentYearsKey,
-                narasumber_name: name || null,
-                saran_text: text
+                content: text,
+                ratio_label: ratioInfo?.label,
+                ratio_deskripsi: ratioInfo?.deskripsi,
+                years: years,
+                values: values,
+                analysis_summary: safeText(a.short || a.detailed, '')
             })
         });
-        if (!response.ok) throw new Error('Gagal menyimpan');
+        if (!response.ok) throw new Error('Gagal mengirim');
 
-        // Clear form
-        nameInput.value = '';
-        textInput.value = '';
-
-        // Reload list
-        await loadNarasumberSaran(ratioId);
+        // Reload riwayat agar sinkron dengan server
+        await loadRasioDialog(ratioId);
     } catch (err) {
-        console.error('Error save saran:', err);
-        alert('Gagal menyimpan saran: ' + err.message);
+        console.error('Error kirim dialog:', err);
+        appendRasioDialogUI({
+            id: 'err',
+            role: 'model',
+            content: '❌ Maaf, gagal mengirim pesan. Coba lagi.'
+        });
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<span>Kirim</span> <i class="fa-solid fa-paper-plane text-xs"></i>';
     }
 }
 
-// ===== HAPUS SARAN NARASUMBER =====
-async function deleteNarasumberSaran(saranId, ratioId) {
-    if (!confirm('Hapus saran narasumber ini?')) return;
+// ===== HAPUS RIWAYAT DIALOG =====
+async function clearRasioDialog(ratioId) {
+    if (!confirm('Hapus seluruh riwayat dialog untuk rasio ini?')) return;
     try {
         const token = localStorage.getItem('eva_token');
-        const response = await fetch(`/api/rasio/saran/${saranId}`, {
+        const url = `/api/rasio/dialog/${encodeURIComponent(ratioId)}?years_key=${encodeURIComponent(currentYearsKey)}`;
+        const response = await fetch(url, {
             method: 'DELETE',
             headers: { 'Authorization': `Bearer ${token}` }
         });
         if (!response.ok) throw new Error('Gagal menghapus');
-        await loadNarasumberSaran(ratioId);
+        await loadRasioDialog(ratioId);
     } catch (err) {
-        console.error('Error delete saran:', err);
-        alert('Gagal menghapus saran.');
+        console.error('Error clear dialog:', err);
+        alert('Gagal menghapus riwayat dialog.');
     }
 }
 
 // ===== HELPER ESCAPE HTML =====
-function escapeHtml(text) {
+function escapeHtmlRasio(text) {
     const div = document.createElement('div');
     div.textContent = text;
     return div.innerHTML;
