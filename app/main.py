@@ -23,7 +23,9 @@ from app.schemas import (
     UserLogin,
     UserRegister,
     EvaRecordCreate,
-    EvaRecordResponse
+    EvaRecordResponse,
+    NarasumberSaranCreate,
+    NarasumberSaranResponse,
 )
 from app.security import create_access_token, hash_password, verify_password, SECRET_KEY, ALGORITHM
 
