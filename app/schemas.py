@@ -2,6 +2,9 @@
 
 from pydantic import BaseModel, Field
 from datetime import datetime
+from typing import Optional
+from datetime import datetime
+
 
 # Tambahkan pada app/schemas.py
 from pydantic import BaseModel, EmailStr
@@ -19,6 +22,25 @@ class TokenResponse(BaseModel):
     access_token: str
     token_type: str = "bearer"
     user_name: str
+
+class NarasumberSaranCreate(BaseModel):
+    ratio_id: str
+    years_key: str
+    narasumber_name: Optional[str] = None
+    saran_text: str
+
+
+class NarasumberSaranResponse(BaseModel):
+    id: int
+    ratio_id: str
+    years_key: str
+    narasumber_name: Optional[str]
+    saran_text: str
+    created_at: datetime
+    updated_at: datetime
+
+class Config:
+    from_attributes = True
 
 class FinancialInput(BaseModel):
     """Raw financial figures uploaded/entered by the user.
