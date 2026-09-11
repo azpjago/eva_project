@@ -795,14 +795,12 @@ function appendRasioDialogUI(msg) {
     box.scrollTop = box.scrollHeight;
 }
 
-// ===== KIRIM PESAN KE AI =====
 async function sendRasioDialog(ratioId) {
     const input = document.getElementById('rasioDialogInput');
     const btn = document.getElementById('btnSendRasioDialog');
     const text = input.value.trim();
     if (!text) return;
 
-    // Cari info rasio & analisis
     let ratioInfo = null;
     RATIO_GROUPS.forEach(g => {
         g.ratios.forEach(r => { if (r.id === ratioId) ratioInfo = r; });
@@ -812,14 +810,19 @@ async function sendRasioDialog(ratioId) {
     const years = rasioData.map(d => d.tahun);
     const values = rasioData.map(d => ratioInfo ? ratioInfo.calc(d) : 0);
 
-    // Tampilkan pesan user langsung (optimistic UI)
     const box = document.getElementById('rasioDialogHistory');
     if (box && box.innerHTML.includes('Belum ada diskusi')) box.innerHTML = '';
-    appendRasioDialogUI({ id: 'temp', role: 'user', content: text });
+
+    // 1. Tampilkan pesan user (optimistic)
+    appendRasioDialogUI({ id: 'temp-user-' + Date.now(), role: 'user', content: text });
 
     input.value = '';
     btn.disabled = true;
     btn.innerHTML = '<i class="fa-solid fa-spinner animate-spin"></i>';
+
+    // 2. Tampilkan typing indicator AI
+    const typingId = 'typing-' + Date.now();
+    showTypingIndicator(typingId);
 
     try {
         const token = localStorage.getItem('eva_token');
@@ -842,19 +845,48 @@ async function sendRasioDialog(ratioId) {
         });
         if (!response.ok) throw new Error('Gagal mengirim');
 
-        // Reload riwayat agar sinkron dengan server
+        // 3. Hapus typing indicator & reload riwayat
+        removeTypingIndicator(typingId);
         await loadRasioDialog(ratioId);
     } catch (err) {
         console.error('Error kirim dialog:', err);
+        removeTypingIndicator(typingId);
         appendRasioDialogUI({
-            id: 'err',
+            id: 'err-' + Date.now(),
             role: 'model',
             content: '❌ Maaf, gagal mengirim pesan. Coba lagi.'
         });
     } finally {
         btn.disabled = false;
         btn.innerHTML = '<span>Kirim</span> <i class="fa-solid fa-paper-plane text-xs"></i>';
+        // Fokus kembali ke input
+        input.focus();
     }
+}
+
+// ===== TYPING INDICATOR =====
+function showTypingIndicator(id) {
+    const box = document.getElementById('rasioDialogHistory');
+    if (!box) return;
+    const html = `
+        <div class="flex justify-start gap-2 w-full" id="${id}">
+            <div class="w-7 h-7 rounded-full bg-teal-500/20 border border-teal-500/40 flex items-center justify-center shrink-0 text-teal-400 mt-0.5 pulse-glow">
+                <i class="fa-solid fa-robot text-[10px]"></i>
+            </div>
+            <div class="bg-slate-700 rounded-2xl rounded-bl-none px-4 py-3 shadow-md shadow-slate-900/20 flex items-center gap-2">
+                <div class="typing-dots">
+                    <span></span><span></span><span></span>
+                </div>
+                <span class="text-[11px] text-slate-400 ml-1">AI sedang menganalisis...</span>
+            </div>
+        </div>`;
+    box.insertAdjacentHTML('beforeend', html);
+    box.scrollTop = box.scrollHeight;
+}
+
+function removeTypingIndicator(id) {
+    const el = document.getElementById(id);
+    if (el) el.remove();
 }
 
 // ===== HAPUS RIWAYAT DIALOG =====
