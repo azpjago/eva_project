@@ -35,7 +35,7 @@ class EvaRecord(Base):
     year_title = Column(String, index=True, nullable=False)
     raw_data = Column(Text, nullable=False)
     nilai_tambah = Column(Float, default=0.0)
-
+    bonus_persen = Column(Float, default=0.0)
     owner = relationship("User", back_populates="records")
 
 # --- TABEL BARU: PENYIMPANAN RIWAYAT CHAT AI ---
