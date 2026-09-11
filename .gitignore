@@ -2,3 +2,6 @@
 __pycache__/
 *.pyc
 .venv/
+# Database
+eva_app.db
+*.db
