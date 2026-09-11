@@ -83,7 +83,29 @@ def chat_reply(message: str, history: list[ChatMessage], eva_context: EvaResult 
     except Exception as e:
         logger.error(f"Error pada chat_reply: {e}", exc_info=True)
         return f"Terjadi kesalahan koneksi ke AI: {str(e)}"
-        
+
+def _coerce_to_string(val, default=""):
+    """Ubah nilai apa pun menjadi string yang aman untuk ditampilkan."""
+    if val is None:
+        return default
+    if isinstance(val, str):
+        return val.strip() or default
+    if isinstance(val, (int, float)):
+        return str(val)
+    if isinstance(val, dict):
+        # Coba gabungkan value dari dict
+        parts = []
+        for k, v in val.items():
+            if isinstance(v, str) and v.strip():
+                parts.append(v.strip())
+            elif isinstance(v, (int, float)):
+                parts.append(str(v))
+        return " ".join(parts) if parts else default
+    if isinstance(val, list):
+        parts = [_coerce_to_string(x) for x in val]
+        return " ".join([p for p in parts if p]) or default
+    return str(val) or default
+    
 def analyze_ratio_trend(data_tahun: list, ratios: list) -> dict:
     """
     Menganalisis SEMUA rasio produktivitas sekaligus menggunakan Gemini AI.
