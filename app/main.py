@@ -24,8 +24,8 @@ from app.schemas import (
     UserRegister,
     EvaRecordCreate,
     EvaRecordResponse,
-    NarasumberSaranCreate,
-    NarasumberSaranResponse,
+    RasioDialogSend,
+    RasioDialogResponse,
 )
 from app.security import create_access_token, hash_password, verify_password, SECRET_KEY, ALGORITHM
 
