@@ -16,17 +16,16 @@ class User(Base):
     records = relationship("EvaRecord", back_populates="owner")
     chats = relationship("ChatMessage", back_populates="owner")
 
-class NarasumberSaran(Base):
-    __tablename__ = "narasumber_saran"
+class RasioDialog(Base):
+    __tablename__ = "rasio_dialog"
 
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False, index=True)
-    ratio_id = Column(String(100), nullable=False)
+    ratio_id = Column(String(100), nullable=False, index=True)
     years_key = Column(String(100), nullable=False)
-    narasumber_name = Column(String(200), nullable=True)
-    saran_text = Column(Text, nullable=False)
+    role = Column(String(20), nullable=False)  # "user" | "model"
+    content = Column(Text, nullable=False)
     created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
 class EvaRecord(Base):
     __tablename__ = "eva_records"
