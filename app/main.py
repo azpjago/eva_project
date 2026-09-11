@@ -335,6 +335,69 @@ def analyze_ratios(req: Dict[str, Any], current_user: User = Depends(get_current
                     analyses[r["id"]] = "Stabil. Pertahankan kinerja."
         return {"analyses": analyses}
 
+# ===== ENDPOINT SARAN NARASUMBER =====
+
+@app.post("/api/rasio/saran", response_model=NarasumberSaranResponse)
+def create_narasumber_saran(
+    data: NarasumberSaranCreate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """Simpan saran baru dari narasumber untuk rasio & tahun tertentu."""
+    saran = NarasumberSaran(
+        user_id=current_user.id,
+        ratio_id=data.ratio_id,
+        years_key=data.years_key,
+        narasumber_name=data.narasumber_name,
+        saran_text=data.saran_text,
+    )
+    db.add(saran)
+    db.commit()
+    db.refresh(saran)
+    return saran
+
+
+@app.get("/api/rasio/saran/{ratio_id}", response_model=list[NarasumberSaranResponse])
+def list_narasumber_saran(
+    ratio_id: str,
+    years_key: str,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """Ambil semua saran narasumber untuk rasio tertentu (filter tahun via query)."""
+    return (
+        db.query(NarasumberSaran)
+        .filter(
+            NarasumberSaran.user_id == current_user.id,
+            NarasumberSaran.ratio_id == ratio_id,
+            NarasumberSaran.years_key == years_key,
+        )
+        .order_by(NarasumberSaran.created_at.desc())
+        .all()
+    )
+
+
+@app.delete("/api/rasio/saran/{saran_id}")
+def delete_narasumber_saran(
+    saran_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """Hapus saran narasumber berdasarkan ID."""
+    saran = (
+        db.query(NarasumberSaran)
+        .filter(
+            NarasumberSaran.id == saran_id,
+            NarasumberSaran.user_id == current_user.id,
+        )
+        .first()
+    )
+    if not saran:
+        raise HTTPException(status_code=404, detail="Saran tidak ditemukan")
+    db.delete(saran)
+    db.commit()
+    return {"message": "Saran berhasil dihapus"}
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)
