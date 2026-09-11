@@ -335,69 +335,107 @@ def analyze_ratios(req: Dict[str, Any], current_user: User = Depends(get_current
                     analyses[r["id"]] = "Stabil. Pertahankan kinerja."
         return {"analyses": analyses}
 
-# ===== ENDPOINT SARAN NARASUMBER =====
+# ===== ENDPOINT DIALOG AI PADA RASIO =====
 
-@app.post("/api/rasio/saran", response_model=NarasumberSaranResponse)
-def create_narasumber_saran(
-    data: NarasumberSaranCreate,
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
-):
-    """Simpan saran baru dari narasumber untuk rasio & tahun tertentu."""
-    saran = NarasumberSaran(
-        user_id=current_user.id,
-        ratio_id=data.ratio_id,
-        years_key=data.years_key,
-        narasumber_name=data.narasumber_name,
-        saran_text=data.saran_text,
-    )
-    db.add(saran)
-    db.commit()
-    db.refresh(saran)
-    return saran
-
-
-@app.get("/api/rasio/saran/{ratio_id}", response_model=list[NarasumberSaranResponse])
-def list_narasumber_saran(
+@app.get("/api/rasio/dialog/{ratio_id}", response_model=list[RasioDialogResponse])
+def list_rasio_dialog(
     ratio_id: str,
     years_key: str,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    """Ambil semua saran narasumber untuk rasio tertentu (filter tahun via query)."""
+    """Ambil riwayat dialog AI untuk rasio tertentu."""
     return (
-        db.query(NarasumberSaran)
+        db.query(RasioDialog)
         .filter(
-            NarasumberSaran.user_id == current_user.id,
-            NarasumberSaran.ratio_id == ratio_id,
-            NarasumberSaran.years_key == years_key,
+            RasioDialog.user_id == current_user.id,
+            RasioDialog.ratio_id == ratio_id,
+            RasioDialog.years_key == years_key,
         )
-        .order_by(NarasumberSaran.created_at.desc())
+        .order_by(RasioDialog.created_at.asc())
         .all()
     )
 
 
-@app.delete("/api/rasio/saran/{saran_id}")
-def delete_narasumber_saran(
-    saran_id: int,
+@app.post("/api/rasio/dialog", response_model=list[RasioDialogResponse])
+def send_rasio_dialog(
+    req: RasioDialogSend,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    """Hapus saran narasumber berdasarkan ID."""
-    saran = (
-        db.query(NarasumberSaran)
-        .filter(
-            NarasumberSaran.id == saran_id,
-            NarasumberSaran.user_id == current_user.id,
-        )
-        .first()
+    """Simpan pesan user, panggil AI dengan konteks rasio, simpan balasan AI. Return [pesan_user, pesan_ai]."""
+    # 1. Simpan pesan user
+    user_msg = RasioDialog(
+        user_id=current_user.id,
+        ratio_id=req.ratio_id,
+        years_key=req.years_key,
+        role="user",
+        content=req.content,
     )
-    if not saran:
-        raise HTTPException(status_code=404, detail="Saran tidak ditemukan")
-    db.delete(saran)
+    db.add(user_msg)
     db.commit()
-    return {"message": "Saran berhasil dihapus"}
+    db.refresh(user_msg)
 
-if __name__ == "__main__":
-    import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    # 2. Ambil riwayat sebelumnya
+    db_history = (
+        db.query(RasioDialog)
+        .filter(
+            RasioDialog.user_id == current_user.id,
+            RasioDialog.ratio_id == req.ratio_id,
+            RasioDialog.years_key == req.years_key,
+        )
+        .order_by(RasioDialog.created_at.asc())
+        .all()
+    )
+
+    # Format untuk AI (exclude pesan user terakhir yang baru saja disimpan)
+    history_for_ai = [
+        {"role": h.role, "content": h.content}
+        for h in db_history[:-1]
+    ]
+
+    # 3. Siapkan konteks rasio
+    ratio_context = {
+        "label": req.ratio_label or "Rasio",
+        "deskripsi": req.ratio_deskripsi or "",
+        "years": req.years or [],
+        "values": req.values or [],
+        "analysis_summary": req.analysis_summary or "",
+    }
+
+    # 4. Panggil AI
+    try:
+        ai_text = ratio_dialog_reply(req.content, history_for_ai, ratio_context)
+    except Exception as e:
+        ai_text = f"Maaf, AI sedang tidak bisa dihubungi: {str(e)[:100]}"
+
+    # 5. Simpan balasan AI
+    ai_msg = RasioDialog(
+        user_id=current_user.id,
+        ratio_id=req.ratio_id,
+        years_key=req.years_key,
+        role="model",
+        content=ai_text,
+    )
+    db.add(ai_msg)
+    db.commit()
+    db.refresh(ai_msg)
+
+    return [user_msg, ai_msg]
+
+
+@app.delete("/api/rasio/dialog/{ratio_id}")
+def clear_rasio_dialog(
+    ratio_id: str,
+    years_key: str,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """Hapus riwayat dialog untuk rasio & tahun tertentu."""
+    db.query(RasioDialog).filter(
+        RasioDialog.user_id == current_user.id,
+        RasioDialog.ratio_id == ratio_id,
+        RasioDialog.years_key == years_key,
+    ).delete()
+    db.commit()
+    return {"message": "Riwayat dialog dihapus"}
