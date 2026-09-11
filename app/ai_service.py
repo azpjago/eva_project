@@ -127,29 +127,68 @@ def analyze_ratio_trend(data_tahun: list, ratios: list) -> dict:
         out = {}
         for r in ratios:
             values = r.get("values", [])
+            growth = r.get("growth", [])
+            rid = r["id"]
+            label = r.get("label", "")
+
             if len(values) < 2:
-                out[r["id"]] = {
+                out[rid] = {
                     "short": "Data tidak cukup untuk analisis.",
-                    "detailed": "Dibutuhkan minimal 2 tahun data untuk analisis tren.",
-                    "recommendations": ["Tambahkan data tahun berikutnya."],
+                    "detailed": (
+                        f"Rasio {label} membutuhkan minimal 2 tahun data untuk analisis tren. "
+                        "Saat ini belum dapat disimpulkan arah perkembangannya."
+                    ),
+                    "recommendations": [
+                        "📋 Tambahkan data tahun berikutnya untuk analisis yang lebih komprehensif.",
+                        "📊 Pastikan semua komponen pembentuk rasio sudah terisi lengkap.",
+                    ],
                     "trend": "stabil",
                     "status": "warning",
                 }
                 continue
+
             first, last = values[0], values[-1]
+            sev = _analyze_severity(values, growth)
+            pct = sev["pct_change"]
+
             if last > first:
                 trend, status = "naik", "positif"
-                short = f"Rasio meningkat dari {first:.2f} ke {last:.2f}. Indikasi peningkatan efisiensi."
+                short = f"📈 Naik {pct:+.1f}% dari {first:.2f} ({r.get('years', ['awal'])[0]}) ke {last:.2f} ({r.get('years', ['', 'akhir'])[-1]}). Indikasi peningkatan efisiensi."
+                detailed = (
+                    f"Rasio {label} menunjukkan tren positif dengan kenaikan {pct:+.1f}% "
+                    f"dari {first:.2f} menjadi {last:.2f}. Peningkatan ini mengindikasikan "
+                    f"perbaikan efisiensi dan efektivitas dalam periode tersebut. "
+                    f"Perusahaan perlu mempertahankan strategi yang sudah berjalan baik "
+                    f"dan melakukan monitoring berkala untuk memastikan keberlanjutan tren positif."
+                )
             elif last < first:
-                trend, status = "turun", "warning"
-                short = f"Rasio menurun dari {first:.2f} ke {last:.2f}. Perlu evaluasi strategi."
+                severity_label = {"mild": "ringan", "moderate": "sedang", "severe": "signifikan"}[sev["level"]]
+                trend = "turun"
+                status = "warning" if sev["level"] in ("mild", "moderate") else "negatif"
+                short = f"📉 Turun {pct:+.1f}% dari {first:.2f} ke {last:.2f}. Penurunan {severity_label} — perlu evaluasi strategi."
+                detailed = (
+                    f"Rasio {label} mengalami penurunan {pct:+.1f}% ({severity_label}) "
+                    f"dari {first:.2f} menjadi {last:.2f}. Penurunan ini perlu menjadi "
+                    f"perhatian manajemen untuk dievaluasi penyebabnya. Faktor seperti "
+                    f"beban kerja, efisiensi proses, atau kualitas SDM patut ditinjau. "
+                    f"Target pemulihan: kembalikan ke level {sev['max_value']:.2f} "
+                    f"(kenaikan +{sev['gap_to_max']:.1f}% dari posisi saat ini)."
+                )
             else:
                 trend, status = "stabil", "positif"
-                short = f"Rasio stabil di {first:.2f}. Pertahankan kinerja."
-            out[r["id"]] = {
+                short = f"➡️ Stabil di {first:.2f}. Ada ruang perbaikan +{sev['gap_to_max']:.1f}% ke benchmark internal."
+                detailed = (
+                    f"Rasio {label} relatif stabil di angka {first:.2f} selama periode analisis. "
+                    f"Kinerja stabil menunjukkan konsistensi operasional, namun masih ada ruang "
+                    f"perbaikan menuju benchmark internal di {sev['max_value']:.2f} "
+                    f"(potensi kenaikan +{sev['gap_to_max']:.1f}%). "
+                    f"Disarankan untuk menerapkan program continuous improvement agar rasio dapat terus bertumbuh."
+                )
+
+            out[rid] = {
                 "short": short,
-                "detailed": short + " Analisis detail membutuhkan AI yang aktif.",
-                "recommendations": [],
+                "detailed": detailed,
+                "recommendations": _build_smart_recommendations(rid, trend, values, growth),
                 "trend": trend,
                 "status": status,
             }
