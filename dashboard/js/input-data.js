@@ -378,7 +378,39 @@ function generateYearPanelHTML(yearId) {
                            placeholder="Auto">
                 </div>
             </div>
-        </details>
+                    </details>
+            <!-- ===== BONUS KARYAWAN ===== -->
+<div class="bg-slate-800 rounded-2xl border border-amber-500/30 overflow-hidden">
+    <div class="px-5 py-4 flex items-center justify-between border-b border-slate-700">
+        <div class="flex items-center gap-2">
+            <i class="fa-solid fa-gift text-amber-400"></i>
+            <span class="font-bold text-white text-sm">Bonus Karyawan</span>
+        </div>
+        <span class="text-xs text-slate-400">Total: <span data-bonus-total class="text-amber-400 font-bold">Rp0</span></span>
+    </div>
+    <div class="px-5 pb-5 pt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+            <label class="block text-xs font-semibold text-slate-400 mb-1.5">Persentase Bonus dari Laba Bersih (%)</label>
+            <div class="relative">
+                <input type="number" min="0" max="100" step="0.1"
+                       data-field="bonus_persen"
+                       oninput="recomputeTotals()"
+                       placeholder="0"
+                       class="w-full pl-3 pr-10 py-2.5 rounded-lg bg-slate-900 border border-slate-700 text-base md:text-sm text-white focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition">
+                <span class="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 text-sm font-bold">%</span>
+            </div>
+            <p class="mt-1.5 text-[11px] text-slate-500">Dihitung dari Laba Bersih tahun tersebut. Nilai akan disimpan ke database.</p>
+        </div>
+        <div>
+            <label class="block text-xs font-semibold text-slate-400 mb-1.5">Total Bonus Karyawan (Rp)</label>
+            <input type="text"
+                   data-field="total_bonus"
+                   readonly
+                   placeholder="Otomatis"
+                   class="w-full px-3 py-2.5 rounded-lg bg-slate-800/50 border border-amber-500/30 text-base md:text-sm text-amber-300 font-bold cursor-not-allowed tabular-nums">
+        </div>
+    </div>
+</div>
 
         <!-- Investasi & Produktivitas -->
         <div class="bg-slate-800 rounded-2xl border border-slate-700 overflow-hidden">
@@ -819,6 +851,22 @@ function recomputeTotals(panel = getYearPanel()) {
     setResult(panel, 'r_pajak', pajak);
     setResult(panel, 'r_bunga', bunga);
 
+        // ===== BONUS KARYAWAN =====
+    const bonusPersenInput = panel.querySelector('input[data-field="bonus_persen"]');
+    const totalBonusInput = panel.querySelector('input[data-field="total_bonus"]');
+    const totalBonusLabel = panel.querySelector('[data-bonus-total]');
+
+    if (bonusPersenInput && totalBonusInput) {
+        const bonusPersen = parseFloat(bonusPersenInput.value) || 0;
+        const labaBersihForBonus = profit.labaBersih > 0 ? profit.labaBersih : 0;
+        const totalBonus = (bonusPersen / 100) * labaBersihForBonus;
+
+        totalBonusInput.value = formatRupiah(totalBonus);
+        if (totalBonusLabel) {
+            totalBonusLabel.textContent = formatRupiah(totalBonus);
+        }
+    }
+
     updateRingkasanView();
 }
 
@@ -916,6 +964,12 @@ async function loadDataFromServer() {
                 console.error("❌ Gagal mem-parsing raw_data", e);
             }
 
+                        // Restore bonus_persen dari database
+            const bonusInput = newPanel.querySelector('input[data-field="bonus_persen"]');
+            if (bonusInput && record.bonus_persen !== undefined && record.bonus_persen !== null) {
+                bonusInput.value = record.bonus_persen;
+            }
+            
             recomputeTotals(newPanel);
         });
 
@@ -967,10 +1021,15 @@ async function saveDataToServer() {
         const totalEl = panel.querySelector('[data-result="total_nilai_tambah"]');
         const nilaiTambah = totalEl ? parseFloat(totalEl.textContent.replace(/Rp|\./g, '').trim()) || 0 : 0;
 
+                // Ambil bonus_persen dari input
+        const bonusInput = panel.querySelector('input[data-field="bonus_persen"]');
+        const bonusPersen = bonusInput ? parseFloat(bonusInput.value) || 0 : 0;
+
         payload.push({
             year_title: title,
             raw_data: JSON.stringify(inputValues),
-            nilai_tambah: nilaiTambah
+            nilai_tambah: nilaiTambah,
+            bonus_persen: bonusPersen,   // ← TAMBAHKAN INI
         });
     });
 
