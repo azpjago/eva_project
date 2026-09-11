@@ -182,10 +182,10 @@ function resetFilterRasio() {
 }
 
 // ===== APPLY FILTER =====
-function applyFilterRasio() {
+async function applyFilterRasio() {
     const select = document.getElementById('filterTahunRasio');
     let selectedYears = Array.from(select.selectedOptions).map(opt => opt.value);
-    
+
     if (selectedYears.length < 2) {
         document.getElementById('rasioContainer').innerHTML = `
             <div class="text-center text-amber-400 py-12 bg-slate-800/50 rounded-2xl border border-amber-500/30">
@@ -197,16 +197,12 @@ function applyFilterRasio() {
         return;
     }
 
-    // Batasi maksimal 3 tahun
     const allYears = Array.from(select.options).map(opt => opt.value);
     const sortedAll = [...allYears].sort((a, b) => b.localeCompare(a));
     const latest3 = sortedAll.slice(0, 3);
     selectedYears = selectedYears.filter(y => latest3.includes(y));
-    if (selectedYears.length > 3) {
-        selectedYears = selectedYears.slice(0, 3);
-    }
+    if (selectedYears.length > 3) selectedYears = selectedYears.slice(0, 3);
 
-    // Ambil data dari panel
     const panels = document.querySelectorAll('.year-panel:not([data-year-id="template"])');
     const dataTahun = [];
 
@@ -233,11 +229,9 @@ function applyFilterRasio() {
     dataTahun.sort((a, b) => a.tahun.localeCompare(b.tahun));
     rasioData = dataTahun;
 
-    // Tampilkan loading
     document.getElementById('loadingRasio').classList.remove('hidden');
     document.getElementById('rasioContainer').innerHTML = '';
 
-    // Hitung semua rasio
     const allRatios = [];
     RATIO_GROUPS.forEach(group => {
         group.ratios.forEach(ratio => {
@@ -256,14 +250,32 @@ function applyFilterRasio() {
         });
     });
 
-    // Kirim ke AI untuk analisis
-    analyzeRatios(allRatios, dataTahun).then(analyses => {
-        document.getElementById('loadingRasio').classList.add('hidden');
-        renderRasioTable(allRatios, analyses);
-    }).catch(() => {
-        document.getElementById('loadingRasio').classList.add('hidden');
-        renderRasioTable(allRatios, {});
-    });
+    // ===== CACHING =====
+    // Key cache = hash dari years + semua nilai (biar tidak re-call AI untuk data yang sama)
+    const cacheKey = 'eva_rasio_ai_' + btoa(JSON.stringify({
+        years: dataTahun.map(d => d.tahun),
+        ratios: allRatios.map(r => [r.ratioId, r.values.map(v => Math.round(v * 100) / 100)])
+    })).slice(0, 80);
+
+    let analyses = null;
+    try {
+        const cached = localStorage.getItem(cacheKey);
+        if (cached) {
+            analyses = JSON.parse(cached);
+            console.log("✅ Memakai cache AI analisis.");
+        }
+    } catch (e) { /* ignore */ }
+
+    if (!analyses) {
+        console.log("🤖 Memanggil AI untuk analisis rasio...");
+        analyses = await analyzeRatios(allRatios, dataTahun);
+        try {
+            localStorage.setItem(cacheKey, JSON.stringify(analyses));
+        } catch (e) { /* ignore quota error */ }
+    }
+
+    document.getElementById('loadingRasio').classList.add('hidden');
+    renderRasioTable(allRatios, analyses);
 }
 
 // ===== AMBIL DATA PANEL =====
@@ -326,22 +338,37 @@ async function analyzeRatios(allRatios, dataTahun) {
                 ratios: allRatios.map(r => ({
                     id: r.ratioId,
                     label: r.label,
+                    satuan: r.satuan,
+                    deskripsi: r.deskripsi,
                     values: r.values,
                     growth: r.growth,
                     years: r.years
                 }))
             })
         });
-        if (!response.ok) throw new Error('AI analysis failed');
+        if (!response.ok) throw new Error('AI analysis failed: ' + response.status);
         const result = await response.json();
         return result.analyses || {};
     } catch (err) {
-        console.error('AI error:', err);
-        // Fallback: analisis sederhana
+        console.error('❌ AI error:', err);
+        // Fallback if-else sederhana
         const fallback = {};
         allRatios.forEach(r => {
-            const trend = analyzeTrend(r.values);
-            fallback[r.ratioId] = trend;
+            const values = r.values;
+            let trend = 'stabil', status = 'positif';
+            let short = 'Data tidak cukup.';
+            if (values.length >= 2) {
+                const first = values[0], last = values[values.length - 1];
+                if (last > first) { trend = 'naik'; status = 'positif'; short = `Meningkat dari ${first.toFixed(2)} ke ${last.toFixed(2)}.`; }
+                else if (last < first) { trend = 'turun'; status = 'warning'; short = `Menurun dari ${first.toFixed(2)} ke ${last.toFixed(2)}.`; }
+                else { short = `Stabil di ${first.toFixed(2)}.`; }
+            }
+            fallback[r.ratioId] = {
+                short,
+                detailed: short + ' (AI sedang tidak tersedia, analisis mendetail tidak dapat ditampilkan.)',
+                recommendations: [],
+                trend, status
+            };
         });
         return fallback;
     }
@@ -380,7 +407,14 @@ function renderRasioTable(allRatios, analyses) {
     const container = document.getElementById('rasioContainer');
     container.innerHTML = '';
 
-    // Kelompokkan berdasarkan group
+    if (!allRatios || allRatios.length === 0) {
+        container.innerHTML = '<div class="text-center text-slate-400 py-12">Tidak ada data rasio untuk ditampilkan.</div>';
+        return;
+    }
+
+    // Simpan analyses ke global untuk diakses modal
+    window.__rasioAnalyses = analyses;
+
     const groups = {};
     allRatios.forEach(r => {
         if (!groups[r.group]) groups[r.group] = [];
@@ -401,7 +435,6 @@ function renderRasioTable(allRatios, analyses) {
         const table = document.createElement('table');
         table.className = 'w-full text-sm text-left';
 
-        // Header
         const thead = document.createElement('thead');
         const trHead = document.createElement('tr');
         trHead.className = 'border-b border-slate-700';
@@ -416,37 +449,55 @@ function renderRasioTable(allRatios, analyses) {
 
         const tbody = document.createElement('tbody');
 
-        ratios.forEach((ratio, idx) => {
+        ratios.forEach((ratio) => {
+            const analysis = analyses[ratio.ratioId] || {};
+            const shortText = analysis.short || '-';
+            const status = analysis.status || 'positif';
+            const trend = analysis.trend || 'stabil';
+
+            const statusColor = status === 'positif' ? 'text-emerald-400'
+                              : status === 'warning' ? 'text-amber-400'
+                              : 'text-rose-400';
+            const trendIcon = trend === 'naik' ? 'fa-arrow-trend-up'
+                            : trend === 'turun' ? 'fa-arrow-trend-down'
+                            : 'fa-minus';
+
             // Baris Nilai
             const trValue = document.createElement('tr');
             trValue.className = 'border-b border-slate-700/50';
-            // No
             const tdNo = document.createElement('td');
             tdNo.className = 'px-3 py-2 text-white font-bold';
             tdNo.textContent = no++;
             trValue.appendChild(tdNo);
-            // Label
             const tdLabel = document.createElement('td');
             tdLabel.className = 'px-3 py-2 text-white';
             tdLabel.textContent = ratio.label;
             trValue.appendChild(tdLabel);
-            // Satuan
             const tdSatuan = document.createElement('td');
             tdSatuan.className = 'px-3 py-2 text-slate-400';
             tdSatuan.textContent = ratio.satuan;
             trValue.appendChild(tdSatuan);
-            // Values per tahun
             ratio.values.forEach(val => {
                 const td = document.createElement('td');
                 td.className = 'px-3 py-2 text-white font-mono';
                 td.textContent = val.toLocaleString('id-ID', { maximumFractionDigits: 2 });
                 trValue.appendChild(td);
             });
-            // Interpretasi
+            // Interpretasi (short)
             const tdInterpretasi = document.createElement('td');
-            tdInterpretasi.className = 'px-3 py-2 text-sm text-slate-300 max-w-xs';
-            const analysis = analyses[ratio.ratioId] || analyzeTrend(ratio.values);
-            tdInterpretasi.textContent = analysis;
+            tdInterpretasi.className = 'px-3 py-2 text-sm max-w-xs';
+            tdInterpretasi.innerHTML = `
+                <div class="flex items-start gap-2">
+                    <i class="fa-solid ${trendIcon} ${statusColor} mt-0.5"></i>
+                    <div>
+                        <p class="text-slate-300">${shortText}</p>
+                        <button onclick="showRasioDetail('${ratio.ratioId}')" 
+                                class="mt-1 text-[11px] text-teal-400 hover:text-teal-300 font-semibold flex items-center gap-1">
+                            <i class="fa-solid fa-circle-info"></i> Lihat Detail
+                        </button>
+                    </div>
+                </div>
+            `;
             trValue.appendChild(tdInterpretasi);
             tbody.appendChild(trValue);
 
@@ -457,13 +508,11 @@ function renderRasioTable(allRatios, analyses) {
             tdEmpty.className = 'px-3 py-1 text-xs text-slate-400';
             tdEmpty.textContent = 'Growth';
             trGrowth.appendChild(tdEmpty);
-            const tdEmpty2 = document.createElement('td');
-            tdEmpty2.className = 'px-3 py-1';
-            trGrowth.appendChild(tdEmpty2);
-            const tdEmpty3 = document.createElement('td');
-            tdEmpty3.className = 'px-3 py-1';
-            trGrowth.appendChild(tdEmpty3);
-            // Growth values
+            [1, 2].forEach(() => {
+                const td = document.createElement('td');
+                td.className = 'px-3 py-1';
+                trGrowth.appendChild(td);
+            });
             ratio.growth.forEach((g, i) => {
                 const td = document.createElement('td');
                 td.className = 'px-3 py-1 text-xs font-mono';
@@ -477,7 +526,6 @@ function renderRasioTable(allRatios, analyses) {
                 }
                 trGrowth.appendChild(td);
             });
-            // Growth interpretasi (kosong)
             const tdEmpty4 = document.createElement('td');
             tdEmpty4.className = 'px-3 py-1';
             trGrowth.appendChild(tdEmpty4);
@@ -488,9 +536,106 @@ function renderRasioTable(allRatios, analyses) {
         wrapper.appendChild(table);
         container.appendChild(wrapper);
     }
+}
 
-    // Jika tidak ada data
-    if (Object.keys(groups).length === 0) {
-        container.innerHTML = '<div class="text-center text-slate-400 py-12">Tidak ada data rasio untuk ditampilkan.</div>';
+// ===== MODAL DETAIL =====
+function showRasioDetail(ratioId) {
+    const analyses = window.__rasioAnalyses || {};
+    const a = analyses[ratioId];
+    if (!a) {
+        alert('Analisis detail belum tersedia.');
+        return;
     }
+
+    // Cari data rasio untuk ditampilkan
+    let ratioInfo = null;
+    RATIO_GROUPS.forEach(g => {
+        g.ratios.forEach(r => {
+            if (r.id === ratioId) ratioInfo = r;
+        });
+    });
+
+    const statusColor = a.status === 'positif' ? 'text-emerald-400'
+                      : a.status === 'warning' ? 'text-amber-400'
+                      : 'text-rose-400';
+    const statusLabel = a.status === 'positif' ? 'POSITIF'
+                      : a.status === 'warning' ? 'PERLU PERHATIAN'
+                      : 'NEGATIF';
+    const statusBg = a.status === 'positif' ? 'bg-emerald-500/10 border-emerald-500/30'
+                    : a.status === 'warning' ? 'bg-amber-500/10 border-amber-500/30'
+                    : 'bg-rose-500/10 border-rose-500/30';
+
+    const recs = (a.recommendations || []).filter(x => x && x.trim());
+    const recsHtml = recs.length > 0
+        ? `<ul class="space-y-2">${recs.map(r => `
+            <li class="flex items-start gap-2 text-sm text-slate-200">
+                <i class="fa-solid fa-lightbulb text-amber-400 mt-1"></i>
+                <span>${r}</span>
+            </li>`).join('')}</ul>`
+        : '<p class="text-sm text-slate-400 italic">Belum ada saran spesifik.</p>';
+
+    // Hapus modal lama jika ada
+    const oldModal = document.getElementById('rasioDetailModal');
+    if (oldModal) oldModal.remove();
+
+    const modal = document.createElement('div');
+    modal.id = 'rasioDetailModal';
+    modal.className = 'fixed inset-0 bg-black/70 backdrop-blur-sm z-[100] flex items-center justify-center p-4 overflow-y-auto';
+    modal.onclick = (e) => { if (e.target === modal) modal.remove(); };
+    modal.innerHTML = `
+        <div class="bg-slate-800 rounded-2xl max-w-2xl w-full border border-slate-700 shadow-2xl my-8">
+            <!-- Header -->
+            <div class="flex items-start justify-between p-5 border-b border-slate-700">
+                <div>
+                    <h3 class="text-lg font-bold text-white">${ratioInfo?.label || 'Detail Rasio'}</h3>
+                    <p class="text-xs text-slate-400 mt-1">${ratioInfo?.deskripsi || ''}</p>
+                </div>
+                <button onclick="document.getElementById('rasioDetailModal').remove()" 
+                        class="text-slate-400 hover:text-white transition p-1">
+                    <i class="fa-solid fa-xmark text-xl"></i>
+                </button>
+            </div>
+
+            <!-- Body -->
+            <div class="p-5 space-y-4 max-h-[70vh] overflow-y-auto">
+                <!-- Status -->
+                <div class="${statusBg} border rounded-xl p-3 flex items-center gap-3">
+                    <i class="fa-solid fa-circle-check ${statusColor} text-lg"></i>
+                    <div>
+                        <div class="text-xs text-slate-400">Status</div>
+                        <div class="font-bold ${statusColor}">${statusLabel}</div>
+                    </div>
+                </div>
+
+                <!-- Analisis Mendalam -->
+                <div>
+                    <h4 class="text-sm font-bold text-white mb-2 flex items-center gap-2">
+                        <i class="fa-solid fa-magnifying-glass-chart text-teal-400"></i> Analisis Mendalam
+                    </h4>
+                    <p class="text-sm text-slate-200 leading-relaxed bg-slate-900/50 p-3 rounded-lg border border-slate-700">
+                        ${a.detailed || a.short || '-'}
+                    </p>
+                </div>
+
+                <!-- Saran Perbaikan -->
+                <div>
+                    <h4 class="text-sm font-bold text-white mb-2 flex items-center gap-2">
+                        <i class="fa-solid fa-lightbulb text-amber-400"></i> Saran Perbaikan
+                    </h4>
+                    <div class="bg-slate-900/50 p-3 rounded-lg border border-slate-700">
+                        ${recsHtml}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Footer -->
+            <div class="p-4 border-t border-slate-700 flex justify-end">
+                <button onclick="document.getElementById('rasioDetailModal').remove()" 
+                        class="px-4 py-2 bg-teal-500 hover:bg-teal-400 text-slate-950 font-bold rounded-lg text-sm transition">
+                    Tutup
+                </button>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(modal);
 }
