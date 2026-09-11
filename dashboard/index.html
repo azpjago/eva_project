@@ -6,6 +6,7 @@
     <title>Dashboard — EVA Platform</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -72,6 +73,9 @@
             </a>
             <a href="#" id="navRasio" onclick="switchView('rasio-produktivitas'); return false;" class="block px-4 py-3 text-slate-400 hover:bg-slate-800 hover:text-slate-200 rounded-xl font-semibold text-sm flex items-center gap-3 transition">
                 <i class="fa-solid fa-table w-5"></i> Rasio Produktivitas
+            </a>
+            <a href="#" id="navNilaiTambah" onclick="switchView('nilai-tambah'); return false;" class="block px-4 py-3 text-slate-400 hover:bg-slate-800 hover:text-slate-200 rounded-xl font-semibold text-sm flex items-center gap-3 transition">
+                <i class="fa-solid fa-chart-pie w-5"></i> Nilai Tambah
             </a>
         </div>
         
@@ -259,11 +263,58 @@
         <!-- Tabel akan dirender oleh JavaScript -->
     </div>
 </div>
+<!-- ===== VIEW: NILAI TAMBAH ===== -->
+<div id="view-nilai-tambah" class="hidden space-y-6 fade-in">
+    <div class="bg-gradient-to-r from-slate-800 to-slate-800/50 rounded-2xl p-6 border border-slate-700 relative overflow-hidden">
+        <div class="absolute -right-20 -top-20 w-64 h-64 bg-teal-500/10 rounded-full blur-3xl"></div>
+        <h1 class="text-2xl font-bold text-white mb-2 relative z-10">🥧 Nilai Tambah</h1>
+        <p class="text-slate-400 text-sm relative z-10">Rincian perhitungan nilai tambah & proporsi komponennya per tahun.</p>
+    </div>
+
+    <!-- Filter Tahun (single select) -->
+    <div class="bg-slate-800 rounded-2xl p-4 border border-slate-700 flex flex-wrap items-center gap-4">
+        <label class="text-sm font-semibold text-white">Pilih Tahun:</label>
+        <select id="filterTahunNT" onchange="loadNilaiTambahData()"
+                class="bg-slate-900 border border-slate-600 rounded-lg px-3 py-2 text-white text-sm focus:ring-2 focus:ring-teal-500 outline-none min-w-[150px]">
+        </select>
+        <span class="text-xs text-slate-400 ml-auto">
+            <i class="fa-solid fa-circle-info"></i> Nilai bisa diedit manual, tidak disimpan ke database
+        </span>
+    </div>
+
+    <!-- Tabel Pengurangan -->
+    <div id="ntTableContainer"></div>
+
+    <!-- Pie Chart -->
+    <div class="bg-slate-800 rounded-2xl p-6 border border-slate-700">
+        <!-- Pie Chart + Legend Custom -->
+<div class="bg-slate-800 rounded-2xl p-6 border border-slate-700">
+    <!-- Judul Chart (di tengah) -->
+    <h3 id="ntChartTitle" class="text-center font-bold text-white text-lg mb-4">
+        NT Metode Penjumlahan
+    </h3>
+
+    <!-- Layout 2 kolom: Chart + Legend -->
+    <div class="flex flex-col lg:flex-row gap-4 items-center lg:items-start">
+        <!-- Chart -->
+        <div class="flex-1 w-full">
+            <div id="pieChartNT" style="min-height: 480px;"></div>
+        </div>
+
+        <!-- Legend Custom -->
+        <div class="w-full lg:w-64 lg:pl-2 lg:border-l lg:border-slate-700">
+            <div id="legendNT" class="w-full"></div>
+        </div>
+    </div>
+</div>
+    </div>
+</div>
         </div>
     </main>
 
     <!-- JavaScript -->
     <script src="js/main.js"></script>
+    <script src="js/nilai-tambah.js"></script>
     <script src="js/auth.js"></script>
     <script src="js/ringkasan.js"></script>
     <script src="js/input-data.js"></script>
