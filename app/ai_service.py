@@ -84,32 +84,152 @@ def chat_reply(message: str, history: list[ChatMessage], eva_context: EvaResult 
         logger.error(f"Error pada chat_reply: {e}", exc_info=True)
         return f"Terjadi kesalahan koneksi ke AI: {str(e)}"
         
-def analyze_ratio_trend(data_tahun, ratios):
+def analyze_ratio_trend(data_tahun: list, ratios: list) -> dict:
     """
-    Menganalisis tren rasio menggunakan AI.
+    Menganalisis SEMUA rasio produktivitas sekaligus menggunakan Gemini AI.
+    Return format:
+    {
+      "ratio_id": {
+        "short": "1-2 kalimat",
+        "detailed": "3-5 kalimat analisis",
+        "recommendations": ["saran 1", "saran 2", ...],
+        "trend": "naik" | "turun" | "stabil",
+        "status": "positif" | "warning" | "negatif"
+      }
+    }
     """
-    # Ini adalah placeholder, nanti bisa diganti dengan panggilan ke LLM
-    analyses = {}
-    for r in ratios:
-        values = r.get("values", [])
-        label = r.get("label", "")
-        years = r.get("years", [])
-        if len(values) < 2:
-            analyses[r["id"]] = "Data tidak cukup untuk analisis."
-            continue
-        # Buat prompt sederhana
-        prompt = f"Analisis tren rasio {label} selama tahun {', '.join(years)} dengan nilai {values}. Berikan interpretasi singkat."
-        # Panggil LLM (contoh)
-        try:
-            # response = llm.generate(prompt)  # implementasi sesuai LLM Anda
-            # Untuk sementara, buat analisis sederhana
+    import json as _json
+
+    # Fallback default (if-else sederhana) jika AI gagal
+    def build_fallback():
+        out = {}
+        for r in ratios:
+            values = r.get("values", [])
+            if len(values) < 2:
+                out[r["id"]] = {
+                    "short": "Data tidak cukup untuk analisis.",
+                    "detailed": "Dibutuhkan minimal 2 tahun data untuk analisis tren.",
+                    "recommendations": ["Tambahkan data tahun berikutnya."],
+                    "trend": "stabil",
+                    "status": "warning",
+                }
+                continue
             first, last = values[0], values[-1]
             if last > first:
-                analyses[r["id"]] = f"Rasio meningkat dari {first:.2f} ke {last:.2f}. Indikasi peningkatan efisiensi."
+                trend, status = "naik", "positif"
+                short = f"Rasio meningkat dari {first:.2f} ke {last:.2f}. Indikasi peningkatan efisiensi."
             elif last < first:
-                analyses[r["id"]] = f"Rasio menurun dari {first:.2f} ke {last:.2f}. Perlu evaluasi strategi."
+                trend, status = "turun", "warning"
+                short = f"Rasio menurun dari {first:.2f} ke {last:.2f}. Perlu evaluasi strategi."
             else:
-                analyses[r["id"]] = f"Rasio stabil di {first:.2f}. Pertahankan kinerja."
-        except:
-            analyses[r["id"]] = "Analisis AI sedang sibuk, coba lagi nanti."
-    return analyses
+                trend, status = "stabil", "positif"
+                short = f"Rasio stabil di {first:.2f}. Pertahankan kinerja."
+            out[r["id"]] = {
+                "short": short,
+                "detailed": short + " Analisis detail membutuhkan AI yang aktif.",
+                "recommendations": [],
+                "trend": trend,
+                "status": status,
+            }
+        return out
+
+    # Pastikan client AI tersedia
+    try:
+        client = _get_client()
+    except Exception as e:
+        logger.warning(f"AI client tidak tersedia, pakai fallback: {e}")
+        return build_fallback()
+
+    # Susun prompt ringkas
+    prompt_data = []
+    for r in ratios:
+        prompt_data.append({
+            "id": r["id"],
+            "label": r["label"],
+            "satuan": r.get("satuan", ""),
+            "deskripsi": r.get("deskripsi", ""),
+            "tahun": r.get("years", []),
+            "nilai": [round(v, 4) for v in r.get("values", [])],
+            "growth_persen": [round(g, 2) for g in r.get("growth", [])],
+        })
+
+    prompt = f"""Anda adalah analis produktivitas senior untuk Kementerian Ketenagakerjaan Indonesia.
+
+Berikut adalah data rasio produktivitas perusahaan lintas tahun:
+
+{_json.dumps(prompt_data, ensure_ascii=False, indent=2)}
+
+TUGAS:
+Untuk SETIAP rasio di atas, berikan analisis singkat, analisis mendetail, dan saran perbaikan.
+Fokus pada: tren (naik/turun/stabil), penyebab potensial, dampak bagi produktivitas, dan rekomendasi aksi nyata.
+
+FORMAT OUTPUT (HARUS JSON VALID, tanpa markdown code fence):
+{{
+  "ratio_id": {{
+    "short": "1-2 kalimat singkat untuk ditampilkan di tabel (maks 120 karakter)",
+    "detailed": "3-5 kalimat analisis mendalam, sebutkan angka spesifik, penyebab, dan dampak",
+    "recommendations": [
+      "Saran aksi nyata 1",
+      "Saran aksi nyata 2",
+      "Saran aksi nyata 3"
+    ],
+    "trend": "naik" | "turun" | "stabil",
+    "status": "positif" | "warning" | "negatif"
+  }}
+}}
+
+Aturan:
+- Gunakan Bahasa Indonesia profesional.
+- Jika rasio menurun, status = "warning" atau "negatif" (sesuai besarnya penurunan).
+- Jika rasio meningkat/stabil, status = "positif".
+- Sertakan angka spesifik dari data.
+- Jangan mengarang data yang tidak ada.
+- Output HANYA JSON, tanpa penjelasan tambahan di luar JSON.
+"""
+
+    try:
+        response = client.models.generate_content(
+            model=MODEL_NAME,
+            contents=prompt,
+            config=types.GenerateContentConfig(
+                temperature=0.4,
+                response_mime_type="application/json",  # paksa JSON
+            ),
+        )
+        text = (response.text or "").strip()
+        # Bersihkan jika masih ada code fence
+        if text.startswith("```"):
+            text = text.strip("`")
+            if text.lower().startswith("json"):
+                text = text[4:].lstrip()
+        # Cari JSON object pertama
+        start = text.find("{")
+        end = text.rfind("}")
+        if start >= 0 and end > start:
+            text = text[start:end + 1]
+
+        parsed = _json.loads(text)
+        # Validasi minimal
+        if not isinstance(parsed, dict):
+            raise ValueError("AI tidak mengembalikan dict")
+
+        # Isi default untuk ratio yang mungkin tidak ada
+        fallback = build_fallback()
+        for rid, fb in fallback.items():
+            if rid not in parsed:
+                parsed[rid] = fb
+            else:
+                # Pastikan field lengkap
+                p = parsed[rid]
+                p.setdefault("short", fb["short"])
+                p.setdefault("detailed", p.get("short", fb["short"]))
+                p.setdefault("recommendations", [])
+                p.setdefault("trend", fb["trend"])
+                p.setdefault("status", fb["status"])
+
+        logger.info("Analisis rasio AI berhasil di-generate.")
+        return parsed
+
+    except Exception as e:
+        logger.error(f"Error pada analyze_ratio_trend: {e}", exc_info=True)
+        return build_fallback()
