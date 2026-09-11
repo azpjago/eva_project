@@ -3,6 +3,7 @@ from sqlalchemy import Column, Integer, String, Float, ForeignKey, Text, DateTim
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from app.database import Base
+from datetime import datetime
 
 class User(Base):
     __tablename__ = "users"
@@ -14,6 +15,18 @@ class User(Base):
 
     records = relationship("EvaRecord", back_populates="owner")
     chats = relationship("ChatMessage", back_populates="owner")
+
+class NarasumberSaran(Base):
+    __tablename__ = "narasumber_saran"
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False, index=True)
+    ratio_id = Column(String(100), nullable=False)
+    years_key = Column(String(100), nullable=False)
+    narasumber_name = Column(String(200), nullable=True)
+    saran_text = Column(Text, nullable=False)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
 class EvaRecord(Base):
     __tablename__ = "eva_records"
