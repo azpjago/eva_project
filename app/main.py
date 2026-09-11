@@ -193,7 +193,8 @@ def save_eva_records(records: list[EvaRecordCreate], db: Session = Depends(get_d
             user_id=current_user.id,
             year_title=rec.year_title,
             raw_data=rec.raw_data,
-            nilai_tambah=rec.nilai_tambah
+            nilai_tambah=rec.nilai_tambah,
+            bonus_persen=rec.bonus_persen or 0.0,
         )
         db.add(new_record)
         saved_records.append(new_record)
