@@ -93,7 +93,6 @@ def _coerce_to_string(val, default=""):
     if isinstance(val, (int, float)):
         return str(val)
     if isinstance(val, dict):
-        # Coba gabungkan value dari dict
         parts = []
         for k, v in val.items():
             if isinstance(v, str) and v.strip():
@@ -105,7 +104,8 @@ def _coerce_to_string(val, default=""):
         parts = [_coerce_to_string(x) for x in val]
         return " ".join([p for p in parts if p]) or default
     return str(val) or default
-    
+
+
 def analyze_ratio_trend(data_tahun: list, ratios: list) -> dict:
     """
     Menganalisis SEMUA rasio produktivitas sekaligus menggunakan Gemini AI.
@@ -122,7 +122,7 @@ def analyze_ratio_trend(data_tahun: list, ratios: list) -> dict:
     """
     import json as _json
 
-    # Fallback default (if-else sederhana) jika AI gagal
+    # === FALLBACK (if-else sederhana) jika AI gagal ===
     def build_fallback():
         out = {}
         for r in ratios:
@@ -155,7 +155,7 @@ def analyze_ratio_trend(data_tahun: list, ratios: list) -> dict:
             }
         return out
 
-    # Pastikan client AI tersedia
+    # Pastikan AI client tersedia
     try:
         client = _get_client()
     except Exception as e:
@@ -188,25 +188,26 @@ Fokus pada: tren (naik/turun/stabil), penyebab potensial, dampak bagi produktivi
 FORMAT OUTPUT (HARUS JSON VALID, tanpa markdown code fence):
 {{
   "ratio_id": {{
-    "short": "1-2 kalimat singkat untuk ditampilkan di tabel (maks 120 karakter)",
-    "detailed": "3-5 kalimat analisis mendalam, sebutkan angka spesifik, penyebab, dan dampak",
+    "short": "1-2 kalimat singkat (STRING, maks 120 karakter)",
+    "detailed": "3-5 kalimat analisis mendalam (STRING)",
     "recommendations": [
-      "Saran aksi nyata 1",
-      "Saran aksi nyata 2",
-      "Saran aksi nyata 3"
+      "Saran aksi nyata 1 (STRING)",
+      "Saran aksi nyata 2 (STRING)"
     ],
-    "trend": "naik" | "turun" | "stabil",
-    "status": "positif" | "warning" | "negatif"
+    "trend": "naik",
+    "status": "positif"
   }}
 }}
 
-Aturan:
+ATURAN PENTING:
+- Field "short" dan "detailed" HARUS berupa STRING (kalimat), BUKAN object atau array.
+- Field "recommendations" HARUS berupa ARRAY of STRING.
+- Field "trend" HARUS salah satu dari: "naik", "turun", "stabil".
+- Field "status" HARUS salah satu dari: "positif", "warning", "negatif".
 - Gunakan Bahasa Indonesia profesional.
-- Jika rasio menurun, status = "warning" atau "negatif" (sesuai besarnya penurunan).
-- Jika rasio meningkat/stabil, status = "positif".
 - Sertakan angka spesifik dari data.
 - Jangan mengarang data yang tidak ada.
-- Output HANYA JSON, tanpa penjelasan tambahan di luar JSON.
+- Output HANYA JSON, tanpa penjelasan tambahan.
 """
 
     try:
@@ -215,39 +216,58 @@ Aturan:
             contents=prompt,
             config=types.GenerateContentConfig(
                 temperature=0.4,
-                response_mime_type="application/json",  # paksa JSON
+                response_mime_type="application/json",
             ),
         )
         text = (response.text or "").strip()
+
         # Bersihkan jika masih ada code fence
         if text.startswith("```"):
             text = text.strip("`")
             if text.lower().startswith("json"):
                 text = text[4:].lstrip()
-        # Cari JSON object pertama
         start = text.find("{")
         end = text.rfind("}")
         if start >= 0 and end > start:
             text = text[start:end + 1]
 
         parsed = _json.loads(text)
-        # Validasi minimal
         if not isinstance(parsed, dict):
             raise ValueError("AI tidak mengembalikan dict")
 
-        # Isi default untuk ratio yang mungkin tidak ada
+        # === NORMALISASI: paksa semua field jadi tipe yang benar ===
+        for rid, item in list(parsed.items()):
+            if not isinstance(item, dict):
+                continue
+            # short & detailed wajib string
+            item["short"] = _coerce_to_string(item.get("short"), "-")
+            item["detailed"] = _coerce_to_string(
+                item.get("detailed") or item.get("short"), item["short"]
+            )
+            # recommendations wajib list of string
+            recs = item.get("recommendations")
+            if isinstance(recs, str):
+                recs = [recs]
+            elif not isinstance(recs, list):
+                recs = []
+            item["recommendations"] = [
+                _coerce_to_string(r) for r in recs if _coerce_to_string(r)
+            ]
+            # trend & status wajib string valid
+            trend = _coerce_to_string(item.get("trend"), "stabil").lower()
+            if trend not in ("naik", "turun", "stabil"):
+                trend = "stabil"
+            item["trend"] = trend
+            status = _coerce_to_string(item.get("status"), "positif").lower()
+            if status not in ("positif", "warning", "negatif"):
+                status = "positif"
+            item["status"] = status
+
+        # Isi default untuk ratio yang mungkin tidak ada di response AI
         fallback = build_fallback()
         for rid, fb in fallback.items():
             if rid not in parsed:
                 parsed[rid] = fb
-            else:
-                # Pastikan field lengkap
-                p = parsed[rid]
-                p.setdefault("short", fb["short"])
-                p.setdefault("detailed", p.get("short", fb["short"]))
-                p.setdefault("recommendations", [])
-                p.setdefault("trend", fb["trend"])
-                p.setdefault("status", fb["status"])
 
         logger.info("Analisis rasio AI berhasil di-generate.")
         return parsed
