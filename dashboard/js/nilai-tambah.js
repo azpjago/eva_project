@@ -1,22 +1,10 @@
 // ===== NILAI TAMBAH =====
 let nilaiTambahItems = [];
 let currentYearNT = '';
-let googleChartsReady = false;
 let amenitiesValue = 0;
 
-// Load Google Charts
-(function initGoogleCharts() {
-    if (typeof google === 'undefined' || !google.charts) {
-        console.warn('Google Charts belum dimuat.');
-        return;
-    }
-    google.charts.load('current', { packages: ['corechart'] });
-    google.charts.setOnLoadCallback(() => {
-        googleChartsReady = true;
-        console.log('✅ Google Charts siap.');
-        if (currentYearNT) renderPieChartNT();
-    });
-})();
+// ApexCharts tidak butuh init khusus
+let googleChartsReady = true;
 
 // ===== INIT =====
 function initNilaiTambah() {
@@ -220,19 +208,15 @@ function onAmenitiesInput(input) {
 }
 
 // ===== PIE CHART 3D + LEGEND CUSTOM =====
+let apexChartNT = null;
+
 function renderPieChartNT() {
     const chartContainer = document.getElementById('pieChartNT');
     const legendContainer = document.getElementById('legendNT');
     if (!chartContainer) return;
 
-    // Update judul
     const titleEl = document.getElementById('ntChartTitle');
     if (titleEl) titleEl.textContent = `NT Metode Penjumlahan (${currentYearNT})`;
-
-    if (!googleChartsReady) {
-        chartContainer.innerHTML = '<div class="text-center text-slate-400 py-16"><i class="fa-solid fa-spinner animate-spin text-2xl mb-2"></i><p class="text-xs">Memuat grafik...</p></div>';
-        return;
-    }
 
     const getVal = (id) => {
         const item = nilaiTambahItems.find(i => i.id === id);
@@ -245,65 +229,151 @@ function renderPieChartNT() {
         .reduce((sum, i) => sum + (parseFloat(i.value) || 0), 0);
     const laba = penjualan - totalDed;
 
-    const rawData = [
-        ['Komponen', 'Nilai'],
-        ['Gaji Karyawan', getVal('tenaga_kerja')],
-        ['Bunga Bank', getVal('bunga')],
-        ['Pajak', getVal('pajak')],
-        ['Penyusutan', getVal('penyusutan')],
-        ['Laba', Math.max(0, laba)],
+    // Data 5 slice
+    const labels = ['Gaji Karyawan', 'Bunga Bank', 'Pajak', 'Penyusutan', 'Laba'];
+    const values = [
+        getVal('tenaga_kerja'),
+        getVal('bunga'),
+        getVal('pajak'),
+        getVal('penyusutan'),
+        Math.max(0, laba),
     ];
 
-    const filteredData = [rawData[0], ...rawData.slice(1).filter(row => row[1] > 0)];
+    // Filter nilai 0
+    const filtered = labels.map((l, i) => ({ label: l, value: values[i] }))
+                          .filter(x => x.value > 0);
 
-    if (filteredData.length < 2) {
+    if (filtered.length === 0) {
         chartContainer.innerHTML = '<p class="text-center text-slate-400 py-12 italic text-sm">Tidak ada data bernilai positif.</p>';
         if (legendContainer) legendContainer.innerHTML = '';
+        if (apexChartNT) { apexChartNT.destroy(); apexChartNT = null; }
         return;
     }
-
-    const data = google.visualization.arrayToDataTable(filteredData);
 
     const palette = ['#14b8a6', '#0d9488', '#0f766e', '#115e59', '#f59e0b'];
 
     const options = {
-        is3D: true,
-        backgroundColor: { fill: 'transparent' },
-        legend: 'none',  // pakai legend custom
-        pieSliceText: 'percentage',
-        pieSliceTextStyle: { color: '#ffffff', fontSize: 14, bold: true },
-        colors: palette,
-        chartArea: { width: '92%', height: '92%', left: 15, top: 15 },
-        tooltip: {
-            textStyle: { color: '#1e293b', fontSize: 13 },
+        chart: {
+            type: 'donut',
+            height: 480,           // ← FIXED HEIGHT
+            width: '100%',
+            background: 'transparent',
+            animations: {
+                enabled: true,
+                easing: 'easeinout',
+                speed: 600,
+            },
+            dropShadow: {
+                enabled: true,
+                top: 8,
+                left: 3,
+                blur: 8,
+                opacity: 0.35,
+                color: '#000',
+            },
+            toolbar: { show: false },
         },
-        pieStartAngle: 0,
-        pieHole: 0,
+        labels: filtered.map(x => x.label),
+        series: filtered.map(x => x.value),
+        colors: palette,
+        legend: { show: false },   // pakai legend custom
+        dataLabels: {
+            enabled: true,
+            formatter: (val) => val.toFixed(1) + '%',
+            style: {
+                fontSize: '13px',
+                fontWeight: 'bold',
+                colors: ['#fff'],
+            },
+            dropShadow: {
+                enabled: true,
+                top: 1,
+                left: 1,
+                blur: 2,
+                opacity: 0.5,
+            },
+        },
+        plotOptions: {
+            pie: {
+                expandOnClick: true,
+                donut: {
+                    size: '62%',   // tebal donut, memberi efek 3D
+                    labels: {
+                        show: true,
+                        name: {
+                            show: true,
+                            fontSize: '14px',
+                            color: '#94a3b8',
+                        },
+                        value: {
+                            show: true,
+                            fontSize: '18px',
+                            fontWeight: 700,
+                            color: '#ffffff',
+                            formatter: (val) => {
+                                return parseInt(val).toLocaleString('id-ID');
+                            },
+                        },
+                        total: {
+                            show: true,
+                            label: 'Total',
+                            color: '#94a3b8',
+                            fontSize: '13px',
+                            formatter: (w) => {
+                                const total = w.globals.seriesTotals.reduce((a, b) => a + b, 0);
+                                return 'Rp' + Math.round(total).toLocaleString('id-ID');
+                            },
+                        },
+                    },
+                },
+            },
+        },
+        tooltip: {
+            theme: 'dark',
+            y: {
+                formatter: (val) => 'Rp' + Math.round(val).toLocaleString('id-ID'),
+            },
+        },
+        stroke: {
+            show: true,
+            width: 2,
+            colors: ['#1e293b'],
+        },
+        responsive: [{
+            breakpoint: 640,
+            options: {
+                chart: { height: 320 },
+            },
+        }],
     };
+
+    // Destroy chart lama jika ada
+    if (apexChartNT) {
+        apexChartNT.destroy();
+        apexChartNT = null;
+    }
 
     chartContainer.innerHTML = '';
     const chartDiv = document.createElement('div');
-    chartDiv.style.width = '100%';
-    chartDiv.style.height = '480px';
+    chartDiv.id = 'apexChartNTDiv';
     chartContainer.appendChild(chartDiv);
 
-    const chart = new google.visualization.PieChart(chartDiv);
-    chart.draw(data, options);
+    apexChartNT = new ApexCharts(chartDiv, options);
+    apexChartNT.render();
 
-    // ===== Custom Legend dengan panah ke chart =====
+    // ===== Legend Custom =====
     if (legendContainer) {
-        const total = filteredData.slice(1).reduce((sum, r) => sum + r[1], 0);
-        const legendItems = filteredData.slice(1).map((row, i) => {
-            const label = row[0];
-            const value = row[1];
-            const pct = total > 0 ? (value / total * 100).toFixed(1) : '0.0';
+        const total = filtered.reduce((sum, x) => sum + x.value, 0);
+        const legendItems = filtered.map((item, i) => {
+            const pct = total > 0 ? (item.value / total * 100).toFixed(1) : '0.0';
             const color = palette[i % palette.length];
             return `
-                <div class="flex items-center gap-2 py-1.5 px-2 rounded-lg hover:bg-slate-700/30 transition">
-                    <span class="w-3 h-3 rounded-full shrink-0 ring-2 ring-opacity-30" style="background: ${color}; box-shadow: 0 0 8px ${color}60;"></span>
+                <div class="flex items-center gap-2 py-1.5 px-2 rounded-lg hover:bg-slate-700/30 transition cursor-pointer"
+                     onclick="if(apexChartNT) apexChartNT.toggleSeries('${item.label}')">
+                    <span class="w-3 h-3 rounded-full shrink-0" style="background: ${color}; box-shadow: 0 0 8px ${color}60;"></span>
                     <div class="flex-1 min-w-0">
-                        <div class="text-[13px] text-slate-200 font-medium truncate">${label}</div>
-                        <div class="text-[10px] text-slate-500 tabular-nums">${formatRupiah(value)}</div>
+                        <div class="text-[13px] text-slate-200 font-medium truncate">${item.label}</div>
+                        <div class="text-[10px] text-slate-500 tabular-nums">${formatRupiah(item.value)}</div>
                     </div>
                     <span class="text-sm font-bold tabular-nums" style="color: ${color};">${pct}%</span>
                 </div>
@@ -318,19 +388,4 @@ function renderPieChartNT() {
             <div class="space-y-0.5">${legendItems}</div>
         `;
     }
-
-    window.__ntPieChart = chart;
-    window.__ntPieData = data;
-    window.__ntPieOptions = options;
 }
-
-// ===== RESIZE =====
-let ntResizeTimer;
-window.addEventListener('resize', () => {
-    clearTimeout(ntResizeTimer);
-    ntResizeTimer = setTimeout(() => {
-        if (window.__ntPieChart && window.__ntPieData && window.__ntPieOptions) {
-            window.__ntPieChart.draw(window.__ntPieData, window.__ntPieOptions);
-        }
-    }, 200);
-});
