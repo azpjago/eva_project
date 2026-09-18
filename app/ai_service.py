@@ -46,7 +46,7 @@ def generate_recommendation_narrative(eva_result: EvaResult) -> str:
         )
         if response.text:
             return response.text.strip()
-        return "Tidak dapat menghasilkan rekomendasi (respons AI kosong atau terblokir filter)."
+        return "Tidak dapat menghasilkan rekomendasi (respons EVA kosong atau terblokir filter)."
     
     except Exception as e:
         logger.error(f"Error pada generate_recommendation_narrative: {e}", exc_info=True)
@@ -78,11 +78,11 @@ def chat_reply(message: str, history: list[ChatMessage], eva_context: EvaResult 
         )
         if response.text:
             return response.text.strip()
-        return "Maaf, AI tidak memberikan respon (respons kosong)."
+        return "Maaf, EVA tidak memberikan respon (respons kosong)."
 
     except Exception as e:
         logger.error(f"Error pada chat_reply: {e}", exc_info=True)
-        return f"Terjadi kesalahan koneksi ke AI: {str(e)}"
+        return f"Terjadi kesalahan koneksi ke EVA: {str(e)}"
 
 def _coerce_to_string(val, default=""):
     """Ubah nilai apa pun menjadi string yang aman untuk ditampilkan."""
@@ -108,7 +108,7 @@ def _coerce_to_string(val, default=""):
 
 def analyze_ratio_trend(data_tahun: list, ratios: list) -> dict:
     """
-    Menganalisis SEMUA rasio produktivitas sekaligus menggunakan Gemini AI.
+    Menganalisis SEMUA rasio produktivitas sekaligus menggunakan EVA Agent.
     Return format:
     {
       "ratio_id": {
@@ -198,7 +198,7 @@ def analyze_ratio_trend(data_tahun: list, ratios: list) -> dict:
     try:
         client = _get_client()
     except Exception as e:
-        logger.warning(f"AI client tidak tersedia, pakai fallback: {e}")
+        logger.warning(f"EVA client tidak tersedia, pakai fallback: {e}")
         return build_fallback()
 
     # Susun prompt ringkas
@@ -272,7 +272,7 @@ ATURAN PENTING:
 
         parsed = _json.loads(text)
         if not isinstance(parsed, dict):
-            raise ValueError("AI tidak mengembalikan dict")
+            raise ValueError("EVA tidak mengembalikan dict")
 
         # === NORMALISASI: paksa semua field jadi tipe yang benar ===
         for rid, item in list(parsed.items()):
@@ -308,7 +308,7 @@ ATURAN PENTING:
             if rid not in parsed:
                 parsed[rid] = fb
 
-        logger.info("Analisis rasio AI berhasil di-generate.")
+        logger.info("Analisis rasio EVA berhasil di-generate.")
         return parsed
 
     except Exception as e:
@@ -631,7 +631,7 @@ PANDUAN MENJAWAB:
         )
         if response.text:
             return response.text.strip()
-        return "Maaf, AI tidak memberikan respon."
+        return "Maaf, EVA tidak memberikan respon."
     except Exception as e:
         logger.error(f"Error pada ratio_dialog_reply: {e}", exc_info=True)
-        return f"Maaf, koneksi ke AI terganggu: {str(e)[:100]}"
+        return f"Maaf, koneksi ke EVA terganggu: {str(e)[:100]}"

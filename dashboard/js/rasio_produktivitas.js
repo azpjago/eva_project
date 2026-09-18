@@ -302,12 +302,12 @@ async function applyFilterRasio() {
         const cached = localStorage.getItem(cacheKey);
         if (cached) {
             analyses = JSON.parse(cached);
-            console.log("✅ Memakai cache AI analisis.");
+            console.log("✅ Memakai cache EVA analisis.");
         }
     } catch (e) { /* ignore */ }
 
     if (!analyses) {
-        console.log("🤖 Memanggil AI untuk analisis rasio...");
+        console.log("🤖 Memanggil EVA untuk analisis rasio...");
         analyses = await analyzeRatios(allRatios, dataTahun);
         try {
             localStorage.setItem(cacheKey, JSON.stringify(analyses));
@@ -386,13 +386,13 @@ async function analyzeRatios(allRatios, dataTahun) {
                 }))
             })
         });
-        if (!response.ok) throw new Error('AI analysis failed: ' + response.status);
+        if (!response.ok) throw new Error('EVA analysis failed: ' + response.status);
         const result = await response.json();
-        console.log('🔍 Response AI mentah:', result);       // ← DEBUG LOG
+        console.log('🔍 Response EVA mentah:', result);       // ← DEBUG LOG
         console.log('🔍 Analyses:', result.analyses);        // ← DEBUG LOG
         return result.analyses || {};
     } catch (err) {
-        console.error('❌ AI error:', err);
+        console.error('❌ EVA error:', err);
         // Fallback if-else sederhana
         const fallback = {};
         allRatios.forEach(r => {
@@ -407,7 +407,7 @@ async function analyzeRatios(allRatios, dataTahun) {
             }
             fallback[r.ratioId] = {
                 short,
-                detailed: short + ' (AI sedang tidak tersedia, analisis mendetail tidak dapat ditampilkan.)',
+                detailed: short + ' (EVA sedang tidak tersedia, analisis mendetail tidak dapat ditampilkan.)',
                 recommendations: [],
                 trend, status
             };
@@ -689,7 +689,7 @@ function showRasioDetail(ratioId) {
                     <div class="px-5 py-3 border-b border-slate-700 flex items-center justify-between bg-slate-900/30">
                         <div class="flex items-center gap-2">
                             <i class="fa-solid fa-robot text-teal-400"></i>
-                            <span class="text-sm font-bold text-white">Diskusi dengan AI</span>
+                            <span class="text-sm font-bold text-white">Diskusi dengan EVA</span>
                         </div>
                         <button onclick="clearRasioDialog('${ratioId}')" 
                                 class="text-xs px-2.5 py-1 bg-rose-500/10 text-rose-400 border border-rose-500/20 hover:bg-rose-500/20 rounded-lg transition flex items-center gap-1">
@@ -706,7 +706,7 @@ function showRasioDetail(ratioId) {
                     <div class="p-4 border-t border-slate-700 bg-slate-900/40">
                         <div class="flex gap-2 items-end">
                             <textarea id="rasioDialogInput" rows="2"
-                                      placeholder="Tanya AI tentang rasio ini... (misal: kenapa turun? apa solusinya?)"
+                                      placeholder="Tanya EVA tentang rasio ini... (misal: kenapa turun? apa solusinya?)"
                                       class="flex-1 px-3 py-2 bg-slate-800 border border-slate-600 rounded-lg text-sm text-white focus:ring-2 focus:ring-teal-500 outline-none resize-none"
                                       onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendRasioDialog('${ratioId}');}"></textarea>
                             <button onclick="sendRasioDialog('${ratioId}')" id="btnSendRasioDialog"
@@ -753,7 +753,7 @@ async function loadRasioDialog(ratioId) {
             box.innerHTML = `
                 <div class="text-center text-slate-500 text-xs mt-8 flex flex-col items-center gap-2">
                     <i class="fa-solid fa-comments text-2xl text-slate-600"></i>
-                    <span>Belum ada diskusi. Mulai dengan bertanya ke AI!</span>
+                    <span>Belum ada diskusi. Mulai dengan bertanya ke EVA!</span>
                 </div>`;
             return;
         }
@@ -877,7 +877,7 @@ function showTypingIndicator(id) {
                 <div class="typing-dots">
                     <span></span><span></span><span></span>
                 </div>
-                <span class="text-[11px] text-slate-400 ml-1">AI sedang menganalisis...</span>
+                <span class="text-[11px] text-slate-400 ml-1">EVA sedang menganalisis...</span>
             </div>
         </div>`;
     box.insertAdjacentHTML('beforeend', html);

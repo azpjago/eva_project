@@ -30,8 +30,8 @@ from app.schemas import (
 from app.security import create_access_token, hash_password, verify_password, SECRET_KEY, ALGORITHM
 
 app = FastAPI(
-    title="EVA Analysis & AI Recommendation API",
-    description="Backend API untuk kalkulasi Economic Value Added dan rekomendasi AI produktivitas ketenagakerjaan.",
+    title="EVA Analysis & Recommendation API",
+    description="Backend API untuk kalkulasi Economic Value Added dan rekomendasi EVA produktivitas perusahaan.",
     version="1.0.0",
 )
 
@@ -137,7 +137,7 @@ def recommend(data: FinancialInput) -> RecommendationResponse:
     try:
         narasi = generate_recommendation_narrative(eva_result)
     except Exception as exc:
-        raise HTTPException(status_code=502, detail=f"AI service error: {exc}") from exc
+        raise HTTPException(status_code=502, detail=f"EVA service error: {exc}") from exc
     return RecommendationResponse(
         eva_result=eva_result,
         fokus_rekomendasi=matrix["fokus"],
@@ -150,7 +150,7 @@ def chat(req: ChatRequest) -> ChatResponse:
     try:
         reply = chat_reply(req.message, req.history, req.eva_context)
     except Exception as exc:
-        raise HTTPException(status_code=502, detail=f"AI service error: {exc}") from exc
+        raise HTTPException(status_code=502, detail=f"EVA service error: {exc}") from exc
     updated_history = req.history + [
         ChatMessage(role="user", content=req.message),
         ChatMessage(role="model", content=reply),
@@ -234,7 +234,7 @@ def get_dashboard_recommendation(data: DashboardContext, current_user: User = De
     try:
         narasi = generate_recommendation_narrative(dummy_eva)
     except Exception as e:
-        narasi = "Sistem AI sedang sibuk, mohon coba lagi nanti."
+        narasi = "Sistem EVA sedang sibuk, mohon coba lagi nanti."
 
     return DashboardRecommendation(
         status=status,
@@ -277,7 +277,7 @@ def send_chat_message(req: ChatMsgSend, db: Session = Depends(get_db), current_u
     try:
         ai_text = chat_reply(req.content, history_for_ai, eva_ctx)
     except Exception as e:
-        ai_text = "Maaf, koneksi ke AI sedang terganggu."
+        ai_text = "Maaf, koneksi ke EVA sedang terganggu."
 
     ai_msg = DBChatMessage(user_id=current_user.id, role="model", content=ai_text)
     db.add(ai_msg)
@@ -305,7 +305,7 @@ from app.ai_service import analyze_ratio_trend  # Anda perlu tambahkan fungsi in
 @app.post("/api/ai/analyze-ratio", response_model=Dict[str, Any])
 def analyze_ratios(req: Dict[str, Any], current_user: User = Depends(get_current_user)):
     """
-    Menganalisis rasio produktivitas menggunakan AI.
+    Menganalisis rasio produktivitas menggunakan EVA.
     Request body: {
         "data_tahun": [{"tahun": "2020", "nilaiTambah": 100, "penjualan": 200, ...}],
         "ratios": [{"id": "nilai_tambah_per_tenaga", "label": "...", "values": [...], "growth": [...], "years": [...]}]
@@ -345,7 +345,7 @@ def list_rasio_dialog(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    """Ambil riwayat dialog AI untuk rasio tertentu."""
+    """Ambil riwayat dialog EVA untuk rasio tertentu."""
     return (
         db.query(RasioDialog)
         .filter(
@@ -408,7 +408,7 @@ def send_rasio_dialog(
     try:
         ai_text = ratio_dialog_reply(req.content, history_for_ai, ratio_context)
     except Exception as e:
-        ai_text = f"Maaf, AI sedang tidak bisa dihubungi: {str(e)[:100]}"
+        ai_text = f"Maaf, EVA sedang tidak bisa dihubungi: {str(e)[:100]}"
 
     # 5. Simpan balasan AI
     ai_msg = RasioDialog(
