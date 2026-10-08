@@ -48,3 +48,136 @@ input[type=number]::-webkit-outer-spin-button { opacity: 1; }
     background: #1e293b;
     color: #e2e8f0;
 }
+/* ============================================================
+   LIGHT THEME OVERRIDE — Match Landing Page
+   Otomatis mengubah tema gelap → terang tanpa ubah JS
+   ============================================================ */
+
+/* ---------- BODY GRADIENT (soft white → soft blue) ---------- */
+body.bg-slate-50 {
+    background: linear-gradient(180deg, #f8fafc 0%, #eff6ff 100%) !important;
+    color: #0f172a !important;
+}
+
+/* ---------- CONTAINER BACKGROUNDS ---------- */
+/* Card utama (bg-slate-800) → putih dengan shadow halus */
+.bg-slate-800 {
+    background-color: #ffffff !important;
+    box-shadow: 0 1px 3px 0 rgba(15, 23, 42, 0.05);
+}
+.bg-slate-800\/70 { background-color: rgba(255, 255, 255, 0.9) !important; }
+.bg-slate-800\/50 { background-color: rgba(248, 250, 252, 0.8) !important; }
+.bg-slate-800\/30 { background-color: rgba(241, 245, 249, 0.6) !important; }
+.bg-slate-800\/20 { background-color: rgba(241, 245, 249, 0.4) !important; }
+
+/* Nested backgrounds (bg-slate-900) → abu muda */
+.bg-slate-900:not(body) { background-color: #f1f5f9 !important; }
+.bg-slate-900\/80 { background-color: rgba(255, 255, 255, 0.95) !important; }
+.bg-slate-900\/70 { background-color: rgba(241, 245, 249, 0.9) !important; }
+.bg-slate-900\/60 { background-color: rgba(241, 245, 249, 0.8) !important; }
+.bg-slate-900\/50 { background-color: rgba(241, 245, 249, 0.7) !important; }
+.bg-slate-900\/40 { background-color: rgba(241, 245, 249, 0.6) !important; }
+.bg-slate-900\/30 { background-color: rgba(241, 245, 249, 0.5) !important; }
+.bg-slate-900\/20 { background-color: rgba(241, 245, 249, 0.3) !important; }
+
+/* ---------- TEKS ---------- */
+.text-white { color: #0f172a !important; }
+.text-slate-100 { color: #0f172a !important; }
+.text-slate-200 { color: #1e293b !important; }
+.text-slate-300 { color: #334155 !important; }
+.text-slate-400 { color: #64748b !important; }
+.text-slate-500 { color: #94a3b8 !important; }
+
+/* Pengecualian: teks putih tetap putih di atas background berwarna */
+[class*="bg-teal-"].text-white,
+[class*="bg-blue-"].text-white,
+[class*="bg-rose-"].text-white,
+[class*="bg-emerald-"].text-white,
+[class*="bg-purple-"].text-white,
+[class*="bg-amber-"].text-white,
+[class*="bg-slate-9"].text-white,
+[class*="bg-black"].text-white {
+    color: #ffffff !important;
+}
+
+/* ---------- BORDER ---------- */
+.border-slate-800 { border-color: #e2e8f0 !important; }
+.border-slate-700 { border-color: #e2e8f0 !important; }
+.border-slate-600 { border-color: #cbd5e1 !important; }
+.border-slate-700\/80 { border-color: rgba(226, 232, 240, 0.8) !important; }
+.border-slate-700\/50 { border-color: rgba(226, 232, 240, 0.7) !important; }
+.border-slate-700\/30 { border-color: rgba(226, 232, 240, 0.5) !important; }
+
+/* ---------- INPUT FIELD ---------- */
+input.bg-slate-900,
+input.bg-slate-800,
+textarea.bg-slate-900,
+textarea.bg-slate-800,
+select.bg-slate-900,
+select.bg-slate-800 {
+    background-color: #ffffff !important;
+    color: #0f172a !important;
+    border-color: #cbd5e1 !important;
+}
+input::placeholder, textarea::placeholder {
+    color: #94a3b8 !important;
+}
+input:focus, textarea:focus, select:focus {
+    border-color: #14b8a6 !important;
+}
+
+/* Input readonly (readonly=true) */
+input[readonly], input[disabled] {
+    background-color: #f1f5f9 !important;
+    color: #64748b !important;
+}
+
+/* ---------- SIDEBAR NAVIGATION (definisi di main.js) ---------- */
+.nav-active {
+    background-color: rgba(20, 184, 166, 0.1) !important;
+    border-color: rgba(20, 184, 166, 0.3) !important;
+    color: #0d9488 !important;
+}
+.nav-inactive {
+    color: #64748b !important;
+}
+.nav-inactive:hover {
+    background-color: #f1f5f9 !important;
+    color: #0f172a !important;
+}
+
+/* ---------- SECONDARY BUTTON (bg-slate-700 / bg-slate-600) ---------- */
+button.bg-slate-700, button.bg-slate-600 {
+    background-color: #f1f5f9 !important;
+    color: #0f172a !important;
+    border: 1px solid #e2e8f0;
+}
+button.bg-slate-700:hover, button.bg-slate-600:hover {
+    background-color: #e2e8f0 !important;
+}
+
+/* ---------- MODAL OVERLAY ---------- */
+.bg-black\/70, .bg-black\/50 {
+    background-color: rgba(15, 23, 42, 0.4) !important;
+}
+
+/* ---------- CHAT BUBBLE AI (bg-slate-700 → abu muda) ---------- */
+.bg-slate-700.prose, .bg-slate-700.text-slate-100 {
+    background-color: #f1f5f9 !important;
+    color: #0f172a !important;
+}
+
+/* ---------- TYPING INDICATOR ---------- */
+.pulse-glow {
+    box-shadow: 0 0 0 0 rgba(20, 184, 166, 0.4);
+}
+
+/* ---------- GRID PATTERN OVERLAY (jika ada) ---------- */
+.absolute.-right-20.-top-20.bg-teal-500\/10 {
+    opacity: 0.4;
+}
+
+/* ---------- SHADOW untuk card di light theme ---------- */
+.rounded-2xl.border {
+    box-shadow: 0 1px 2px 0 rgba(15, 23, 42, 0.04);
+}

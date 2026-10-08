@@ -1,5 +1,12 @@
 // ===== GRAFIK EVA =====
 let grafikCharts = {};
+// ===== THEME CONFIG (Light Mode) =====
+const CHART_THEME = {
+    textColor: '#0f172a',           // slate-900
+    textSecondary: '#64748b',       // slate-500
+    gridColor: 'rgba(203, 213, 225, 0.4)',  // slate-300 alpha
+    barColors: ['#14b8a6', '#0d9488', '#0891b2', '#2563eb', '#6366f1', '#8b5cf6'],
+};
 
 function initGrafik() {
     populateYearFilter();
@@ -20,7 +27,6 @@ function populateYearFilter() {
         }
     });
 
-    // Urutkan descending (tahun terbaru di atas)
     years.sort((a, b) => b.localeCompare(a));
 
     select.innerHTML = '';
@@ -31,7 +37,6 @@ function populateYearFilter() {
         select.appendChild(option);
     });
 
-    // Pilih maksimal 5 tahun terbaru
     const options = Array.from(select.options);
     const maxSelect = 5;
     const toSelect = options.slice(0, maxSelect);
@@ -73,12 +78,10 @@ function applyFilterGrafik() {
         return;
     }
 
-    // Batasi maksimal 5 tahun (ambil 5 tahun terbaru)
     const allYears = Array.from(select.options).map(opt => opt.value);
     const sortedAll = [...allYears].sort((a, b) => b.localeCompare(a));
     const latest5 = sortedAll.slice(0, 5);
     
-    // Filter selectedYears yang termasuk dalam latest5
     selectedYears = selectedYears.filter(year => latest5.includes(year));
     if (selectedYears.length === 0) {
         selectedYears = latest5;
@@ -102,7 +105,7 @@ function applyFilterGrafik() {
     });
 
     if (dataTahun.length === 0) {
-        document.getElementById('grafikContainer').innerHTML = '<div class="text-center text-slate-400 py-12">Tidak ada data untuk tahun yang dipilih.</div>';
+        document.getElementById('grafikContainer').innerHTML = '<div class="text-center text-slate-500 py-12">Tidak ada data untuk tahun yang dipilih.</div>';
         return;
     }
 
@@ -184,13 +187,13 @@ function renderGrafik(data) {
     const container = document.getElementById('grafikContainer');
     container.innerHTML = '';
 
-    const colors = ['#14b8a6', '#0d9488', '#0f766e', '#115e59', '#134e4a', '#042f2e'];
-    const bgColors = colors.map(c => c + '80');
+    const colors = CHART_THEME.barColors;
+    const bgColors = colors.map(c => c + 'CC');
 
     // 1. Grafik Nilai Tambah per Tahun
     const wrapper1 = document.createElement('div');
-    wrapper1.className = 'bg-slate-800 rounded-2xl p-4 border border-slate-700';
-    wrapper1.innerHTML = '<h3 class="text-sm font-bold text-white mb-2">Nilai Tambah per Tahun</h3>';
+    wrapper1.className = 'bg-white rounded-2xl p-4 border border-slate-200 shadow-sm';
+    wrapper1.innerHTML = '<h3 class="text-sm font-bold text-slate-900 mb-2">Nilai Tambah per Tahun</h3>';
     const canvas1 = document.createElement('canvas');
     wrapper1.appendChild(canvas1);
     container.appendChild(wrapper1);
@@ -210,18 +213,18 @@ function renderGrafik(data) {
         options: {
             responsive: true,
             plugins: {
-                title: { display: true, text: 'Nilai Tambah per Tahun', color: 'white' },
-                legend: { labels: { color: 'white' } }
+                title: { display: true, text: 'Nilai Tambah per Tahun', color: CHART_THEME.textColor },
+                legend: { labels: { color: CHART_THEME.textColor } }
             },
             scales: {
                 y: { 
                     beginAtZero: true,
-                    ticks: { color: 'white' },
-                    grid: { color: 'rgba(255,255,255,0.1)' }
+                    ticks: { color: CHART_THEME.textColor },
+                    grid: { color: CHART_THEME.gridColor }
                 },
                 x: { 
-                    ticks: { color: 'white' },
-                    grid: { color: 'rgba(255,255,255,0.1)' }
+                    ticks: { color: CHART_THEME.textColor },
+                    grid: { color: CHART_THEME.gridColor }
                 }
             }
         }
@@ -243,9 +246,9 @@ function renderGrafik(data) {
 // ===== FUNGSI BANTU =====
 function createGroup(container, title) {
     const wrapper = document.createElement('div');
-    wrapper.className = 'bg-slate-800/50 rounded-2xl p-4 border border-slate-700';
+    wrapper.className = 'bg-white rounded-2xl p-4 border border-slate-200 shadow-sm';
     const h3 = document.createElement('h3');
-    h3.className = 'text-lg font-bold text-white mb-4 border-b border-slate-700 pb-2';
+    h3.className = 'text-lg font-bold text-slate-900 mb-4 border-b border-slate-200 pb-2';
     h3.textContent = title;
     wrapper.appendChild(h3);
     const grid = document.createElement('div');
@@ -257,8 +260,8 @@ function createGroup(container, title) {
 
 // ===== RENDER GROUP 2: PRODUKTIVITAS =====
 function renderGroup2(grid, data) {
-    const colors = ['#14b8a6', '#0d9488', '#0f766e', '#115e59'];
-    const bgColors = colors.map(c => c + '80');
+    const colors = CHART_THEME.barColors;
+    const bgColors = colors.map(c => c + 'CC');
 
     const charts = [
         { label: 'Nilai Tambah per Tenaga Kerja', key: 'nilaiTambahPerTenaga' },
@@ -269,7 +272,7 @@ function renderGroup2(grid, data) {
 
     charts.forEach((item, idx) => {
         const div = document.createElement('div');
-        div.className = 'bg-slate-800 rounded-xl p-3';
+        div.className = 'bg-slate-50 rounded-xl p-3 border border-slate-100';
         const canvas = document.createElement('canvas');
         div.appendChild(canvas);
         grid.appendChild(div);
@@ -289,17 +292,17 @@ function renderGroup2(grid, data) {
             options: {
                 responsive: true,
                 plugins: {
-                    legend: { labels: { color: 'white' } }
+                    legend: { labels: { color: CHART_THEME.textColor } }
                 },
                 scales: {
                     y: { 
                         beginAtZero: true,
-                        ticks: { color: 'white', callback: function(v) { return v.toLocaleString('id-ID'); } },
-                        grid: { color: 'rgba(255,255,255,0.1)' }
+                        ticks: { color: CHART_THEME.textColor, callback: function(v) { return v.toLocaleString('id-ID'); } },
+                        grid: { color: CHART_THEME.gridColor }
                     },
                     x: { 
-                        ticks: { color: 'white' },
-                        grid: { color: 'rgba(255,255,255,0.1)' }
+                        ticks: { color: CHART_THEME.textColor },
+                        grid: { color: CHART_THEME.gridColor }
                     }
                 }
             }
@@ -309,8 +312,8 @@ function renderGroup2(grid, data) {
 
 // ===== RENDER GROUP 3: EFISIENSI INVESTASI =====
 function renderGroup3(grid, data) {
-    const colors = ['#14b8a6', '#0d9488', '#0f766e'];
-    const bgColors = colors.map(c => c + '80');
+    const colors = CHART_THEME.barColors;
+    const bgColors = colors.map(c => c + 'CC');
 
     const charts = [
         { label: 'Penjualan / Total Investasi', key: 'penjualanPerInvestasi' },
@@ -320,7 +323,7 @@ function renderGroup3(grid, data) {
 
     charts.forEach((item, idx) => {
         const div = document.createElement('div');
-        div.className = 'bg-slate-800 rounded-xl p-3';
+        div.className = 'bg-slate-50 rounded-xl p-3 border border-slate-100';
         const canvas = document.createElement('canvas');
         div.appendChild(canvas);
         grid.appendChild(div);
@@ -340,17 +343,17 @@ function renderGroup3(grid, data) {
             options: {
                 responsive: true,
                 plugins: {
-                    legend: { labels: { color: 'white' } }
+                    legend: { labels: { color: CHART_THEME.textColor } }
                 },
                 scales: {
                     y: { 
                         beginAtZero: true,
-                        ticks: { color: 'white', callback: function(v) { return v.toLocaleString('id-ID'); } },
-                        grid: { color: 'rgba(255,255,255,0.1)' }
+                        ticks: { color: CHART_THEME.textColor, callback: function(v) { return v.toLocaleString('id-ID'); } },
+                        grid: { color: CHART_THEME.gridColor }
                     },
                     x: { 
-                        ticks: { color: 'white' },
-                        grid: { color: 'rgba(255,255,255,0.1)' }
+                        ticks: { color: CHART_THEME.textColor },
+                        grid: { color: CHART_THEME.gridColor }
                     }
                 }
             }
@@ -360,8 +363,8 @@ function renderGroup3(grid, data) {
 
 // ===== RENDER GROUP 4: PROFITABILITAS =====
 function renderGroup4(grid, data) {
-    const colors = ['#14b8a6', '#0d9488', '#0f766e'];
-    const bgColors = colors.map(c => c + '80');
+    const colors = CHART_THEME.barColors;
+    const bgColors = colors.map(c => c + 'CC');
 
     const charts = [
         { label: 'Laba Bersih / Penjualan (%)', key: 'labaBersihPerPenjualan' },
@@ -371,7 +374,7 @@ function renderGroup4(grid, data) {
 
     charts.forEach((item, idx) => {
         const div = document.createElement('div');
-        div.className = 'bg-slate-800 rounded-xl p-3';
+        div.className = 'bg-slate-50 rounded-xl p-3 border border-slate-100';
         const canvas = document.createElement('canvas');
         div.appendChild(canvas);
         grid.appendChild(div);
@@ -391,20 +394,20 @@ function renderGroup4(grid, data) {
             options: {
                 responsive: true,
                 plugins: {
-                    legend: { labels: { color: 'white' } }
+                    legend: { labels: { color: CHART_THEME.textColor } }
                 },
                 scales: {
                     y: { 
                         beginAtZero: true,
                         ticks: { 
-                            color: 'white', 
+                            color: CHART_THEME.textColor, 
                             callback: function(v) { return v.toFixed(1) + '%'; } 
                         },
-                        grid: { color: 'rgba(255,255,255,0.1)' }
+                        grid: { color: CHART_THEME.gridColor }
                     },
                     x: { 
-                        ticks: { color: 'white' },
-                        grid: { color: 'rgba(255,255,255,0.1)' }
+                        ticks: { color: CHART_THEME.textColor },
+                        grid: { color: CHART_THEME.gridColor }
                     }
                 }
             }
