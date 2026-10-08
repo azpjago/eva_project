@@ -291,8 +291,9 @@ async function applyFilterRasio() {
     });
 
     // ===== CACHING =====
-    // Key cache = hash dari years + semua nilai (biar tidak re-call AI untuk data yang sama)
-    const cacheKey = 'eva_rasio_ai_' + btoa(JSON.stringify({
+    // ===== CACHING =====
+    const CACHE_VERSION = 'v3';   // ← TAMBAHKAN INI
+    const cacheKey = 'eva_rasio_ai_' + CACHE_VERSION + '_' + btoa(JSON.stringify({
         years: dataTahun.map(d => d.tahun),
         ratios: allRatios.map(r => [r.ratioId, r.values.map(v => Math.round(v * 100) / 100)])
     })).slice(0, 80);

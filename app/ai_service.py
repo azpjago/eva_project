@@ -47,7 +47,7 @@ def generate_recommendation_narrative(eva_result: EvaResult) -> str:
         if response.text:
             return response.text.strip()
         return "Tidak dapat menghasilkan rekomendasi (respons EVA kosong atau terblokir filter)."
-    
+
     except Exception as e:
         logger.error(f"Error pada generate_recommendation_narrative: {e}", exc_info=True)
         return f"Gagal membuat rekomendasi bisnis: {str(e)}"
@@ -260,7 +260,7 @@ def analyze_ratio_trend(data_tahun: list, ratios: list) -> dict:
             "growth_persen": [round(g, 2) for g in r.get("growth", [])],
         })
 
-        # Daftar metode untuk prompt
+    # Daftar metode untuk prompt
     methods_list = []
     for category, items in PRODUCTIVITY_METHODS.items():
         methods_list.append(f"\n### {category}:")
@@ -285,21 +285,21 @@ Untuk SETIAP rasio, berikan:
 
 FORMAT OUTPUT (JSON VALID, tanpa markdown code fence):
 {{
-  "ratio_id": {{
+"ratio_id": {{
     "short": "1-2 kalimat singkat (STRING, maks 120 karakter)",
     "detailed": "3-5 kalimat analisis mendalam (STRING)",
     "recommendations": ["Saran 1", "Saran 2", "Saran 3", "Saran 4", "Saran 5"],
     "recommended_methods": [
-      {{
+    {{
         "method": "Nama Singkat Metode (mis: Kaizen)",
         "full_name": "Nama Lengkap Metode",
         "alasan": "1-2 kalimat mengapa metode ini cocok untuk rasio ini",
         "penerapan": "1-2 kalimat langkah penerapan konkret"
-      }}
+    }}
     ],
     "trend": "naik",
     "status": "positif"
-  }}
+}}
 }}
 
 ATURAN PENTING:
@@ -312,7 +312,7 @@ ATURAN PENTING:
 - Bahasa Indonesia profesional.
 - Output HANYA JSON.
 """
-        try:
+    try:
         response = client.models.generate_content(
             model=MODEL_NAME,
             contents=prompt,
