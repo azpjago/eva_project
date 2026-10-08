@@ -258,24 +258,42 @@ def analyze_ratio_trend(data_tahun: list, ratios: list) -> dict:
             "growth_persen": [round(g, 2) for g in r.get("growth", [])],
         })
 
+        # Daftar metode untuk prompt
+    methods_list = []
+    for category, items in PRODUCTIVITY_METHODS.items():
+        methods_list.append(f"\n### {category}:")
+        for m in items:
+            methods_list.append(f"- {m}")
+    methods_text = "\n".join(methods_list)
+
     prompt = f"""Anda adalah analis produktivitas senior untuk Kementerian Ketenagakerjaan Indonesia.
 
-Berikut adalah data rasio produktivitas perusahaan lintas tahun:
-
+Berikut data rasio produktivitas perusahaan lintas tahun:
 {_json.dumps(prompt_data, ensure_ascii=False, indent=2)}
 
-TUGAS:
-Untuk SETIAP rasio, berikan analisis singkat, analisis mendetail, dan TEPAT 5 saran perbaikan yang spesifik, terukur, dan actionable.
-Fokus pada: tren (naik/turun/stabil), penyebab potensial, dampak bagi produktivitas, dan rekomendasi aksi nyata.
+DAFTAR METODE PENINGKATAN PRODUKTIVITAS YANG TERSEDIA:
+{methods_text}
 
-FORMAT OUTPUT (HARUS JSON VALID, tanpa markdown code fence):
+TUGAS:
+Untuk SETIAP rasio, berikan:
+1. Analisis singkat (short)
+2. Analisis mendetail (detailed)
+3. TEPAT 5 saran perbaikan konkret (recommendations)
+4. TEPAT 3 metode peningkatan produktivitas yang PALING COCOK dari daftar di atas (recommended_methods)
+
+FORMAT OUTPUT (JSON VALID, tanpa markdown code fence):
 {{
   "ratio_id": {{
     "short": "1-2 kalimat singkat (STRING, maks 120 karakter)",
     "detailed": "3-5 kalimat analisis mendalam (STRING)",
-    "recommendations": [
-      "Saran aksi nyata 1 (STRING)",
-      "Saran aksi nyata 2 (STRING)"
+    "recommendations": ["Saran 1", "Saran 2", "Saran 3", "Saran 4", "Saran 5"],
+    "recommended_methods": [
+      {{
+        "method": "Nama Singkat Metode (mis: Kaizen)",
+        "full_name": "Nama Lengkap Metode",
+        "alasan": "1-2 kalimat mengapa metode ini cocok untuk rasio ini",
+        "penerapan": "1-2 kalimat langkah penerapan konkret"
+      }}
     ],
     "trend": "naik",
     "status": "positif"
@@ -283,16 +301,15 @@ FORMAT OUTPUT (HARUS JSON VALID, tanpa markdown code fence):
 }}
 
 ATURAN PENTING:
-- Field "short" dan "detailed" HARUS berupa STRING (kalimat), BUKAN object atau array.
-- "recommendations" HARUS ARRAY of STRING (TEPAT 5 saran, masing-masing 1-2 kalimat actionable dengan angka target bila memungkinkan).
-- Field "trend" HARUS salah satu dari: "naik", "turun", "stabil".
-- Field "status" HARUS salah satu dari: "positif", "warning", "negatif".
-- Gunakan Bahasa Indonesia profesional.
-- Sertakan angka spesifik dari data.
-- Jangan mengarang data yang tidak ada.
-- Output HANYA JSON, tanpa penjelasan tambahan.
+- Field "short" & "detailed" HARUS STRING (kalimat), bukan object/array.
+- Field "recommendations" HARUS ARRAY of STRING dengan TEPAT 5 saran actionable.
+- Field "recommended_methods" HARUS ARRAY of OBJECT dengan TEPAT 3 metode. Setiap metode HARUS dari daftar yang tersedia di atas (jangan mengarang metode baru).
+- Field "trend": "naik" | "turun" | "stabil".
+- Field "status": "positif" | "warning" | "negatif".
+- Setiap "alasan" dan "penerapan" harus KONTEKSTUAL dengan temuan rasio ini (sebutkan angka spesifik bila memungkinkan).
+- Bahasa Indonesia profesional.
+- Output HANYA JSON.
 """
-
     try:
         response = client.models.generate_content(
             model=MODEL_NAME,
