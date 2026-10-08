@@ -681,6 +681,15 @@ function showRasioDetail(ratioId) {
                             ${recsHtml}
                         </div>
                     </div>
+                    <!-- Saran Metode Peningkatan Produktivitas -->
+                    <div>
+                        <h4 class="text-sm font-bold text-white mb-2 flex items-center gap-2">
+                            <i class="fa-solid fa-toolbox text-cyan-400"></i> Saran Metode Peningkatan Produktivitas
+                        </h4>
+                        <div class="space-y-2">
+                            ${renderMethods(a.recommended_methods)}
+                        </div>
+                    </div>
                 </div>
 
                 <!-- KOLOM KANAN: Dialog AI -->
@@ -862,6 +871,51 @@ async function sendRasioDialog(ratioId) {
         // Fokus kembali ke input
         input.focus();
     }
+}
+
+// ===== RENDER SARAN METODE =====
+function renderMethods(methods) {
+    if (!Array.isArray(methods) || methods.length === 0) {
+        return '<p class="text-xs text-slate-400 italic bg-slate-900/50 p-3 rounded-lg border border-slate-700">Belum ada saran metode untuk rasio ini.</p>';
+    }
+
+    const colors = [
+        { bg: 'bg-cyan-500/10', border: 'border-cyan-500/30', text: 'text-cyan-400', icon: 'fa-gears' },
+        { bg: 'bg-blue-500/10', border: 'border-blue-500/30', text: 'text-blue-400', icon: 'fa-diagram-project' },
+        { bg: 'bg-purple-500/10', border: 'border-purple-500/30', text: 'text-purple-400', icon: 'fa-lightbulb' },
+    ];
+
+    return methods.map((m, i) => {
+        const c = colors[i % colors.length];
+        const methodName = safeText(m.method, 'Metode');
+        const fullName = safeText(m.full_name, methodName);
+        const alasan = safeText(m.alasan, '-');
+        const penerapan = safeText(m.penerapan, '-');
+
+        return `
+            <div class="${c.bg} border ${c.border} rounded-lg p-3 space-y-2">
+                <div class="flex items-start gap-2">
+                    <div class="shrink-0 w-7 h-7 rounded-lg ${c.bg} border ${c.border} flex items-center justify-center ${c.text} mt-0.5">
+                        <i class="fa-solid ${c.icon} text-xs"></i>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <div class="font-bold ${c.text} text-sm leading-tight">${methodName}</div>
+                        <div class="text-[10px] text-slate-500 mt-0.5">${fullName}</div>
+                    </div>
+                </div>
+                <div class="pl-9 space-y-1.5 text-xs">
+                    <div>
+                        <span class="text-slate-400 font-semibold">💡 Alasan:</span>
+                        <span class="text-slate-200 ml-1">${alasan}</span>
+                    </div>
+                    <div>
+                        <span class="text-slate-400 font-semibold">🎯 Penerapan:</span>
+                        <span class="text-slate-200 ml-1">${penerapan}</span>
+                    </div>
+                </div>
+            </div>
+        `;
+    }).join('');
 }
 
 // ===== TYPING INDICATOR =====
