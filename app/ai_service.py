@@ -606,6 +606,256 @@ def _build_smart_recommendations(ratio_id: str, trend: str, values: list, growth
             "🎯 **Aksi Benchmarking**: Bandingkan dengan rata-rata industri — identifikasi area gap untuk ditingkatkan.",
         ], "stabil")
 
+def _build_fallback_methods(ratio_id: str, trend: str) -> list:
+    """
+    Fallback: pilih metode peningkatan produktivitas jika AI gagal.
+    Mengembalikan 3 metode paling relevan per jenis rasio & tren.
+    """
+    # Mapping berdasarkan ratio_id + trend
+    method_map = {
+        # ===== PRODUKTIVITAS TENAGA KERJA =====
+        "nilai_tambah_per_tenaga": {
+            "naik": ["Kaizen", "5S/5R", "Time Study"],
+            "turun": ["Work Sampling", "Time Study", "Kaizen"],
+            "stabil": ["Kaizen", "PDCA", "Balanced Scorecard"],
+        },
+        "nilai_tambah_per_jam": {
+            "naik": ["Kaizen", "Time Study", "5S/5R"],
+            "turun": ["Time Study", "Work Sampling", "Lean Manufacturing"],
+            "stabil": ["PDCA", "Kaizen", "Line Balancing"],
+        },
+        "nilai_tambah_per_biaya_tk": {
+            "naik": ["Kaizen", "Balanced Scorecard", "PDCA"],
+            "turun": ["Line Balancing", "Work Sampling", "Time Study"],
+            "stabil": ["Kaizen", "5S/5R", "PDCA"],
+        },
+        "biaya_tk_per_jam": {
+            "naik": ["Time Study", "Work Sampling", "Line Balancing"],
+            "turun": ["Lean Manufacturing", "Kaizen", "Kanban System"],
+            "stabil": ["PDCA", "Time Study", "Kaizen"],
+        },
+        # ===== PRODUKTIVITAS MODAL =====
+        "penjualan_per_investasi": {
+            "naik": ["Lean Manufacturing", "VSM", "Kaizen"],
+            "turun": ["VSM", "Lean Manufacturing", "Process Mapping"],
+            "stabil": ["PDCA", "Balanced Scorecard", "VSM"],
+        },
+        "nilai_tambah_per_investasi": {
+            "naik": ["Lean Manufacturing", "VSM", "PDCA"],
+            "turun": ["VSM", "Process Mapping", "Lean Manufacturing"],
+            "stabil": ["Kaizen", "PDCA", "VSM"],
+        },
+        "investasi_per_tenaga": {
+            "naik": ["TPM", "OEE", "5S/5R"],
+            "turun": ["TPM", "OEE", "Kanban System"],
+            "stabil": ["TPM", "PDCA", "Kaizen"],
+        },
+        # ===== PROFITABILITAS =====
+        "laba_per_penjualan": {
+            "naik": ["Kaizen", "Lean Manufacturing", "PDCA"],
+            "turun": ["Pareto Diagram", "Fishbone Diagram", "Kaizen"],
+            "stabil": ["PDCA", "Lean Manufacturing", "Balanced Scorecard"],
+        },
+        "laba_per_nilai_tambah": {
+            "naik": ["Kaizen", "PDCA", "Value Stream Mapping"],
+            "turun": ["Fishbone Diagram", "Pareto Diagram", "VSM"],
+            "stabil": ["PDCA", "Kaizen", "Check Sheet"],
+        },
+        "laba_per_investasi": {
+            "naik": ["Balanced Scorecard", "PDCA", "Kaizen"],
+            "turun": ["SWOT", "Balanced Scorecard", "VSM"],
+            "stabil": ["PDCA", "Balanced Scorecard", "Kaizen"],
+        },
+        # ===== PENDUKUNG =====
+        "nilai_tambah_per_penjualan": {
+            "naik": ["Lean Manufacturing", "VSM", "Kaizen"],
+            "turun": ["VSM", "Lean Manufacturing", "Fishbone Diagram"],
+            "stabil": ["PDCA", "Lean Manufacturing", "Kaizen"],
+        },
+        "nilai_tambah_per_bahan_baku": {
+            "naik": ["Kaizen", "PDCA", "EOQ"],
+            "turun": ["MRP", "EOQ", "Pareto Diagram"],
+            "stabil": ["EOQ", "MRP", "Kaizen"],
+        },
+        "nilai_tambah_per_biaya_tk_v2": {
+            "naik": ["Kaizen", "PDCA", "Balanced Scorecard"],
+            "turun": ["Time Study", "Work Sampling", "Line Balancing"],
+            "stabil": ["Kaizen", "PDCA", "5S/5R"],
+        },
+    }
+
+    # Detail setiap metode
+    method_details = {
+        "5S/5R": {
+            "full_name": "5S/5R (Ringkas, Rapi, Resik, Rawat, Rajin)",
+            "alasan": "Menata lingkungan kerja agar lebih efisien dan mengurangi waktu pencarian alat/bahan.",
+            "penerapan": "Bentuk tim 5S per area kerja, lakukan audit mingguan, beri reward ke tim terbaik.",
+        },
+        "Kaizen": {
+            "full_name": "Kaizen (Continuous Improvement)",
+            "alasan": "Cocok untuk perbaikan bertahap berkelanjutan tanpa investasi besar.",
+            "penerapan": "Bentuk gugus kendali mutu (QCC) — tim kecil bertemu mingguan untuk usulkan perbaikan.",
+        },
+        "PDCA": {
+            "full_name": "PDCA (Plan-Do-Check-Act)",
+            "alasan": "Siklus perbaikan sistematis untuk memastikan setiap perubahan terukur.",
+            "penerapan": "Terapkan siklus PDCA per kuartal dengan target spesifik & evaluasi berkala.",
+        },
+        "TQM": {
+            "full_name": "TQM (Total Quality Management)",
+            "alasan": "Melibatkan seluruh organisasi untuk peningkatan kualitas menyeluruh.",
+            "penerapan": "Bangun budaya kualitas melalui pelatihan, SOP, dan komitmen manajemen puncak.",
+        },
+        "TQC": {
+            "full_name": "TQC (Total Quality Control)",
+            "alasan": "Kontrol kualitas menyeluruh di setiap tahap produksi.",
+            "penerapan": "Terapkan inspeksi di setiap stasiun kerja dengan standar kualitas jelas.",
+        },
+        "Poka-Yoke": {
+            "full_name": "Poka-Yoke (Error Proofing)",
+            "alasan": "Mencegah kesalahan sejak awal, mengurangi rework.",
+            "penerapan": "Identifikasi titik rawan kesalahan, pasang sensor/checklist pencegahan.",
+        },
+        "Kanban System": {
+            "full_name": "Kanban System",
+            "alasan": "Mengontrol aliran material/produksi agar sesuai permintaan.",
+            "penerapan": "Pasang papan Kanban visual, batasi WIP per stasiun, lakukan review harian.",
+        },
+        "Fishbone Diagram": {
+            "full_name": "Fishbone Diagram (Ishikawa)",
+            "alasan": "Menganalisis akar penyebab masalah secara sistematis (Man, Method, Machine, Material, Measurement, Environment).",
+            "penerapan": "Adakan sesi brainstorming lintas divisi untuk memetakan akar masalah.",
+        },
+        "5W+1H": {
+            "full_name": "5W+1H (What, Why, Where, When, Who, How)",
+            "alasan": "Kerangka investigasi masalah yang menyeluruh.",
+            "penerapan": "Gunakan untuk analisis insiden/penurunan kinerja sebelum menentukan solusi.",
+        },
+        "Pareto Diagram": {
+            "full_name": "Pareto Diagram (80/20 Rule)",
+            "alasan": "Fokus pada 20% penyebab yang menimbulkan 80% masalah.",
+            "penerapan": "Kumpulkan data frekuensi masalah, urutkan, tangani penyebab utama lebih dulu.",
+        },
+        "SWOT": {
+            "full_name": "SWOT Analysis",
+            "alasan": "Menilai posisi internal & eksternal perusahaan untuk strategi tepat.",
+            "penerapan": "Adakan workshop strategis tahunan dengan manajemen & stakeholder kunci.",
+        },
+        "FMEA": {
+            "full_name": "FMEA (Failure Mode and Effects Analysis)",
+            "alasan": "Mengidentifikasi potensi kegagalan sebelum terjadi.",
+            "penerapan": "Buat tabel FMEA per proses kritis, hitung RPN, prioritaskan mitigasi.",
+        },
+        "Check Sheet": {
+            "full_name": "Check Sheet",
+            "alasan": "Mencatat data secara sistematis untuk analisis lebih lanjut.",
+            "penerapan": "Buat form checklist sederhana untuk pengumpulan data harian.",
+        },
+        "Flowchart": {
+            "full_name": "Flowchart / Flow Process Chart",
+            "alasan": "Memvisualisasikan alur proses untuk identifikasi inefisiensi.",
+            "penerapan": "Petakan alur kerja saat ini (as-is), tandai langkah non-value-added.",
+        },
+        "Control Chart": {
+            "full_name": "Control Chart",
+            "alasan": "Memantau stabilitas proses dari waktu ke waktu.",
+            "penerapan": "Plot data kinerja harian pada chart kontrol, tandai outlier untuk investigasi.",
+        },
+        "SPC": {
+            "full_name": "SPC (Statistical Process Control)",
+            "alasan": "Mengontrol kualitas berbasis data statistik.",
+            "penerapan": "Terapkan batas kontrol UCL/LCL di proses produksi kritis.",
+        },
+        "OEE": {
+            "full_name": "OEE (Overall Equipment Effectiveness)",
+            "alasan": "Mengukur efektivitas peralatan/mesin secara menyeluruh.",
+            "penerapan": "Ukur Availability × Performance × Quality tiap shift, target ≥85%.",
+        },
+        "Work Sampling": {
+            "full_name": "Work Sampling",
+            "alasan": "Mengetahui proporsi waktu kerja produktif vs non-produktif.",
+            "penerapan": "Lakukan observasi acak 30-50 kali per minggu selama 2 minggu.",
+        },
+        "Time Study": {
+            "full_name": "Time Study",
+            "alasan": "Mengukur waktu standar setiap aktivitas untuk baseline perbaikan.",
+            "penerapan": "Ukur waktu setiap elemen tugas dengan stopwatch, tetapkan waktu baku.",
+        },
+        "Histogram": {
+            "full_name": "Histogram",
+            "alasan": "Memvisualisasikan distribusi data untuk memahami variasi.",
+            "penerapan": "Plot data produksi/kinerja, identifikasi pola & outlier.",
+        },
+        "Lean Manufacturing": {
+            "full_name": "Lean Manufacturing",
+            "alasan": "Menghilangkan 7 waste (overproduction, waiting, transport, over-processing, inventory, motion, defects).",
+            "penerapan": "Petakan value stream, identifikasi waste, terapkan perbaikan berkelanjutan.",
+        },
+        "VSM": {
+            "full_name": "VSM (Value Stream Mapping)",
+            "alasan": "Memetakan aliran nilai dari bahan mentah sampai produk jadi.",
+            "penerapan": "Buat peta current state & future state, targetkan lead time reduction.",
+        },
+        "JIT": {
+            "full_name": "JIT (Just In Time)",
+            "alasan": "Mengurangi inventori dengan produksi sesuai permintaan.",
+            "penerapan": "Selaraskan jadwal produksi dengan order, bangun hubungan erat dengan supplier.",
+        },
+        "SMED": {
+            "full_name": "SMED (Single-Minute Exchange of Die)",
+            "alasan": "Mempercepat waktu setup/ganti alat agar lebih fleksibel.",
+            "penerapan": "Pisahkan setup internal & eksternal, targetkan <10 menit per changeover.",
+        },
+        "Line Balancing": {
+            "full_name": "Line Balancing",
+            "alasan": "Menyeimbangkan beban kerja antar stasiun untuk hilangkan bottleneck.",
+            "penerapan": "Hitung takt time, redistribusi tugas antar operator, evaluasi mingguan.",
+        },
+        "Process Mapping": {
+            "full_name": "Process Mapping",
+            "alasan": "Dokumentasi proses bisnis yang detail untuk identifikasi inefisiensi.",
+            "penerapan": "Petakan proses end-to-end, tandai langkah yang bisa diotomasi/dihilangkan.",
+        },
+        "TPM": {
+            "full_name": "TPM (Total Productive Maintenance)",
+            "alasan": "Melibatkan semua operator dalam perawatan mesin untuk hindari downtime.",
+            "penerapan": "Terapkan autonomous maintenance, jadwal perawatan preventif, ukur OEE.",
+        },
+        "Balanced Scorecard": {
+            "full_name": "Balanced Scorecard (BSC)",
+            "alasan": "Mengukur kinerja dari 4 perspektif: finansial, pelanggan, proses, pembelajaran.",
+            "penerapan": "Susun KPI per perspektif, review kuartalan dengan manajemen puncak.",
+        },
+        "MRP": {
+            "full_name": "MRP (Material Requirements Planning)",
+            "alasan": "Merencanakan kebutuhan bahan baku sesuai jadwal produksi.",
+            "penerapan": "Bangun sistem MRP terintegrasi dengan jadwal produksi & stok.",
+        },
+        "EOQ": {
+            "full_name": "EOQ (Economic Order Quantity)",
+            "alasan": "Menghitung jumlah pemesanan optimal untuk minimalkan biaya pesan & simpan.",
+            "penerapan": "Hitung EOQ per item, negosiasi harga dengan supplier untuk volume optimal.",
+        },
+        "Six Sigma": {
+            "full_name": "Six Sigma",
+            "alasan": "Mengurangi cacat hingga 3.4 per juta peluang (DMAIC).",
+            "penerapan": "Bentuk tim Black Belt/Green Belt, terapkan DMAIC untuk masalah kritis.",
+        },
+    }
+
+    entry = method_map.get(ratio_id, {}).get(trend, ["Kaizen", "PDCA", "5S/5R"])
+
+    result = []
+    for m in entry:
+        detail = method_details.get(m, {})
+        result.append({
+            "method": m,
+            "full_name": detail.get("full_name", m),
+            "alasan": detail.get("alasan", "Metode ini relevan dengan temuan rasio."),
+            "penerapan": detail.get("penerapan", "Terapkan sesuai konteks operasional perusahaan."),
+        })
+    return result
+
 def ratio_dialog_reply(
     message: str,
     history: list,
