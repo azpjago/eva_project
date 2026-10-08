@@ -105,6 +105,50 @@ def _coerce_to_string(val, default=""):
         return " ".join([p for p in parts if p]) or default
     return str(val) or default
 
+# ===== DAFTAR METODE PENINGKATAN PRODUKTIVITAS =====
+PRODUCTIVITY_METHODS = {
+    "Manajemen & Budaya Kerja": [
+        "5S/5R (Seiri/Seiton/Seiso/Seiketsu/Shitsuke)",
+        "Kaizen (Continuous Improvement)",
+        "PDCA (Plan-Do-Check-Act)",
+        "TQM (Total Quality Management)",
+        "TQC (Total Quality Control)",
+        "Poka-Yoke (Error Proofing)",
+        "Kanban System",
+    ],
+    "Analisis & Pemecahan Masalah": [
+        "Fishbone Diagram (Ishikawa)",
+        "5W+1H (What, Why, Where, When, Who + How)",
+        "Pareto Diagram",
+        "SWOT Analysis",
+        "FMEA (Failure Mode and Effects Analysis)",
+        "Check Sheet",
+        "Flowchart / Flow Process Chart",
+    ],
+    "Pengukuran & Kontrol": [
+        "Control Chart",
+        "SPC (Statistical Process Control)",
+        "OEE (Overall Equipment Effectiveness)",
+        "Work Sampling",
+        "Time Study",
+        "Histogram",
+    ],
+    "Optimasi Proses": [
+        "Lean Manufacturing",
+        "VSM (Value Stream Mapping)",
+        "JIT (Just In Time)",
+        "SMED (Single-Minute Exchange of Die)",
+        "Line Balancing",
+        "Process Mapping",
+        "TPM (Total Productive Maintenance)",
+    ],
+    "Strategi & Perencanaan": [
+        "Balanced Scorecard (BSC)",
+        "MRP (Material Requirements Planning)",
+        "EOQ (Economic Order Quantity)",
+        "Six Sigma",
+    ],
+}
 
 def analyze_ratio_trend(data_tahun: list, ratios: list) -> dict:
     """
