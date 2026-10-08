@@ -186,6 +186,7 @@ def analyze_ratio_trend(data_tahun: list, ratios: list) -> dict:
                         "📋 Tambahkan data tahun berikutnya untuk analisis yang lebih komprehensif.",
                         "📊 Pastikan semua komponen pembentuk rasio sudah terisi lengkap.",
                     ],
+                    "recommended_methods": _build_fallback_methods(rid, "stabil"),
                     "trend": "stabil",
                     "status": "warning",
                 }
@@ -233,6 +234,7 @@ def analyze_ratio_trend(data_tahun: list, ratios: list) -> dict:
                 "short": short,
                 "detailed": detailed,
                 "recommendations": _build_smart_recommendations(rid, trend, values, growth),
+                "recommended_methods": _build_fallback_methods(rid, "stabil"),
                 "trend": trend,
                 "status": status,
             }
@@ -414,7 +416,7 @@ ATURAN PENTING:
     except Exception as e:
         logger.error(f"Error pada analyze_ratio_trend: {e}", exc_info=True)
         return build_fallback()
-        
+
 def _analyze_severity(values: list, growth_rates: list) -> dict:
     """
     Klasifikasikan tingkat keparahan berdasarkan growth dan volatilitas.
