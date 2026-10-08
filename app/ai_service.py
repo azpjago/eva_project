@@ -310,7 +310,7 @@ ATURAN PENTING:
 - Bahasa Indonesia profesional.
 - Output HANYA JSON.
 """
-    try:
+        try:
         response = client.models.generate_content(
             model=MODEL_NAME,
             contents=prompt,
@@ -339,12 +339,14 @@ ATURAN PENTING:
         for rid, item in list(parsed.items()):
             if not isinstance(item, dict):
                 continue
-            # short & detailed wajib string
+
+            # ----- short & detailed wajib string -----
             item["short"] = _coerce_to_string(item.get("short"), "-")
             item["detailed"] = _coerce_to_string(
                 item.get("detailed") or item.get("short"), item["short"]
             )
-            # recommendations wajib list of string
+
+            # ----- recommendations wajib list of string -----
             recs = item.get("recommendations")
             if isinstance(recs, str):
                 recs = [recs]
@@ -353,15 +355,52 @@ ATURAN PENTING:
             item["recommendations"] = [
                 _coerce_to_string(r) for r in recs if _coerce_to_string(r)
             ]
-            # trend & status wajib string valid
+
+            # ----- trend & status wajib string valid -----
             trend = _coerce_to_string(item.get("trend"), "stabil").lower()
             if trend not in ("naik", "turun", "stabil"):
                 trend = "stabil"
             item["trend"] = trend
+
             status = _coerce_to_string(item.get("status"), "positif").lower()
             if status not in ("positif", "warning", "negatif"):
                 status = "positif"
             item["status"] = status
+
+            # ============================================================
+            # ⬇️⬇️⬇️ KODE BARU: NORMALISASI recommended_methods ⬇️⬇️⬇️
+            # ============================================================
+            methods = item.get("recommended_methods")
+            if not isinstance(methods, list):
+                methods = []
+
+            cleaned_methods = []
+            for m in methods:
+                if not isinstance(m, dict):
+                    continue
+                cleaned_methods.append({
+                    "method": _coerce_to_string(m.get("method"), "Metode"),
+                    "full_name": _coerce_to_string(
+                        m.get("full_name"), m.get("method", "Metode")
+                    ),
+                    "alasan": _coerce_to_string(m.get("alasan"), "-"),
+                    "penerapan": _coerce_to_string(m.get("penerapan"), "-"),
+                })
+
+            # Jika AI kasih < 3 metode, lengkapi dari fallback
+            if len(cleaned_methods) < 3:
+                fb_methods = _build_fallback_methods(rid, item["trend"])
+                for fb_m in fb_methods:
+                    if len(cleaned_methods) >= 3:
+                        break
+                    # Hindari duplikat
+                    if not any(x["method"] == fb_m["method"] for x in cleaned_methods):
+                        cleaned_methods.append(fb_m)
+
+            item["recommended_methods"] = cleaned_methods[:3]
+            # ============================================================
+            # ⬆️⬆️⬆️ SAMPAI SINI ⬆️⬆️⬆️
+            # ============================================================
 
         # Isi default untuk ratio yang mungkin tidak ada di response AI
         fallback = build_fallback()
@@ -375,7 +414,7 @@ ATURAN PENTING:
     except Exception as e:
         logger.error(f"Error pada analyze_ratio_trend: {e}", exc_info=True)
         return build_fallback()
-
+        
 def _analyze_severity(values: list, growth_rates: list) -> dict:
     """
     Klasifikasikan tingkat keparahan berdasarkan growth dan volatilitas.
