@@ -17,6 +17,9 @@ function switchView(view) {
     if (view === 'nilai-tambah') {
         if (typeof initNilaiTambah === 'function') initNilaiTambah();
     }
+    if (view === 'temuan') {
+        if (typeof initTemuan === 'function') initTemuan();
+    }
 
     document.getElementById('view-ringkasan').classList.toggle('hidden', view !== 'ringkasan');
     document.getElementById('view-input-data').classList.toggle('hidden', view !== 'input-data');
@@ -24,6 +27,7 @@ function switchView(view) {
     document.getElementById('view-grafik-eva').classList.toggle('hidden', view !== 'grafik-eva');
     document.getElementById('view-rasio-produktivitas').classList.toggle('hidden', view !== 'rasio-produktivitas');
     document.getElementById('view-nilai-tambah').classList.toggle('hidden', view !== 'nilai-tambah');
+    document.getElementById('view-temuan').classList.toggle('hidden', view !== 'temuan');
 
     document.getElementById('navRingkasan').className = view === 'ringkasan' ? NAV_ACTIVE : NAV_INACTIVE;
     document.getElementById('navInputData').className = view === 'input-data' ? NAV_ACTIVE : NAV_INACTIVE;
@@ -31,6 +35,7 @@ function switchView(view) {
     document.getElementById('navGrafik').className = view === 'grafik-eva' ? NAV_ACTIVE : NAV_INACTIVE;
     document.getElementById('navRasio').className = view === 'rasio-produktivitas' ? NAV_ACTIVE : NAV_INACTIVE;
     document.getElementById('navNilaiTambah').className = view === 'nilai-tambah' ? NAV_ACTIVE : NAV_INACTIVE;
+    document.getElementById('navTemuan').className = view === 'temuan' ? NAV_ACTIVE : NAV_INACTIVE;
 }
 
 // ===== TAMPILKAN NAMA PENGGUNA =====
