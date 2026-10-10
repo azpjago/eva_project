@@ -33,6 +33,12 @@ from app.schemas import (
     RasioDialogSend,
     RasioDialogResponse,
 )
+from app.ai_service import analyze_temuan
+from app.schemas import (
+    TemuanCreate, TemuanUpdate, TemuanStatusUpdate, 
+    TemuanResponse, TemuanHistoryResponse,
+    AnalyzeTemuanRequest,
+)
 from app.security import create_access_token, hash_password, verify_password, SECRET_KEY, ALGORITHM
 
 app = FastAPI(
@@ -615,3 +621,316 @@ def list_categories(current_user: User = Depends(get_current_user)):
     """Ambil daftar kategori standar untuk UI dropdown."""
     from app.pic_template import STANDARD_CATEGORIES
     return {"categories": STANDARD_CATEGORIES}
+
+# ============================================================
+# ENDPOINT TEMUAN & TINDAK LANJUT
+# ============================================================
+
+@app.get("/api/temuan", response_model=list[TemuanResponse])
+def list_temuan(
+    status: str = None,
+    kategori: str = None,
+    prioritas: str = None,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """Ambil semua temuan user dengan filter opsional."""
+    query = db.query(Temuan).filter(Temuan.user_id == current_user.id)
+    
+    if status:
+        query = query.filter(Temuan.status == status)
+    if kategori:
+        query = query.filter(Temuan.kategori == kategori)
+    if prioritas:
+        query = query.filter(Temuan.prioritas == prioritas)
+    
+    return query.order_by(Temuan.created_at.desc()).all()
+
+
+@app.get("/api/temuan/{temuan_id}", response_model=TemuanResponse)
+def get_temuan(
+    temuan_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """Ambil detail satu temuan."""
+    temuan = db.query(Temuan).filter(
+        Temuan.id == temuan_id,
+        Temuan.user_id == current_user.id,
+    ).first()
+    if not temuan:
+        raise HTTPException(status_code=404, detail="Temuan tidak ditemukan")
+    return temuan
+
+
+@app.post("/api/temuan", response_model=TemuanResponse)
+def create_temuan(
+    data: TemuanCreate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """Buat temuan baru."""
+    temuan = Temuan(
+        user_id=current_user.id,
+        tahun=data.tahun,
+        judul=data.judul,
+        deskripsi=data.deskripsi,
+        kategori=data.kategori,
+        prioritas=data.prioritas,
+        data_pendukung=_json.dumps(data.data_pendukung or {}),
+        dampak=data.dampak,
+        rekomendasi=data.rekomendasi,
+        pic_id=data.pic_id,
+        status=data.status or "open",
+        deadline=data.deadline,
+    )
+    db.add(temuan)
+    db.commit()
+    db.refresh(temuan)
+    return temuan
+
+
+@app.put("/api/temuan/{temuan_id}", response_model=TemuanResponse)
+def update_temuan(
+    temuan_id: int,
+    data: TemuanUpdate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """Update temuan."""
+    temuan = db.query(Temuan).filter(
+        Temuan.id == temuan_id,
+        Temuan.user_id == current_user.id,
+    ).first()
+    if not temuan:
+        raise HTTPException(status_code=404, detail="Temuan tidak ditemukan")
+    
+    update_data = data.dict(exclude_unset=True)
+    for key, value in update_data.items():
+        setattr(temuan, key, value)
+    
+    db.commit()
+    db.refresh(temuan)
+    return temuan
+
+
+@app.delete("/api/temuan/{temuan_id}")
+def delete_temuan(
+    temuan_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """Hapus temuan dan history-nya."""
+    temuan = db.query(Temuan).filter(
+        Temuan.id == temuan_id,
+        Temuan.user_id == current_user.id,
+    ).first()
+    if not temuan:
+        raise HTTPException(status_code=404, detail="Temuan tidak ditemukan")
+    
+    db.query(TemuanHistory).filter(TemuanHistory.temuan_id == temuan_id).delete()
+    db.delete(temuan)
+    db.commit()
+    return {"message": "Temuan berhasil dihapus"}
+
+
+@app.patch("/api/temuan/{temuan_id}/status")
+def update_temuan_status(
+    temuan_id: int,
+    data: TemuanStatusUpdate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """Update status temuan + catat di history."""
+    temuan = db.query(Temuan).filter(
+        Temuan.id == temuan_id,
+        Temuan.user_id == current_user.id,
+    ).first()
+    if not temuan:
+        raise HTTPException(status_code=404, detail="Temuan tidak ditemukan")
+    
+    # Validasi status
+    valid_status = ["open", "in_progress", "resolved", "on_hold"]
+    if data.status not in valid_status:
+        raise HTTPException(
+            status_code=400, 
+            detail=f"Status harus salah satu dari: {', '.join(valid_status)}"
+        )
+    
+    status_lama = temuan.status
+    temuan.status = data.status
+    
+    # Set resolved_at jika di-resolve
+    if data.status == "resolved":
+        temuan.resolved_at = datetime.utcnow()
+    else:
+        temuan.resolved_at = None
+    
+    # Log ke history
+    history = TemuanHistory(
+        temuan_id=temuan.id,
+        status_lama=status_lama,
+        status_baru=data.status,
+        catatan=data.catatan,
+        changed_by=current_user.id,
+    )
+    db.add(history)
+    db.commit()
+    db.refresh(temuan)
+    
+    return {"message": "Status berhasil diupdate", "temuan_id": temuan.id, "status": temuan.status}
+
+
+@app.get("/api/temuan/{temuan_id}/history", response_model=list[TemuanHistoryResponse])
+def get_temuan_history(
+    temuan_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """Ambil riwayat perubahan status temuan."""
+    temuan = db.query(Temuan).filter(
+        Temuan.id == temuan_id,
+        Temuan.user_id == current_user.id,
+    ).first()
+    if not temuan:
+        raise HTTPException(status_code=404, detail="Temuan tidak ditemukan")
+    
+    return (
+        db.query(TemuanHistory)
+        .filter(TemuanHistory.temuan_id == temuan_id)
+        .order_by(TemuanHistory.changed_at.desc())
+        .all()
+    )
+
+
+@app.post("/api/temuan/analyze")
+def analyze_temuan_endpoint(
+    req: AnalyzeTemuanRequest,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """
+    Analisis semua data EVA user, hasilkan temuan, dan simpan ke database.
+    Jika ada temuan baru, simpan. Jika judul sama & belum resolved, update.
+    """
+    # Ambil semua record EVA user
+    records = db.query(EvaRecord).filter(EvaRecord.user_id == current_user.id).all()
+    
+    if not records:
+        return {
+            "message": "Belum ada data EVA. Silakan isi kalkulator terlebih dahulu.",
+            "temuan_baru": 0,
+            "temuan_updated": 0,
+        }
+    
+    # Filter tahun jika ditentukan
+    if req.tahun_list:
+        records = [r for r in records if r.year_title in req.tahun_list]
+    
+    if len(records) < 2:
+        return {
+            "message": "Butuh minimal 2 tahun data untuk analisis.",
+            "temuan_baru": 0,
+            "temuan_updated": 0,
+        }
+    
+    # Sort by tahun
+    records.sort(key=lambda r: r.year_title)
+    
+    # Susun data untuk AI
+    data_tahun = []
+    for r in records:
+        # Parse raw_data (list nilai input)
+        try:
+            raw = _json.loads(r.raw_data) if r.raw_data else []
+        except:
+            raw = []
+        
+        # Ambil nilai dari raw_data berdasarkan index field di form
+        # Index sesuai urutan input di generateYearPanelHTML:
+        # 0=Total Penjualan, 1=Jumlah Unit, 2=Harga Jual, 3=Pertumbuhan, 4=Penjualan Periode Sebelumnya,
+        # 5-7=Biaya Tenaga Kerja, 8-11=Bahan Digunakan, 12-19=Overhead, 20-21=Bunga, 22-36=Biaya Admin,
+        # 37-38=Penyusutan, 39-41=Pajak, 42-49=Aktiva, ... (index bisa beda)
+        # Untuk aman, kita pakai nilai_tambah yang sudah tersimpan
+        
+        nilai_tambah = r.nilai_tambah or 0
+        
+        # Estimasi kasar nilai-nilai lain dari raw_data (jika index konsisten)
+        def safe_get(idx, default=0):
+            try:
+                return float(raw[idx]) if idx < len(raw) and raw[idx] else default
+            except (ValueError, TypeError):
+                return default
+        
+        data_tahun.append({
+            "tahun": r.year_title,
+            "penjualan": safe_get(0),
+            "biayaTenagaKerja": safe_get(5) + safe_get(6) + safe_get(7),
+            "bahanDigunakan": safe_get(8) + safe_get(9) + safe_get(10) + safe_get(11),
+            "overhead_produksi": sum(safe_get(i) for i in range(12, 20)),
+            "biaya_administrasi": sum(safe_get(i) for i in range(22, 37)),
+            "penyusutan": safe_get(37) + safe_get(38),
+            "pajak": safe_get(39) + safe_get(40) + safe_get(41),
+            "bunga_pinjaman": safe_get(20) + safe_get(21),
+            "nilaiTambah": nilai_tambah,
+            "totalInvestasi": safe_get(50),  # estimasi
+            "labaBersih": nilai_tambah - safe_get(5) - safe_get(37) - safe_get(39) - safe_get(20),
+            "jumlahTenagaKerja": safe_get(48),
+            "totalJamKerja": safe_get(52),
+            "bahanBaku": safe_get(10),
+        })
+    
+    # Panggil AI
+    try:
+        temuan_list = analyze_temuan(data_tahun, force_refresh=req.force_refresh)
+    except Exception as e:
+        logger.error(f"Error analyze_temuan: {e}", exc_info=True)
+        raise HTTPException(status_code=502, detail=f"AI service error: {str(e)}")
+    
+    # Simpan ke database
+    tahun_str = f"{data_tahun[0]['tahun']}-{data_tahun[-1]['tahun']}" if len(data_tahun) > 1 else data_tahun[0]['tahun']
+    temuan_baru = 0
+    temuan_updated = 0
+    
+    for t in temuan_list:
+        # Cek apakah sudah ada temuan dengan judul sama & belum resolved
+        existing = db.query(Temuan).filter(
+            Temuan.user_id == current_user.id,
+            Temuan.judul == t["judul"],
+            Temuan.status != "resolved",
+        ).first()
+        
+        if existing:
+            # Update
+            existing.deskripsi = t["deskripsi"]
+            existing.kategori = t["kategori"]
+            existing.prioritas = t["prioritas"]
+            existing.data_pendukung = _json.dumps(t.get("data_pendukung", {}))
+            existing.dampak = t.get("dampak")
+            existing.rekomendasi = t.get("rekomendasi")
+            temuan_updated += 1
+        else:
+            # Buat baru
+            new_temuan = Temuan(
+                user_id=current_user.id,
+                tahun=tahun_str,
+                judul=t["judul"],
+                deskripsi=t["deskripsi"],
+                kategori=t["kategori"],
+                prioritas=t["prioritas"],
+                data_pendukung=_json.dumps(t.get("data_pendukung", {})),
+                dampak=t.get("dampak"),
+                rekomendasi=t.get("rekomendasi"),
+                status="open",
+            )
+            db.add(new_temuan)
+            temuan_baru += 1
+    
+    db.commit()
+    
+    return {
+        "message": f"Analisis selesai. {temuan_baru} temuan baru, {temuan_updated} diperbarui.",
+        "temuan_baru": temuan_baru,
+        "temuan_updated": temuan_updated,
+        "total_temuan": len(temuan_list),
+    }
