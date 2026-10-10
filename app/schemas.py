@@ -256,6 +256,7 @@ class TemuanResponse(BaseModel):
     data_pendukung: dict = {}
     dampak: Optional[str] = None
     rekomendasi: Optional[str] = None
+    recommended_methods: list = []
     pic_id: Optional[int] = None
     status: str
     deadline: Optional[datetime] = None
