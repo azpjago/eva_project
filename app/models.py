@@ -77,6 +77,7 @@ class Temuan(Base):
     dampak = Column(Text, nullable=True)
     rekomendasi = Column(Text, nullable=True)
     recommended_methods = Column(Text, default="[]") 
+    fingerprint = Column(String(200), default="", index=True)
     pic_id = Column(Integer, ForeignKey("pic.id"), nullable=True, index=True)
     status = Column(String(20), default="open")
     deadline = Column(DateTime, nullable=True)

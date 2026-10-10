@@ -72,20 +72,113 @@ function resetFilterTemuan() {
 }
 
 // ===== ANALISIS TEMUAN (panggil AI) =====
+// ===== ANALISIS TEMUAN (dengan konfirmasi 3 lapis) =====
 async function analyzeTemuan() {
+    // Tampilkan dialog konfirmasi dulu
+    showAnalyzeConfirmModal();
+}
+
+function showAnalyzeConfirmModal() {
+    const oldModal = document.getElementById('analyzeConfirmModal');
+    if (oldModal) oldModal.remove();
+
+    const modal = document.createElement('div');
+    modal.id = 'analyzeConfirmModal';
+    modal.className = 'fixed inset-0 bg-black/60 backdrop-blur-sm z-[120] flex items-center justify-center p-4 overflow-y-auto';
+    modal.onclick = (e) => { if (e.target === modal) modal.remove(); };
+
+    modal.innerHTML = `
+        <div class="bg-white rounded-2xl max-w-md w-full border border-slate-200 shadow-2xl my-8">
+            <div class="p-5 border-b border-slate-200 flex items-start justify-between">
+                <div class="flex items-start gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-amber-100 flex items-center justify-center text-amber-600 shrink-0">
+                        <i class="fa-solid fa-triangle-exclamation text-lg"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-base font-bold text-slate-900">Konfirmasi Analisis Ulang</h3>
+                        <p class="text-xs text-slate-500 mt-1">Sistem akan menganalisis data EVA dengan 3 lapis proteksi.</p>
+                    </div>
+                </div>
+                <button onclick="document.getElementById('analyzeConfirmModal').remove()" 
+                        class="text-slate-400 hover:text-slate-900 p-1 transition">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+
+            <div class="p-5 space-y-3">
+                <div class="bg-teal-50 border border-teal-200 rounded-lg p-3">
+                    <div class="flex items-start gap-2">
+                        <i class="fa-solid fa-rotate text-teal-600 mt-0.5"></i>
+                        <div>
+                            <div class="text-xs font-bold text-teal-800">Update Otomatis</div>
+                            <p class="text-[11px] text-teal-700 mt-0.5">
+                                Temuan lama dengan <strong>kategori + metrik + arah tren sama</strong> akan diperbarui — tidak buat duplikat.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-amber-50 border border-amber-200 rounded-lg p-3">
+                    <div class="flex items-start gap-2">
+                        <i class="fa-solid fa-broom text-amber-600 mt-0.5"></i>
+                        <div>
+                            <div class="text-xs font-bold text-amber-800">Bersihkan yang Obsolete</div>
+                            <p class="text-[11px] text-amber-700 mt-0.5">
+                                Temuan <strong>status "open"</strong> yang tidak ditemukan lagi di analisis baru akan <strong>otomatis dihapus</strong>.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-emerald-50 border border-emerald-200 rounded-lg p-3">
+                    <div class="flex items-start gap-2">
+                        <i class="fa-solid fa-shield-halved text-emerald-600 mt-0.5"></i>
+                        <div>
+                            <div class="text-xs font-bold text-emerald-800">Temuan Aktif Dilindungi</div>
+                            <p class="text-[11px] text-emerald-700 mt-0.5">
+                                Temuan berstatus <strong>"in_progress"</strong> dan <strong>"resolved"</strong> tidak akan diganggu (PIC & status aman).
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="text-[11px] text-slate-500 italic pt-2 border-t border-slate-100">
+                    💡 Proses ini memakan waktu 5-15 detik.
+                </div>
+            </div>
+
+            <div class="p-4 border-t border-slate-200 flex justify-end gap-2">
+                <button onclick="document.getElementById('analyzeConfirmModal').remove()"
+                        class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-lg text-sm transition">
+                    Batal
+                </button>
+                <button onclick="document.getElementById('analyzeConfirmModal').remove(); runAnalyzeTemuan();"
+                        class="px-5 py-2 bg-teal-500 hover:bg-teal-600 text-white font-bold rounded-lg text-sm transition flex items-center gap-2">
+                    <i class="fa-solid fa-wand-magic-sparkles text-xs"></i> Ya, Analisis Ulang
+                </button>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(modal);
+}
+
+// ===== EKSEKUSI ANALISIS =====
+async function runAnalyzeTemuan() {
     const btn = document.getElementById('btnAnalyzeTemuan');
     const original = btn.innerHTML;
     btn.disabled = true;
     btn.innerHTML = '<i class="fa-solid fa-spinner animate-spin"></i> Menganalisis...';
 
     const listContainer = document.getElementById('temuanListContainer');
-    listContainer.innerHTML = `
-        <div class="bg-white rounded-2xl p-12 border border-slate-200 text-center shadow-sm">
-            <i class="fa-solid fa-wand-magic-sparkles text-4xl text-teal-500 mb-3 animate-pulse"></i>
-            <p class="text-slate-700 font-semibold mb-1">AI sedang menganalisis data Anda...</p>
-            <p class="text-slate-500 text-sm">Proses ini membutuhkan 5-15 detik. Mohon tunggu.</p>
-        </div>
-    `;
+    if (listContainer) {
+        listContainer.innerHTML = `
+            <div class="bg-white rounded-2xl p-12 border border-slate-200 text-center shadow-sm">
+                <i class="fa-solid fa-wand-magic-sparkles text-4xl text-teal-500 mb-3 animate-pulse"></i>
+                <p class="text-slate-700 font-semibold mb-1">AI sedang menganalisis data Anda...</p>
+                <p class="text-slate-500 text-sm">Proses ini membutuhkan 5-15 detik. Mohon tunggu.</p>
+            </div>
+        `;
+    }
 
     try {
         const token = localStorage.getItem('eva_token');
@@ -106,20 +199,26 @@ async function analyzeTemuan() {
         const data = await r.json();
         console.log('✅ Analisis selesai:', data);
 
-        // Tampilkan notifikasi kecil
-        showToast(`✅ ${data.message || 'Analisis selesai'}`);
+        // Toast dengan info lengkap
+        const parts = [];
+        if (data.temuan_baru > 0) parts.push(`${data.temuan_baru} baru`);
+        if (data.temuan_updated > 0) parts.push(`${data.temuan_updated} diperbarui`);
+        if (data.temuan_deleted > 0) parts.push(`${data.temuan_deleted} dihapus`);
+        
+        showToast(`✅ ${parts.join(', ') || 'Analisis selesai'}`);
 
-        // Reload list
         await loadTemuanList();
     } catch (err) {
         console.error('Error analyze:', err);
-        listContainer.innerHTML = `
-            <div class="bg-rose-50 rounded-2xl p-8 border border-rose-200 text-center">
-                <i class="fa-solid fa-triangle-exclamation text-3xl text-rose-500 mb-2"></i>
-                <p class="text-rose-700 font-semibold">Gagal menganalisis</p>
-                <p class="text-rose-600 text-xs mt-1">${err.message}</p>
-            </div>
-        `;
+        if (listContainer) {
+            listContainer.innerHTML = `
+                <div class="bg-rose-50 rounded-2xl p-8 border border-rose-200 text-center">
+                    <i class="fa-solid fa-triangle-exclamation text-3xl text-rose-500 mb-2"></i>
+                    <p class="text-rose-700 font-semibold">Gagal menganalisis</p>
+                    <p class="text-rose-600 text-xs mt-1">${err.message}</p>
+                </div>
+            `;
+        }
     } finally {
         btn.disabled = false;
         btn.innerHTML = original;
@@ -840,4 +939,522 @@ function escapeHtml(text) {
     const div = document.createElement('div');
     div.textContent = String(text);
     return div.innerHTML;
+}
+
+// ============================================================
+// DASHBOARD STATISTIK TEMUAN
+// ============================================================
+
+let dashboardCharts = {};
+
+async function loadDashboardTemuan() {
+    const panel = document.getElementById('temuanPanelDashboard');
+    if (!panel) return;
+
+    panel.innerHTML = `
+        <div class="bg-white rounded-2xl p-12 border border-slate-200 text-center shadow-sm">
+            <i class="fa-solid fa-spinner animate-spin text-3xl text-teal-500 mb-3"></i>
+            <p class="text-slate-500 text-sm">Memuat statistik temuan...</p>
+        </div>
+    `;
+
+    try {
+        const token = localStorage.getItem('eva_token');
+        const r = await fetch('/api/temuan/stats', {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (!r.ok) throw new Error('Gagal memuat statistik');
+        const stats = await r.json();
+        renderDashboardTemuan(stats);
+    } catch (err) {
+        console.error('Error load dashboard:', err);
+        panel.innerHTML = `
+            <div class="bg-rose-50 rounded-2xl p-8 border border-rose-200 text-center">
+                <i class="fa-solid fa-triangle-exclamation text-2xl text-rose-500 mb-2"></i>
+                <p class="text-rose-700 text-sm font-semibold">Gagal memuat statistik</p>
+                <p class="text-rose-600 text-xs mt-1">${err.message}</p>
+                <button onclick="loadDashboardTemuan()" class="mt-3 px-4 py-2 bg-rose-500 hover:bg-rose-600 text-white rounded-lg text-xs font-bold transition">
+                    Coba Lagi
+                </button>
+            </div>
+        `;
+    }
+}
+
+function renderDashboardTemuan(stats) {
+    const panel = document.getElementById('temuanPanelDashboard');
+    if (!panel) return;
+
+    // Cleanup chart lama
+    Object.values(dashboardCharts).forEach(c => {
+        try { c.destroy(); } catch (e) { /* ignore */ }
+    });
+    dashboardCharts = {};
+
+    // Kalau belum ada temuan
+    if (stats.total === 0) {
+        panel.innerHTML = `
+            <div class="bg-white rounded-2xl p-12 border border-dashed border-slate-300 text-center">
+                <div class="w-16 h-16 mx-auto mb-4 rounded-2xl bg-teal-500/10 border border-teal-500/20 flex items-center justify-center">
+                    <i class="fa-solid fa-chart-pie text-teal-500 text-2xl"></i>
+                </div>
+                <h3 class="text-lg font-bold text-slate-900 mb-2">Belum Ada Data untuk Dashboard</h3>
+                <p class="text-slate-500 text-sm max-w-md mx-auto mb-5">
+                    Lakukan analisis temuan terlebih dahulu di tab <strong>Daftar Temuan</strong>.
+                </p>
+                <button onclick="switchTemuanTab('temuan')" 
+                        class="px-6 py-3 rounded-xl bg-teal-500 hover:bg-teal-600 text-white font-bold text-sm transition inline-flex items-center gap-2">
+                    <i class="fa-solid fa-arrow-right"></i> Ke Daftar Temuan
+                </button>
+            </div>
+        `;
+        return;
+    }
+
+    const pr = stats.prioritas;
+    const st = stats.status;
+
+    // ===== Bangun HTML =====
+    panel.innerHTML = `
+        <!-- KPI Cards -->
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+            <div class="bg-gradient-to-br from-slate-50 to-white rounded-2xl p-4 border border-slate-200 shadow-sm">
+                <div class="flex items-center justify-between mb-2">
+                    <div class="w-9 h-9 rounded-lg bg-slate-100 flex items-center justify-center">
+                        <i class="fa-solid fa-clipboard-list text-slate-600 text-sm"></i>
+                    </div>
+                </div>
+                <div class="text-[10px] text-slate-500 uppercase font-bold tracking-wider">Total Temuan</div>
+                <div class="text-3xl font-extrabold text-slate-900 mt-1">${stats.total}</div>
+            </div>
+            <div class="bg-gradient-to-br from-rose-50 to-white rounded-2xl p-4 border border-rose-200 shadow-sm">
+                <div class="flex items-center justify-between mb-2">
+                    <div class="w-9 h-9 rounded-lg bg-rose-100 flex items-center justify-center">
+                        <i class="fa-solid fa-fire text-rose-600 text-sm"></i>
+                    </div>
+                </div>
+                <div class="text-[10px] text-rose-600 uppercase font-bold tracking-wider">Prioritas Tinggi</div>
+                <div class="text-3xl font-extrabold text-rose-600 mt-1">${pr.tinggi}</div>
+            </div>
+            <div class="bg-gradient-to-br from-blue-50 to-white rounded-2xl p-4 border border-blue-200 shadow-sm">
+                <div class="flex items-center justify-between mb-2">
+                    <div class="w-9 h-9 rounded-lg bg-blue-100 flex items-center justify-center">
+                        <i class="fa-solid fa-hourglass-half text-blue-600 text-sm"></i>
+                    </div>
+                </div>
+                <div class="text-[10px] text-blue-600 uppercase font-bold tracking-wider">Sedang Dikerjakan</div>
+                <div class="text-3xl font-extrabold text-blue-600 mt-1">${st.in_progress}</div>
+            </div>
+            <div class="bg-gradient-to-br from-emerald-50 to-white rounded-2xl p-4 border border-emerald-200 shadow-sm">
+                <div class="flex items-center justify-between mb-2">
+                    <div class="w-9 h-9 rounded-lg bg-emerald-100 flex items-center justify-center">
+                        <i class="fa-solid fa-circle-check text-emerald-600 text-sm"></i>
+                    </div>
+                </div>
+                <div class="text-[10px] text-emerald-600 uppercase font-bold tracking-wider">Selesai</div>
+                <div class="text-3xl font-extrabold text-emerald-600 mt-1">${st.resolved}</div>
+            </div>
+        </div>
+
+        <!-- Charts Row 1: Kategori + Status -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-4">
+            <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm">
+                <h3 class="text-sm font-bold text-slate-900 mb-1 flex items-center gap-2">
+                    <i class="fa-solid fa-chart-pie text-teal-500"></i> Distribusi per Kategori
+                </h3>
+                <p class="text-[11px] text-slate-500 mb-3">Proporsi temuan berdasarkan kategori produktivitas</p>
+                <div style="height: 280px; position: relative;">
+                    <canvas id="chartKategori"></canvas>
+                </div>
+            </div>
+            <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm">
+                <h3 class="text-sm font-bold text-slate-900 mb-1 flex items-center gap-2">
+                    <i class="fa-solid fa-list-check text-blue-500"></i> Status Temuan
+                </h3>
+                <p class="text-[11px] text-slate-500 mb-3">Jumlah temuan per status tindak lanjut</p>
+                <div style="height: 280px; position: relative;">
+                    <canvas id="chartStatus"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts Row 2: Prioritas + PIC -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-4">
+            <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm">
+                <h3 class="text-sm font-bold text-slate-900 mb-1 flex items-center gap-2">
+                    <i class="fa-solid fa-flag text-rose-500"></i> Prioritas Temuan
+                </h3>
+                <p class="text-[11px] text-slate-500 mb-3">Tingkat keparahan temuan yang ditemukan</p>
+                <div style="height: 260px; position: relative;">
+                    <canvas id="chartPrioritas"></canvas>
+                </div>
+            </div>
+            <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm">
+                <h3 class="text-sm font-bold text-slate-900 mb-1 flex items-center gap-2">
+                    <i class="fa-solid fa-trophy text-amber-500"></i> Top 5 PIC
+                </h3>
+                <p class="text-[11px] text-slate-500 mb-3">PIC dengan temuan terbanyak</p>
+                <div id="topPicContainer" class="space-y-2"></div>
+            </div>
+        </div>
+
+        <!-- Timeline -->
+        <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm mt-4">
+            <h3 class="text-sm font-bold text-slate-900 mb-1 flex items-center gap-2">
+                <i class="fa-solid fa-chart-line text-purple-500"></i> Timeline Temuan
+            </h3>
+            <p class="text-[11px] text-slate-500 mb-3">Jumlah temuan per bulan (6 bulan terakhir)</p>
+            <div style="height: 240px; position: relative;">
+                <canvas id="chartTimeline"></canvas>
+            </div>
+        </div>
+
+        <!-- Assignment Info -->
+        <div class="bg-gradient-to-r from-teal-50 to-white rounded-2xl p-5 border border-teal-200 shadow-sm mt-4">
+            <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+                <div class="flex items-start gap-3">
+                    <div class="w-10 h-10 rounded-lg bg-teal-100 flex items-center justify-center text-teal-600 shrink-0">
+                        <i class="fa-solid fa-user-check"></i>
+                    </div>
+                    <div>
+                        <div class="text-sm font-bold text-slate-900">Status Assignment PIC</div>
+                        <div class="text-xs text-slate-600 mt-0.5">
+                            <span class="font-semibold text-emerald-600">${stats.assigned} sudah di-assign</span>
+                            ${stats.unassigned > 0 ? ` • <span class="font-semibold text-amber-600">${stats.unassigned} belum di-assign</span>` : ''}
+                        </div>
+                    </div>
+                </div>
+                ${stats.unassigned > 0 ? `
+                    <button onclick="switchTemuanTab('temuan'); document.getElementById('filterTemuanStatus').value='open'; loadTemuanList();"
+                            class="px-4 py-2 bg-amber-500 hover:bg-amber-600 text-white font-bold rounded-lg text-xs transition flex items-center gap-1.5">
+                        <i class="fa-solid fa-user-plus text-[10px]"></i> Assign PIC (${stats.unassigned} belum)
+                    </button>
+                ` : ''}
+            </div>
+        </div>
+    `;
+
+    // ===== Render Charts =====
+    renderChartKategori(stats.kategori);
+    renderChartStatus(st);
+    renderChartPrioritas(pr);
+    renderTopPIC(stats.top_pics, stats.unassigned);
+    renderChartTimeline(stats.timeline);
+}
+
+// ===== CHART KATEGORI (DOUGHNUT) =====
+function renderChartKategori(kategoriData) {
+    const canvas = document.getElementById('chartKategori');
+    if (!canvas) return;
+
+    // Sort by count desc
+    const entries = Object.entries(kategoriData).sort((a, b) => b[1] - a[1]);
+    const labels = [];
+    const data = [];
+    const colorPalette = [
+        '#14b8a6', '#3b82f6', '#f59e0b', '#ec4899',
+        '#8b5cf6', '#10b981', '#ef4444', '#6366f1',
+        '#0891b2', '#f472b6', '#84cc16', '#f97316',
+        '#a855f7', '#06b6d4', '#eab308'
+    ];
+
+    entries.forEach(([key, count]) => {
+        // Cari label dari picCategories
+        const cat = (picCategories || []).find(c => c.id === key);
+        labels.push(cat ? cat.label : key);
+        data.push(count);
+    });
+
+    dashboardCharts.kategori = new Chart(canvas, {
+        type: 'doughnut',
+        data: {
+            labels: labels,
+            datasets: [{
+                data: data,
+                backgroundColor: colorPalette.slice(0, labels.length),
+                borderWidth: 3,
+                borderColor: '#ffffff',
+                hoverOffset: 8,
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            cutout: '62%',
+            plugins: {
+                legend: {
+                    position: 'right',
+                    labels: {
+                        color: '#0f172a',
+                        font: { family: 'Plus Jakarta Sans', size: 11, weight: '600' },
+                        boxWidth: 12,
+                        boxHeight: 12,
+                        padding: 8,
+                        usePointStyle: true,
+                        pointStyle: 'circle',
+                    }
+                },
+                tooltip: {
+                    backgroundColor: 'rgba(15, 23, 42, 0.95)',
+                    padding: 10,
+                    cornerRadius: 8,
+                    titleFont: { family: 'Plus Jakarta Sans', size: 12, weight: '700' },
+                    bodyFont: { family: 'Plus Jakarta Sans', size: 11 },
+                    callbacks: {
+                        label: function(ctx) {
+                            const total = ctx.dataset.data.reduce((a, b) => a + b, 0);
+                            const pct = ((ctx.parsed / total) * 100).toFixed(1);
+                            return ` ${ctx.label}: ${ctx.parsed} (${pct}%)`;
+                        }
+                    }
+                }
+            }
+        }
+    });
+}
+
+// ===== CHART STATUS (BAR) =====
+function renderChartStatus(statusData) {
+    const canvas = document.getElementById('chartStatus');
+    if (!canvas) return;
+
+    const labels = ['Open', 'In Progress', 'Resolved', 'On Hold'];
+    const data = [
+        statusData.open || 0,
+        statusData.in_progress || 0,
+        statusData.resolved || 0,
+        statusData.on_hold || 0,
+    ];
+    const colors = ['#3b82f6', '#f59e0b', '#10b981', '#64748b'];
+
+    dashboardCharts.status = new Chart(canvas, {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Jumlah Temuan',
+                data: data,
+                backgroundColor: colors,
+                borderRadius: 8,
+                borderSkipped: false,
+                barPercentage: 0.6,
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    backgroundColor: 'rgba(15, 23, 42, 0.95)',
+                    padding: 10,
+                    cornerRadius: 8,
+                    titleFont: { family: 'Plus Jakarta Sans', size: 12, weight: '700' },
+                    bodyFont: { family: 'Plus Jakarta Sans', size: 11 },
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        color: '#64748b',
+                        font: { family: 'Plus Jakarta Sans', size: 11 },
+                        precision: 0,
+                    },
+                    grid: { color: 'rgba(203, 213, 225, 0.3)', borderDash: [4, 4] },
+                    border: { display: false },
+                },
+                x: {
+                    ticks: {
+                        color: '#0f172a',
+                        font: { family: 'Plus Jakarta Sans', size: 11, weight: '600' },
+                    },
+                    grid: { display: false },
+                    border: { display: false },
+                }
+            }
+        }
+    });
+}
+
+// ===== CHART PRIORITAS (BAR) =====
+function renderChartPrioritas(prioritasData) {
+    const canvas = document.getElementById('chartPrioritas');
+    if (!canvas) return;
+
+    dashboardCharts.prioritas = new Chart(canvas, {
+        type: 'bar',
+        data: {
+            labels: ['🔴 Tinggi', '🟡 Sedang', '🟢 Rendah'],
+            datasets: [{
+                label: 'Jumlah Temuan',
+                data: [
+                    prioritasData.tinggi || 0,
+                    prioritasData.sedang || 0,
+                    prioritasData.rendah || 0,
+                ],
+                backgroundColor: ['#ef4444', '#f59e0b', '#10b981'],
+                borderRadius: 8,
+                borderSkipped: false,
+                barPercentage: 0.5,
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    backgroundColor: 'rgba(15, 23, 42, 0.95)',
+                    padding: 10,
+                    cornerRadius: 8,
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        color: '#64748b',
+                        font: { family: 'Plus Jakarta Sans', size: 11 },
+                        precision: 0,
+                    },
+                    grid: { color: 'rgba(203, 213, 225, 0.3)', borderDash: [4, 4] },
+                    border: { display: false },
+                },
+                x: {
+                    ticks: {
+                        color: '#0f172a',
+                        font: { family: 'Plus Jakarta Sans', size: 12, weight: '600' },
+                    },
+                    grid: { display: false },
+                    border: { display: false },
+                }
+            }
+        }
+    });
+}
+
+// ===== TOP PIC LIST =====
+function renderTopPIC(topPics, unassigned) {
+    const container = document.getElementById('topPicContainer');
+    if (!container) return;
+
+    if ((!topPics || topPics.length === 0) && unassigned === 0) {
+        container.innerHTML = `
+            <div class="text-center py-8">
+                <i class="fa-solid fa-user-slash text-3xl text-slate-300 mb-2"></i>
+                <p class="text-xs text-slate-500">Belum ada PIC yang di-assign</p>
+            </div>
+        `;
+        return;
+    }
+
+    const medalEmojis = ['🥇', '🥈', '🥉', '4️⃣', '5️⃣'];
+
+    let html = (topPics || []).map((p, i) => {
+        const initials = getInitials(p.nama || p.jabatan);
+        const photoHtml = p.foto_base64
+            ? `<img src="${p.foto_base64}" class="w-10 h-10 rounded-xl object-cover border border-slate-200">`
+            : `<div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-purple-500 to-indigo-500 flex items-center justify-center text-white font-bold text-xs">${initials}</div>`;
+
+        return `
+            <div class="flex items-center gap-3 p-2.5 rounded-xl border border-slate-100 hover:bg-slate-50 transition">
+                <span class="text-xl shrink-0 w-6 text-center">${medalEmojis[i] || ''}</span>
+                ${photoHtml}
+                <div class="flex-1 min-w-0">
+                    <div class="text-xs font-bold text-slate-900 truncate">${escapeHtml(p.nama || '(tanpa nama)')}</div>
+                    <div class="text-[10px] text-slate-500 truncate">${escapeHtml(p.jabatan || '')}</div>
+                </div>
+                <div class="shrink-0">
+                    <div class="text-lg font-extrabold text-teal-600">${p.total}</div>
+                    <div class="text-[9px] text-slate-400 text-right -mt-1">temuan</div>
+                </div>
+            </div>
+        `;
+    }).join('');
+
+    if (unassigned > 0) {
+        html += `
+            <div class="flex items-center gap-3 p-2.5 rounded-xl border border-dashed border-amber-300 bg-amber-50/50">
+                <span class="text-xl shrink-0 w-6 text-center">⚠️</span>
+                <div class="w-10 h-10 rounded-xl bg-amber-100 border border-amber-200 flex items-center justify-center text-amber-600">
+                    <i class="fa-solid fa-user-slash text-sm"></i>
+                </div>
+                <div class="flex-1 min-w-0">
+                    <div class="text-xs font-bold text-amber-700">Belum Di-assign</div>
+                    <div class="text-[10px] text-amber-600">Perlu ditunjuk PIC</div>
+                </div>
+                <div class="shrink-0">
+                    <div class="text-lg font-extrabold text-amber-600">${unassigned}</div>
+                    <div class="text-[9px] text-amber-500 text-right -mt-1">temuan</div>
+                </div>
+            </div>
+        `;
+    }
+
+    container.innerHTML = html;
+}
+
+// ===== CHART TIMELINE (LINE) =====
+function renderChartTimeline(timeline) {
+    const canvas = document.getElementById('chartTimeline');
+    if (!canvas || !timeline) return;
+
+    const labels = timeline.map(t => t.label);
+    const data = timeline.map(t => t.count);
+
+    dashboardCharts.timeline = new Chart(canvas, {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Jumlah Temuan',
+                data: data,
+                borderColor: '#8b5cf6',
+                backgroundColor: 'rgba(139, 92, 246, 0.1)',
+                borderWidth: 3,
+                pointBackgroundColor: '#8b5cf6',
+                pointBorderColor: '#ffffff',
+                pointBorderWidth: 2,
+                pointRadius: 5,
+                pointHoverRadius: 7,
+                tension: 0.4,
+                fill: true,
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    backgroundColor: 'rgba(15, 23, 42, 0.95)',
+                    padding: 10,
+                    cornerRadius: 8,
+                    titleFont: { family: 'Plus Jakarta Sans', size: 12, weight: '700' },
+                    bodyFont: { family: 'Plus Jakarta Sans', size: 11 },
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        color: '#64748b',
+                        font: { family: 'Plus Jakarta Sans', size: 11 },
+                        precision: 0,
+                    },
+                    grid: { color: 'rgba(203, 213, 225, 0.3)', borderDash: [4, 4] },
+                    border: { display: false },
+                },
+                x: {
+                    ticks: {
+                        color: '#0f172a',
+                        font: { family: 'Plus Jakarta Sans', size: 11, weight: '600' },
+                    },
+                    grid: { display: false },
+                    border: { display: false },
+                }
+            }
+        }
+    });
 }

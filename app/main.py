@@ -831,6 +831,91 @@ def list_temuan(
     
     return query.order_by(Temuan.created_at.desc()).all()
 
+@app.get("/api/temuan/stats")
+def get_temuan_stats(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """Ambil statistik agregat temuan untuk dashboard."""
+    from collections import defaultdict
+    from datetime import datetime, timedelta
+
+    all_temuan = db.query(Temuan).filter(Temuan.user_id == current_user.id).all()
+
+    total = len(all_temuan)
+    kategori_count = {}
+    prioritas_count = {"tinggi": 0, "sedang": 0, "rendah": 0}
+    status_count = {"open": 0, "in_progress": 0, "resolved": 0, "on_hold": 0}
+    pic_count = {}
+    assigned = 0
+    unassigned = 0
+
+    for t in all_temuan:
+        # Kategori
+        kategori_count[t.kategori] = kategori_count.get(t.kategori, 0) + 1
+        # Prioritas
+        if t.prioritas in prioritas_count:
+            prioritas_count[t.prioritas] += 1
+        # Status
+        if t.status in status_count:
+            status_count[t.status] += 1
+        # PIC
+        if t.pic_id:
+            assigned += 1
+            pic_count[t.pic_id] = pic_count.get(t.pic_id, 0) + 1
+        else:
+            unassigned += 1
+
+    # ===== Top PIC =====
+    top_pics = []
+    sorted_pics = sorted(pic_count.items(), key=lambda x: x[1], reverse=True)[:5]
+    for pic_id, count in sorted_pics:
+        pic = db.query(PIC).filter(PIC.id == pic_id).first()
+        if pic:
+            top_pics.append({
+                "pic_id": pic_id,
+                "nama": pic.nama_orang or pic.nama_jabatan,
+                "jabatan": pic.nama_jabatan,
+                "foto_base64": pic.foto_base64,
+                "total": count,
+            })
+
+    # ===== Timeline 6 bulan terakhir =====
+    timeline_map = defaultdict(int)
+    for t in all_temuan:
+        if t.created_at:
+            key = t.created_at.strftime("%Y-%m")
+            timeline_map[key] += 1
+
+    now = datetime.utcnow()
+    timeline = []
+    for i in range(5, -1, -1):
+        month = now.month - i
+        year = now.year
+        while month <= 0:
+            month += 12
+            year -= 1
+        key = f"{year:04d}-{month:02d}"
+        try:
+            label = datetime(year, month, 1).strftime("%b %Y")
+        except Exception:
+            label = key
+        timeline.append({
+            "bulan": key,
+            "label": label,
+            "count": timeline_map.get(key, 0),
+        })
+
+    return {
+        "total": total,
+        "prioritas": prioritas_count,
+        "status": status_count,
+        "kategori": kategori_count,
+        "assigned": assigned,
+        "unassigned": unassigned,
+        "top_pics": top_pics,
+        "timeline": timeline,
+    }
 
 @app.get("/api/temuan/{temuan_id}", response_model=TemuanResponse)
 def get_temuan(
@@ -995,10 +1080,12 @@ def analyze_temuan_endpoint(
     current_user: User = Depends(get_current_user),
 ):
     """
-    Analisis semua data EVA user, hasilkan temuan, dan simpan ke database.
-    Menggunakan ekstraksi data akurat berdasarkan RAW_IDX mapping.
+    Analisis data EVA → update/create/delete temuan dengan 3 lapis proteksi:
+    1. Fingerprint matching (mencegah duplikat)
+    2. Auto-clean temuan open yang obsolete
+    3. Preserve temuan in_progress/resolved
     """
-    # Ambil semua record EVA user
+    # 1. Ambil semua record EVA user
     records = db.query(EvaRecord).filter(EvaRecord.user_id == current_user.id).all()
     
     if not records:
@@ -1006,9 +1093,9 @@ def analyze_temuan_endpoint(
             "message": "Belum ada data EVA. Silakan isi kalkulator terlebih dahulu.",
             "temuan_baru": 0,
             "temuan_updated": 0,
+            "temuan_deleted": 0,
         }
     
-    # Filter tahun jika ditentukan
     if req.tahun_list:
         records = [r for r in records if r.year_title in req.tahun_list]
     
@@ -1017,52 +1104,78 @@ def analyze_temuan_endpoint(
             "message": "Butuh minimal 2 tahun data untuk analisis.",
             "temuan_baru": 0,
             "temuan_updated": 0,
+            "temuan_deleted": 0,
         }
     
-    # Sort by tahun
     records.sort(key=lambda r: r.year_title)
     
-    # ===== EKSTRAKSI AKURAT dengan RAW_IDX =====
+    # 2. Ekstraksi data akurat
     data_tahun = []
     for r in records:
         d = _extract_eva_data(r.raw_data, r.nilai_tambah or 0)
         d["tahun"] = r.year_title
         data_tahun.append(d)
     
-    # Log untuk debugging
-    logger.info(f"📊 Data untuk analisis temuan ({len(data_tahun)} tahun):")
-    for d in data_tahun:
-        logger.info(
-            f"   {d['tahun']}: Penjualan=Rp{d['penjualan']:,.0f} | "
-            f"NT=Rp{d['nilai_tambah']:,.0f} | "
-            f"Laba Bersih=Rp{d['laba_bersih']:,.0f} | "
-            f"Investasi=Rp{d['total_investasi']:,.0f}"
-        )
+    logger.info(f"📊 Analisis temuan ({len(data_tahun)} tahun)")
     
-    # ===== Panggil AI =====
+    # 3. Panggil AI
     try:
         temuan_list = analyze_temuan(data_tahun, force_refresh=req.force_refresh)
     except Exception as e:
         logger.error(f"Error analyze_temuan: {e}", exc_info=True)
         raise HTTPException(status_code=502, detail=f"EVA service error: {str(e)}")
     
-    # ===== Simpan ke database =====
     tahun_str = f"{data_tahun[0]['tahun']}-{data_tahun[-1]['tahun']}" if len(data_tahun) > 1 else data_tahun[0]['tahun']
+    
+    # ============================================================
+    # LAPIS 1: Bangun fingerprint dari hasil AI
+    # ============================================================
+    new_fingerprints = {}
+    for t in temuan_list:
+        fp = t.get("fingerprint", "")
+        if fp:
+            new_fingerprints[fp] = t
+    
+    # ============================================================
+    # LAPIS 2: Klasifikasi temuan lama
+    # ============================================================
+    old_temuan = db.query(Temuan).filter(Temuan.user_id == current_user.id).all()
+    
+    to_update = {}   # fingerprint → old_temuan
+    to_delete = []   # old_temuan yang open & obsolete
+    to_keep = []     # old_temuan yang in_progress/resolved
+    
+    for old in old_temuan:
+        old_fp = old.fingerprint or ""
+        if old_fp in new_fingerprints:
+            to_update[old_fp] = old
+        elif old.status in ("in_progress", "resolved"):
+            to_keep.append(old)
+        else:
+            # status open/on_hold dan tidak ada di hasil baru → obsolete
+            to_delete.append(old)
+    
+    # ============================================================
+    # LAPIS 3: Eksekusi — delete obsolete, update, create
+    # ============================================================
+    temuan_deleted = 0
+    for old in to_delete:
+        db.delete(old)
+        temuan_deleted += 1
+    
     temuan_baru = 0
     temuan_updated = 0
     
     for t in temuan_list:
-        existing = db.query(Temuan).filter(
-            Temuan.user_id == current_user.id,
-            Temuan.judul == t["judul"],
-            Temuan.status != "resolved",
-        ).first()
-        
-        # Serialize recommended_methods → JSON string
+        fp = t.get("fingerprint", "")
         methods_json = _json.dumps(t.get("recommended_methods", []))
         data_pendukung_json = _json.dumps(t.get("data_pendukung", {}))
         
-        if existing:
+        if fp in to_update:
+            # UPDATE
+            existing = to_update[fp]
+            existing.tahun = tahun_str
+            existing.judul = t["judul"]
             existing.deskripsi = t["deskripsi"]
             existing.kategori = t["kategori"]
             existing.prioritas = t["prioritas"]
@@ -1070,8 +1183,10 @@ def analyze_temuan_endpoint(
             existing.dampak = t.get("dampak")
             existing.rekomendasi = t.get("rekomendasi")
             existing.recommended_methods = methods_json
+            # ⚠️ pic_id & status TIDAK diubah — biar user punya kontrol penuh
             temuan_updated += 1
         else:
+            # CREATE
             new_temuan = Temuan(
                 user_id=current_user.id,
                 tahun=tahun_str,
@@ -1083,16 +1198,43 @@ def analyze_temuan_endpoint(
                 dampak=t.get("dampak"),
                 rekomendasi=t.get("rekomendasi"),
                 recommended_methods=methods_json,
+                fingerprint=fp,
                 status="open",
             )
             db.add(new_temuan)
             temuan_baru += 1
     
-    db.commit()
+    # Commit dengan retry
+    import time as _time
+    max_retry = 3
+    for attempt in range(max_retry):
+        try:
+            db.commit()
+            break
+        except Exception as commit_err:
+            err_str = str(commit_err).lower()
+            if "database is locked" in err_str and attempt < max_retry - 1:
+                logger.warning(f"⚠️ DB locked, retry {attempt + 1}/{max_retry}...")
+                db.rollback()
+                _time.sleep(2)
+                continue
+            else:
+                logger.error(f"❌ Gagal commit: {commit_err}")
+                db.rollback()
+                raise HTTPException(
+                    status_code=500,
+                    detail="Database sedang sibuk. Silakan coba lagi."
+                )
     
     return {
-        "message": f"Analisis selesai. {temuan_baru} temuan baru, {temuan_updated} diperbarui.",
+        "message": f"Analisis selesai. {temuan_baru} baru, {temuan_updated} diperbarui, {temuan_deleted} obsolete dihapus.",
         "temuan_baru": temuan_baru,
         "temuan_updated": temuan_updated,
+        "temuan_deleted": temuan_deleted,
         "total_temuan": len(temuan_list),
     }
+
+# ============================================================
+# ENDPOINT STATISTIK TEMUAN (untuk Tab Dashboard)
+# ============================================================
+

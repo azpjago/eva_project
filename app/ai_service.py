@@ -58,13 +58,11 @@ def chat_reply(message: str, history: list[ChatMessage], eva_context: EvaResult 
     client = _get_client()
     system_instruction = build_chat_system_prompt(eva_context)
 
-    # Convert history ke format SDK. Map role 'assistant' menjadi 'model' sesuai standar Gemini SDK.
     contents = []
     for h in history:
         role = "model" if h.role in ["assistant", "model"] else "user"
         contents.append(types.Content(role=role, parts=[types.Part(text=h.content)]))
 
-    # Tambahkan pesan terbaru dari user
     contents.append(types.Content(role="user", parts=[types.Part(text=message)]))
 
     try:
@@ -83,6 +81,7 @@ def chat_reply(message: str, history: list[ChatMessage], eva_context: EvaResult 
     except Exception as e:
         logger.error(f"Error pada chat_reply: {e}", exc_info=True)
         return f"Terjadi kesalahan koneksi ke EVA: {str(e)}"
+
 
 def _coerce_to_string(val, default=""):
     """Ubah nilai apa pun menjadi string yang aman untuk ditampilkan."""
@@ -104,6 +103,7 @@ def _coerce_to_string(val, default=""):
         parts = [_coerce_to_string(x) for x in val]
         return " ".join([p for p in parts if p]) or default
     return str(val) or default
+
 
 # ===== DAFTAR METODE PENINGKATAN PRODUKTIVITAS =====
 PRODUCTIVITY_METHODS = {
@@ -312,19 +312,7 @@ METHOD_DETAILS = {
 
 
 def analyze_ratio_trend(data_tahun: list, ratios: list) -> dict:
-    """
-    Menganalisis SEMUA rasio produktivitas sekaligus menggunakan EVA Agent.
-    Return format:
-    {
-      "ratio_id": {
-        "short": "1-2 kalimat",
-        "detailed": "3-5 kalimat analisis",
-        "recommendations": ["Saran 1", "Saran 2", "Saran 3", "Saran 4", "Saran 5"],
-        "trend": "naik" | "turun" | "stabil",
-        "status": "positif" | "warning" | "negatif"
-      }
-    }
-    """
+    """Menganalisis SEMUA rasio produktivitas sekaligus menggunakan EVA Agent."""
     import json as _json
 
     # === FALLBACK (if-else sederhana) jika AI gagal ===
@@ -484,7 +472,6 @@ ATURAN PENTING:
         )
         text = (response.text or "").strip()
 
-        # Bersihkan jika masih ada code fence
         if text.startswith("```"):
             text = text.strip("`")
             if text.lower().startswith("json"):
@@ -498,18 +485,16 @@ ATURAN PENTING:
         if not isinstance(parsed, dict):
             raise ValueError("EVA tidak mengembalikan dict")
 
-        # === NORMALISASI: paksa semua field jadi tipe yang benar ===
+        # === NORMALISASI ===
         for rid, item in list(parsed.items()):
             if not isinstance(item, dict):
                 continue
 
-            # ----- short & detailed wajib string -----
             item["short"] = _coerce_to_string(item.get("short"), "-")
             item["detailed"] = _coerce_to_string(
                 item.get("detailed") or item.get("short"), item["short"]
             )
 
-            # ----- recommendations wajib list of string -----
             recs = item.get("recommendations")
             if isinstance(recs, str):
                 recs = [recs]
@@ -519,7 +504,6 @@ ATURAN PENTING:
                 _coerce_to_string(r) for r in recs if _coerce_to_string(r)
             ]
 
-            # ----- trend & status wajib string valid -----
             trend = _coerce_to_string(item.get("trend"), "stabil").lower()
             if trend not in ("naik", "turun", "stabil"):
                 trend = "stabil"
@@ -530,7 +514,6 @@ ATURAN PENTING:
                 status = "positif"
             item["status"] = status
 
-            # ----- NORMALISASI recommended_methods -----
             methods = item.get("recommended_methods")
             if not isinstance(methods, list):
                 methods = []
@@ -548,7 +531,6 @@ ATURAN PENTING:
                     "penerapan": _coerce_to_string(m.get("penerapan"), "-"),
                 })
 
-            # Jika AI kasih < 3 metode, lengkapi dari fallback
             if len(cleaned_methods) < 3:
                 fb_methods = _build_fallback_methods(rid, item["trend"])
                 for fb_m in fb_methods:
@@ -559,7 +541,6 @@ ATURAN PENTING:
 
             item["recommended_methods"] = cleaned_methods[:3]
 
-        # Isi default untuk ratio yang mungkin tidak ada di response AI
         fallback = build_fallback()
         for rid, fb in fallback.items():
             if rid not in parsed:
@@ -574,9 +555,7 @@ ATURAN PENTING:
 
 
 def _analyze_severity(values: list, growth_rates: list) -> dict:
-    """
-    Klasifikasikan tingkat keparahan berdasarkan growth dan volatilitas.
-    """
+    """Klasifikasikan tingkat keparahan berdasarkan growth dan volatilitas."""
     if len(values) < 2:
         return {"level": "unknown", "pct_change": 0, "max_value": 0, "min_value": 0}
 
@@ -584,10 +563,8 @@ def _analyze_severity(values: list, growth_rates: list) -> dict:
     max_val = max(values)
     min_val = min(values)
 
-    # Total perubahan dari awal ke akhir
     pct_change = ((last - first) / first * 100) if first != 0 else 0
 
-    # Volatilitas (standar deviasi perubahan growth)
     if len(growth_rates) > 1:
         avg_growth = sum(growth_rates[1:]) / (len(growth_rates) - 1)
     else:
@@ -648,10 +625,7 @@ def _ensure_min_5_suggestions(recs: list, trend: str) -> list:
 
 
 def _build_smart_recommendations(ratio_id: str, trend: str, values: list, growth_rates: list) -> list:
-    """
-    Buat rekomendasi JELAS & TERUKUR dengan target, KPI, dan timeframe.
-    Menggunakan data historis sebagai benchmark (nilai tertinggi = best-in-class).
-    """
+    """Buat rekomendasi JELAS & TERUKUR dengan target, KPI, dan timeframe."""
     sev = _analyze_severity(values, growth_rates)
     level = sev["level"]
     pct_change = sev["pct_change"]
@@ -659,18 +633,15 @@ def _build_smart_recommendations(ratio_id: str, trend: str, values: list, growth
     last_val = sev["last"]
     gap_to_max = sev["gap_to_max"]
 
-    # Target minimal (kembali ke level tertinggi = benchmark realistis karena pernah dicapai)
     target_min = max_val
     target_pct = gap_to_max
 
-    # ===== TREN NAIK (PERTAHANKAN + TINGKATKAN) =====
     if trend == "naik":
         base = [
             f"📊 **Target**: Pertahankan rasio minimal di level {last_val:.2f}, targetkan pertumbuhan +5% dalam 6 bulan ke depan (≥ {last_val * 1.05:.2f}).",
             f"📅 **KPI Monitoring**: Evaluasi rasio per kuartal. Alert jika turun >3% dari kuartal sebelumnya.",
             f"🏆 **Benchmark Internal**: Level tertinggi yang pernah dicapai: {max_val:.2f}. Jadikan standar minimum operasional.",
         ]
-        # Tambahan sesuai jenis rasio
         specific = {
             "nilai_tambah_per_tenaga": [
                 "👥 **Aksi SDM**: Adakan program pelatihan teknis lanjutan 40 jam/tahun untuk setiap tenaga kerja.",
@@ -727,22 +698,18 @@ def _build_smart_recommendations(ratio_id: str, trend: str, values: list, growth
         }
         return _ensure_min_5_suggestions(base + specific.get(ratio_id, []), "naik")
 
-    # ===== TREN TURUN (PERBAIKAN TERUKUR) =====
     elif trend == "turun":
-        # Base rekomendasi dengan target recovery
         base = [
             f"🎯 **Target Pemulihan**: Kembalikan rasio ke level {target_min:.2f} dalam {6 if level == 'mild' else 9 if level == 'moderate' else 12} bulan (kenaikan +{target_pct:.1f}% dari posisi saat ini {last_val:.2f}).",
             f"📅 **KPI Monitoring**: Evaluasi bulanan dengan target kenaikan +2% per bulan hingga tercapai level target.",
             f"⚠️ **Early Warning**: Jika rasio turun lagi >5% dalam 3 bulan, lakukan audit menyeluruh pada proses terkait.",
         ]
 
-        # Severity-specific actions
         if level == "severe":
             base.append(f"🚨 **Tindakan Darurat**: Total penurunan {abs(pct_change):.1f}% — bentuk tim task force lintas divisi untuk investigasi akar masalah dalam 30 hari.")
         elif level == "moderate":
             base.append(f"🔧 **Tindakan Segera**: Penurunan {abs(pct_change):.1f}% — review proses bisnis terkait dalam 60 hari.")
 
-        # Specific per rasio
         specific = {
             "nilai_tambah_per_tenaga": [
                 f"👥 **Aksi SDM**: Audit produktivitas per individu. Target: naikkan output per tenaga kerja minimal +5% dalam 6 bulan.",
@@ -812,7 +779,6 @@ def _build_smart_recommendations(ratio_id: str, trend: str, values: list, growth
         }
         return _ensure_min_5_suggestions(base + specific.get(ratio_id, []), "turun")
 
-    # ===== TREN STABIL =====
     else:
         return _ensure_min_5_suggestions([
             f"📊 **Target**: Naikkan rasio +3-5% dari level saat ini ({last_val:.2f}) dalam 6 bulan ke depan.",
@@ -824,13 +790,8 @@ def _build_smart_recommendations(ratio_id: str, trend: str, values: list, growth
 
 
 def _build_fallback_methods(ratio_id: str, trend: str) -> list:
-    """
-    Fallback: pilih metode peningkatan produktivitas jika AI gagal.
-    Mengembalikan 3 metode paling relevan per jenis rasio & tren.
-    """
-    # Mapping berdasarkan ratio_id + trend
+    """Fallback: pilih metode peningkatan produktivitas jika AI gagal."""
     method_map = {
-        # ===== PRODUKTIVITAS TENAGA KERJA =====
         "nilai_tambah_per_tenaga": {
             "naik": ["Kaizen", "5S/5R", "Time Study"],
             "turun": ["Work Sampling", "Time Study", "Kaizen"],
@@ -851,7 +812,6 @@ def _build_fallback_methods(ratio_id: str, trend: str) -> list:
             "turun": ["Lean Manufacturing", "Kaizen", "Kanban System"],
             "stabil": ["PDCA", "Time Study", "Kaizen"],
         },
-        # ===== PRODUKTIVITAS MODAL =====
         "penjualan_per_investasi": {
             "naik": ["Lean Manufacturing", "VSM", "Kaizen"],
             "turun": ["VSM", "Lean Manufacturing", "Process Mapping"],
@@ -867,7 +827,6 @@ def _build_fallback_methods(ratio_id: str, trend: str) -> list:
             "turun": ["TPM", "OEE", "Kanban System"],
             "stabil": ["TPM", "PDCA", "Kaizen"],
         },
-        # ===== PROFITABILITAS =====
         "laba_per_penjualan": {
             "naik": ["Kaizen", "Lean Manufacturing", "PDCA"],
             "turun": ["Pareto Diagram", "Fishbone Diagram", "Kaizen"],
@@ -883,7 +842,6 @@ def _build_fallback_methods(ratio_id: str, trend: str) -> list:
             "turun": ["SWOT", "Balanced Scorecard", "VSM"],
             "stabil": ["PDCA", "Balanced Scorecard", "Kaizen"],
         },
-        # ===== PENDUKUNG =====
         "nilai_tambah_per_penjualan": {
             "naik": ["Lean Manufacturing", "VSM", "Kaizen"],
             "turun": ["VSM", "Lean Manufacturing", "Fishbone Diagram"],
@@ -915,25 +873,8 @@ def _build_fallback_methods(ratio_id: str, trend: str) -> list:
     return result
 
 
-def ratio_dialog_reply(
-    message: str,
-    history: list,
-    ratio_context: dict,
-) -> str:
-    """
-    Balas pesan user dalam konteks rasio produktivitas tertentu.
-    
-    Args:
-        message: pesan user
-        history: list dict {"role": "user"|"model", "content": "..."}
-        ratio_context: {
-            "label": "Nilai Tambah / Jumlah Tenaga Kerja",
-            "deskripsi": "...",
-            "years": ["2020", "2021", "2022"],
-            "values": [100, 120, 130],
-            "analysis_summary": "Rasio menurun..."
-        }
-    """
+def ratio_dialog_reply(message: str, history: list, ratio_context: dict) -> str:
+    """Balas pesan user dalam konteks rasio produktivitas tertentu."""
     client = _get_client()
 
     label = ratio_context.get("label", "Rasio")
@@ -942,7 +883,6 @@ def ratio_dialog_reply(
     values = ratio_context.get("values", [])
     analysis = ratio_context.get("analysis_summary", "")
 
-    # Susun konteks dalam format tabel sederhana
     data_str = ""
     for i, y in enumerate(years):
         v = values[i] if i < len(values) else "-"
@@ -966,7 +906,6 @@ PANDUAN MENJAWAB:
 - Gunakan Bahasa Indonesia profesional. Maksimal 3-4 paragraf pendek.
 """
 
-    # Susun contents
     contents = []
     for h in history:
         role = "model" if h.get("role") in ("assistant", "model") else "user"
@@ -994,7 +933,6 @@ PANDUAN MENJAWAB:
 # FUNGSI AI: ANALISIS TEMUAN PRODUKTIVITAS
 # ============================================================
 
-# Mapping kategori → kategori PIC yang relevan
 KATEGORI_KE_PIC = {
     "sales_revenue": "sales_revenue",
     "labor_cost": "labor_cost",
@@ -1014,7 +952,6 @@ KATEGORI_KE_PIC = {
 }
 
 
-# ===== MAPPING KATEGORI TEMUAN → 3 METODE ATM DEFAULT =====
 KATEGORI_TO_METHODS = {
     "sales_revenue": ["Balanced Scorecard", "Kaizen", "PDCA"],
     "labor_cost": ["Work Sampling", "Time Study", "Line Balancing"],
@@ -1051,7 +988,6 @@ def _normalize_methods(methods, kategori: str) -> list:
                 "penerapan": _coerce_to_string(m.get("penerapan"), "-"),
             })
 
-    # Kalau AI kasih < 3 metode → lengkapi dari fallback
     if len(cleaned) < 3:
         fb = _build_methods_from_kategori(kategori)
         for m in fb:
@@ -1065,7 +1001,6 @@ def _normalize_methods(methods, kategori: str) -> list:
 
 def _build_methods_from_kategori(kategori: str) -> list:
     """Fallback: generate 3 metode ATM berdasarkan kategori temuan."""
-    # Ambil list metode dari mapping
     entry = KATEGORI_TO_METHODS.get(kategori, ["Kaizen", "PDCA", "5S/5R"])
     result = []
     for method_name in entry:
@@ -1079,10 +1014,31 @@ def _build_methods_from_kategori(kategori: str) -> list:
     return result
 
 
+# ===== WHITELIST METRIK KUNCI (untuk fingerprint) =====
+ALLOWED_METRICS = [
+    "penjualan",
+    "biaya_tenaga_kerja",
+    "bahan_digunakan",
+    "overhead_produksi",
+    "biaya_administrasi",
+    "penyusutan",
+    "pajak",
+    "bunga_pinjaman",
+    "total_investasi",
+    "laba_bersih",
+    "nilai_tambah",
+    "produktivitas",
+    "margin_laba",
+    "umum",
+]
+
+ALLOWED_TRENDS = ["naik", "turun", "stabil"]
+
+
 def analyze_temuan(data_tahun: list, force_refresh: bool = False) -> list:
     """
     Menganalisis seluruh data kalkulator EVA dan menghasilkan daftar temuan.
-    Setiap temuan dilengkapi rekomendasi ATM (Alat, Teknik, Metode).
+    Setiap temuan dilengkapi rekomendasi ATM dan fingerprint untuk deduplikasi.
     """
     import json as _json
 
@@ -1096,6 +1052,9 @@ def analyze_temuan(data_tahun: list, force_refresh: bool = False) -> list:
                 "judul": "Data belum cukup untuk analisis mendalam",
                 "deskripsi": "Diperlukan minimal 2 tahun data untuk mendeteksi tren dan anomali.",
                 "kategori": "strategic",
+                "metrik_kunci": "umum",
+                "arah_tren": "stabil",
+                "fingerprint": "strategic|umum|stabil",
                 "prioritas": "rendah",
                 "data_pendukung": {"info": "minimal 2 tahun data"},
                 "dampak": "Analisis temuan tidak dapat dilakukan secara komprehensif.",
@@ -1110,7 +1069,6 @@ def analyze_temuan(data_tahun: list, force_refresh: bool = False) -> list:
                 return 100.0 if b > 0 else 0.0
             return ((b - a) / a) * 100
         
-        # Metrik kunci yang diperiksa (snake_case)
         metrics = [
             ("nilai_tambah", "Nilai Tambah", "productivity", "produktivitas"),
             ("penjualan", "Penjualan", "sales_revenue", "penjualan"),
@@ -1130,9 +1088,18 @@ def analyze_temuan(data_tahun: list, force_refresh: bool = False) -> list:
             
             change = pct_change(awal, akhir)
             
+            # Tentukan arah_tren
+            if abs(change) < 5:
+                arah_tren = "stabil"
+            elif change > 0:
+                arah_tren = "naik"
+            else:
+                arah_tren = "turun"
+            
+            fingerprint = f"{kategori}|{key}|{arah_tren}"
+            
             if abs(change) > 10:
                 if change < 0:
-                    # Skip kalau nilai awalnya kecil (< 1000) — bukan temuan signifikan
                     if awal < 1000:
                         continue
                     prioritas = "tinggi" if abs(change) > 20 else "sedang"
@@ -1144,6 +1111,9 @@ def analyze_temuan(data_tahun: list, force_refresh: bool = False) -> list:
                             f"Penurunan sebesar {abs(change):.1f}% ini perlu evaluasi mendalam."
                         ),
                         "kategori": kategori,
+                        "metrik_kunci": key,
+                        "arah_tren": arah_tren,
+                        "fingerprint": fingerprint,
                         "prioritas": prioritas,
                         "data_pendukung": {
                             "metrik": label,
@@ -1159,7 +1129,6 @@ def analyze_temuan(data_tahun: list, force_refresh: bool = False) -> list:
                         "recommended_methods": _build_methods_from_kategori(kategori),
                     })
                 else:
-                    # NAIK — hanya tampilkan kalau signifikan (>15%)
                     if abs(change) < 15:
                         continue
                     temuan_list.append({
@@ -1169,6 +1138,9 @@ def analyze_temuan(data_tahun: list, force_refresh: bool = False) -> list:
                             f"dari {awal:,.0f} ({first['tahun']}) menjadi {akhir:,.0f} ({last['tahun']})."
                         ),
                         "kategori": kategori,
+                        "metrik_kunci": key,
+                        "arah_tren": arah_tren,
+                        "fingerprint": fingerprint,
                         "prioritas": "rendah",
                         "data_pendukung": {
                             "metrik": label,
@@ -1192,6 +1164,9 @@ def analyze_temuan(data_tahun: list, force_refresh: bool = False) -> list:
                     "Kinerja perusahaan relatif stabil dalam periode analisis."
                 ),
                 "kategori": "strategic",
+                "metrik_kunci": "umum",
+                "arah_tren": "stabil",
+                "fingerprint": "strategic|umum|stabil",
                 "prioritas": "rendah",
                 "data_pendukung": {"tahun": [d["tahun"] for d in data_tahun]},
                 "dampak": "Tidak ada indikasi masalah kritis.",
@@ -1232,16 +1207,16 @@ def analyze_temuan(data_tahun: list, force_refresh: bool = False) -> list:
             "total_jam_kerja": round(d.get("total_jam_kerja", 0)),
         })
     
-    # Daftar kategori yang tersedia
     kategori_list = "\n".join([f"- {k}" for k in KATEGORI_KE_PIC.keys()])
     
-    # Daftar metode ATM yang tersedia
     methods_list = []
     for category, items in PRODUCTIVITY_METHODS.items():
         methods_list.append(f"\n### {category}:")
         for m in items:
             methods_list.append(f"- {m}")
     methods_text = "\n".join(methods_list)
+
+    metrics_list = "\n".join([f"- {m}" for m in ALLOWED_METRICS])
 
     prompt = f"""Anda adalah auditor produktivitas senior Kementerian Ketenagakerjaan RI.
 
@@ -1255,6 +1230,11 @@ Temukan minimal 3 dan maksimal 7 temuan paling signifikan.
 KATEGORI YANG TERSEDIA (pilih yang paling cocok):
 {kategori_list}
 
+METRIK KUNCI YANG TERSEDIA (WAJIB pilih salah satu, ini untuk identifikasi unik):
+{metrics_list}
+
+ARAH TREN (WAJIB pilih salah satu): "naik" | "turun" | "stabil"
+
 DAFTAR METODE ATM (ALAT, TEKNIK, METODE) YANG TERSEDIA:
 {methods_text}
 
@@ -1263,21 +1243,23 @@ FORMAT OUTPUT (JSON VALID tanpa markdown):
   "temuan": [
     {{
       "judul": "Judul singkat temuan (maks 80 karakter)",
-      "deskripsi": "3-5 kalimat analisis: apa masalahnya, penyebab potensial, dampak",
+      "deskripsi": "3-5 kalimat analisis",
       "kategori": "salah satu dari kategori di atas",
+      "metrik_kunci": "salah satu dari METRIK KUNCI di atas",
+      "arah_tren": "naik|turun|stabil",
       "prioritas": "tinggi|sedang|rendah",
       "data_pendukung": {{
-        "metrik": "nama metrik utama",
+        "metrik": "nama metrik yang dianalisis",
         "tahun": ["2020", "2021", "2022"],
         "nilai": [100, 120, 90]
       }},
       "dampak": "1-2 kalimat dampak bisnis konkret",
       "recommended_methods": [
         {{
-          "method": "Nama Singkat Metode (mis: Kaizen)",
+          "method": "Nama Singkat Metode",
           "full_name": "Nama Lengkap Metode",
-          "alasan": "1-2 kalimat mengapa metode ini cocok untuk temuan ini",
-          "penerapan": "1-2 kalimat langkah penerapan konkret"
+          "alasan": "1-2 kalimat mengapa cocok",
+          "penerapan": "1-2 kalimat langkah penerapan"
         }}
       ]
     }}
@@ -1285,14 +1267,12 @@ FORMAT OUTPUT (JSON VALID tanpa markdown):
 }}
 
 ATURAN PENTING:
-1. Fokus pada temuan yang ACTIONABLE, bukan sekadar "data naik/turun".
-2. Prioritas: "tinggi" jika dampak > 15%, "sedang" jika 5-15%, "rendah" jika < 5%.
-3. Sertakan ANGKA SPESIFIK dari data.
-4. Kategori HARUS salah satu dari daftar di atas.
-5. Field "recommended_methods" HARUS ARRAY of OBJECT dengan TEPAT 3 metode.
-6. Setiap metode HARUS dari daftar ATM yang tersedia di atas (jangan mengarang metode baru).
-7. Setiap "alasan" dan "penerapan" harus KONTEKSTUAL dengan temuan ini.
-8. Output HANYA JSON valid, tanpa penjelasan tambahan.
+1. Fokus pada temuan ACTIONABLE.
+2. Prioritas: "tinggi" jika >15%, "sedang" 5-15%, "rendah" <5%.
+3. Field "metrik_kunci" HARUS dari METRIK KUNCI di atas. Ini sangat penting untuk sistem deduplikasi.
+4. Field "arah_tren" HARUS sesuai dengan kesimpulan analisis.
+5. Field "recommended_methods" TEPAT 3 metode dari daftar ATM.
+6. Output HANYA JSON valid.
 """
 
     try:
@@ -1306,7 +1286,6 @@ ATURAN PENTING:
         )
         text = (response.text or "").strip()
         
-        # Bersihkan code fence jika ada
         if text.startswith("```"):
             text = text.strip("`")
             if text.lower().startswith("json"):
@@ -1336,15 +1315,27 @@ ATURAN PENTING:
             if prioritas not in ("tinggi", "sedang", "rendah"):
                 prioritas = "sedang"
             
-            # Normalisasi data_pendukung
+            metrik_kunci = _coerce_to_string(t.get("metrik_kunci"), "umum").lower()
+            if metrik_kunci not in ALLOWED_METRICS:
+                metrik_kunci = "umum"
+            
+            arah_tren = _coerce_to_string(t.get("arah_tren"), "stabil").lower()
+            if arah_tren not in ALLOWED_TRENDS:
+                arah_tren = "stabil"
+            
             dp = t.get("data_pendukung", {})
             if not isinstance(dp, dict):
                 dp = {}
+            
+            fingerprint = f"{kategori}|{metrik_kunci}|{arah_tren}"
             
             cleaned.append({
                 "judul": _coerce_to_string(t.get("judul"), "Temuan tanpa judul"),
                 "deskripsi": _coerce_to_string(t.get("deskripsi"), "-"),
                 "kategori": kategori,
+                "metrik_kunci": metrik_kunci,
+                "arah_tren": arah_tren,
+                "fingerprint": fingerprint,
                 "prioritas": prioritas,
                 "data_pendukung": dp,
                 "dampak": _coerce_to_string(t.get("dampak"), ""),

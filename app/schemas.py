@@ -257,7 +257,8 @@ class TemuanResponse(BaseModel):
     data_pendukung: dict = {}
     dampak: Optional[str] = None
     rekomendasi: Optional[str] = None
-    recommended_methods: list = []      # ← TAMBAHAN
+    recommended_methods: list = []
+    fingerprint: Optional[str] = ""    # ← TAMBAHAN
     pic_id: Optional[int] = None
     status: str
     deadline: Optional[datetime] = None
@@ -268,31 +269,25 @@ class TemuanResponse(BaseModel):
     @field_validator('data_pendukung', mode='before')
     @classmethod
     def parse_data_pendukung(cls, v):
-        if v is None:
-            return {}
-        if isinstance(v, dict):
-            return v
+        if v is None: return {}
+        if isinstance(v, dict): return v
         if isinstance(v, str):
             try:
                 parsed = _json.loads(v)
                 return parsed if isinstance(parsed, dict) else {}
-            except (ValueError, TypeError):
-                return {}
+            except (ValueError, TypeError): return {}
         return {}
 
     @field_validator('recommended_methods', mode='before')
     @classmethod
     def parse_recommended_methods(cls, v):
-        if v is None:
-            return []
-        if isinstance(v, list):
-            return v
+        if v is None: return []
+        if isinstance(v, list): return v
         if isinstance(v, str):
             try:
                 parsed = _json.loads(v)
                 return parsed if isinstance(parsed, list) else []
-            except (ValueError, TypeError):
-                return []
+            except (ValueError, TypeError): return []
         return []
 
     class Config:
