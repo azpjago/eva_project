@@ -987,3 +987,299 @@ PANDUAN MENJAWAB:
     except Exception as e:
         logger.error(f"Error pada ratio_dialog_reply: {e}", exc_info=True)
         return f"Maaf, koneksi ke EVA terganggu: {str(e)[:100]}"
+
+# ============================================================
+# FUNGSI AI: ANALISIS TEMUAN PRODUKTIVITAS
+# ============================================================
+
+# Mapping kategori → kategori PIC yang relevan
+KATEGORI_KE_PIC = {
+    "sales_revenue": "sales_revenue",
+    "labor_cost": "labor_cost",
+    "material_cost": "material_cost",
+    "overhead_cost": "overhead_cost",
+    "finance_cost": "finance_cost",
+    "admin_cost": "admin_cost",
+    "tax": "tax",
+    "profit": "profit",
+    "productivity": "productivity",
+    "quality": "quality",
+    "strategic": "strategic",
+    "compliance": "compliance",
+    "supply_chain": "supply_chain",
+    "maintenance": "maintenance",
+    "it_support": "it_support",
+}
+
+
+def analyze_temuan(data_tahun: list, force_refresh: bool = False) -> list:
+    """
+    Menganalisis seluruh data kalkulator EVA dan menghasilkan daftar temuan.
+    
+    Args:
+        data_tahun: list dict per tahun:
+            [{"tahun": "2020", "penjualan": ..., "nilaiTambah": ..., ...}, ...]
+        force_refresh: bool (untuk logging saja, cache ditangani frontend)
+    
+    Returns:
+        list of dict: [
+            {
+                "judul": "...",
+                "deskripsi": "...",
+                "kategori": "labor_cost",
+                "prioritas": "tinggi|sedang|rendah",
+                "data_pendukung": {"tahun": [...], "nilai": [...]},
+                "dampak": "...",
+                "rekomendasi": "..."
+            },
+            ...
+        ]
+    """
+    import json as _json
+
+    # === FALLBACK: analisis rule-based ===
+    def build_fallback_temuan():
+        """Fallback jika AI gagal — pakai rule sederhana."""
+        temuan_list = []
+        
+        if len(data_tahun) < 2:
+            return [{
+                "judul": "Data belum cukup untuk analisis mendalam",
+                "deskripsi": "Diperlukan minimal 2 tahun data untuk mendeteksi tren dan anomali.",
+                "kategori": "strategic",
+                "prioritas": "rendah",
+                "data_pendukung": {"info": "minimal 2 tahun data"},
+                "dampak": "Analisis temuan tidak dapat dilakukan secara komprehensif.",
+                "rekomendasi": "Lengkapi data tahun sebelumnya di Kalkulator EVA.",
+            }]
+        
+        # Ambil tahun awal & akhir
+        first, last = data_tahun[0], data_tahun[-1]
+        tahun_str = f"{first['tahun']}-{last['tahun']}"
+        
+        def pct_change(a, b):
+            if a == 0: return 0
+            return ((b - a) / a) * 100
+        
+        # Cek beberapa metrik kunci
+        metrics = [
+            ("nilaiTambah", "Nilai Tambah", "productivity", "produktivitas"),
+            ("penjualan", "Penjualan", "sales_revenue", "penjualan"),
+            ("biayaTenagaKerja", "Biaya Tenaga Kerja", "labor_cost", "biaya tenaga kerja"),
+            ("totalInvestasi", "Total Investasi", "finance_cost", "investasi"),
+            ("labaBersih", "Laba Bersih", "profit", "profitabilitas"),
+        ]
+        
+        for key, label, kategori, kata in metrics:
+            awal = first.get(key, 0)
+            akhir = last.get(key, 0)
+            if awal == 0 and akhir == 0:
+                continue
+            
+            change = pct_change(awal, akhir)
+            
+            # Deteksi tren signifikan
+            if abs(change) > 10:
+                if change < 0:
+                    prioritas = "tinggi" if abs(change) > 20 else "sedang"
+                    temuan_list.append({
+                        "judul": f"Penurunan {label} sebesar {abs(change):.1f}%",
+                        "deskripsi": (
+                            f"{label} mengalami penurunan dari {awal:,.0f} ({first['tahun']}) "
+                            f"menjadi {akhir:,.0f} ({last['tahun']}). "
+                            f"Penurunan sebesar {abs(change):.1f}% ini perlu evaluasi untuk "
+                            f"mengetahui penyebab dan tindakan perbaikan yang tepat."
+                        ),
+                        "kategori": kategori,
+                        "prioritas": prioritas,
+                        "data_pendukung": {
+                            "metrik": label,
+                            "tahun": [d["tahun"] for d in data_tahun],
+                            "nilai": [d.get(key, 0) for d in data_tahun],
+                        },
+                        "dampak": f"Potensi penurunan {kata} sebesar {abs(change):.1f}%.",
+                        "rekomendasi": (
+                            f"1. Audit mendalam pada faktor-faktor yang mempengaruhi {kata}.\n"
+                            f"2. Bandingkan dengan benchmark industri.\n"
+                            f"3. Susun action plan pemulihan dalam 30-60 hari."
+                        ),
+                    })
+                else:
+                    temuan_list.append({
+                        "judul": f"Peningkatan {label} sebesar {change:.1f}%",
+                        "deskripsi": (
+                            f"{label} menunjukkan tren positif dengan kenaikan {change:.1f}% "
+                            f"dari {awal:,.0f} ({first['tahun']}) menjadi {akhir:,.0f} ({last['tahun']}). "
+                            f"Pertahankan dan dokumentasikan strategi yang berhasil."
+                        ),
+                        "kategori": kategori,
+                        "prioritas": "rendah",
+                        "data_pendukung": {
+                            "metrik": label,
+                            "tahun": [d["tahun"] for d in data_tahun],
+                            "nilai": [d.get(key, 0) for d in data_tahun],
+                        },
+                        "dampak": f"Potensi keberlanjutan pertumbuhan {kata}.",
+                        "rekomendasi": (
+                            f"1. Dokumentasikan praktik terbaik sebagai SOP.\n"
+                            f"2. Tetapkan target progresif untuk tahun berikutnya.\n"
+                            f"3. Bagikan strategi ke divisi lain yang relevan."
+                        ),
+                    })
+        
+        # Jika tidak ada temuan signifikan
+        if not temuan_list:
+            temuan_list.append({
+                "judul": "Kinerja relatif stabil",
+                "deskripsi": (
+                    "Tidak ditemukan perubahan signifikan (>10%) pada metrik utama. "
+                    "Kinerja perusahaan relatif stabil dalam periode analisis."
+                ),
+                "kategori": "strategic",
+                "prioritas": "rendah",
+                "data_pendukung": {"tahun": [d["tahun"] for d in data_tahun]},
+                "dampak": "Tidak ada indikasi masalah kritis.",
+                "rekomendasi": (
+                    "1. Tetapkan target pertumbuhan yang lebih agresif.\n"
+                    "2. Lakukan benchmarking eksternal.\n"
+                    "3. Adopsi program continuous improvement."
+                ),
+            })
+        
+        return temuan_list
+
+    # === Panggil AI ===
+    try:
+        client = _get_client()
+    except Exception as e:
+        logger.warning(f"AI client tidak tersedia, pakai fallback: {e}")
+        return build_fallback_temuan()
+
+    # Batasi data untuk hemat token
+    data_ringkas = []
+    for d in data_tahun:
+        data_ringkas.append({
+            "tahun": d.get("tahun"),
+            "penjualan": round(d.get("penjualan", 0)),
+            "nilai_tambah": round(d.get("nilaiTambah", 0)),
+            "biaya_tenaga_kerja": round(d.get("biayaTenagaKerja", 0)),
+            "bahan_digunakan": round(d.get("bahanDigunakan", 0)),
+            "overhead_produksi": round(d.get("overhead_produksi", 0)),
+            "biaya_administrasi": round(d.get("biaya_administrasi", 0)),
+            "penyusutan": round(d.get("penyusutan", 0)),
+            "pajak": round(d.get("pajak", 0)),
+            "bunga_pinjaman": round(d.get("bunga_pinjaman", 0)),
+            "total_investasi": round(d.get("totalInvestasi", 0)),
+            "laba_bersih": round(d.get("labaBersih", 0)),
+            "jumlah_tenaga_kerja": round(d.get("jumlahTenagaKerja", 0)),
+            "total_jam_kerja": round(d.get("totalJamKerja", 0)),
+            "bahan_baku": round(d.get("bahanBaku", 0)),
+        })
+    
+    # Daftar kategori yang tersedia
+    kategori_list = "\n".join([f"- {k}" for k in KATEGORI_KE_PIC.keys()])
+
+    prompt = f"""Anda adalah auditor produktivitas senior Kementerian Ketenagakerjaan RI.
+
+Berikut data keuangan perusahaan lintas tahun (angka dalam Rupiah):
+{_json.dumps(data_ringkas, ensure_ascii=False, indent=2)}
+
+TUGAS:
+Analisis data di atas dan temukan MASALAH/KETIDAKEFISIENAN yang perlu ditindaklanjuti.
+Temukan minimal 3 dan maksimal 7 temuan paling signifikan.
+
+KATEGORI YANG TERSEDIA (pilih yang paling cocok):
+{kategori_list}
+
+FORMAT OUTPUT (JSON VALID tanpa markdown):
+{{
+  "temuan": [
+    {{
+      "judul": "Judul singkat temuan (maks 80 karakter)",
+      "deskripsi": "3-5 kalimat analisis: apa masalahnya, penyebab potensial, dampak",
+      "kategori": "salah satu dari kategori di atas",
+      "prioritas": "tinggi|sedang|rendah",
+      "data_pendukung": {{
+        "metrik": "nama metrik utama",
+        "tahun": ["2020", "2021", "2022"],
+        "nilai": [100, 120, 90]
+      }},
+      "dampak": "1-2 kalimat dampak bisnis konkret",
+      "rekomendasi": "3 poin rekomendasi aksi dengan langkah konkret dan terukur"
+    }}
+  ]
+}}
+
+ATURAN PENTING:
+1. Fokus pada temuan yang ACTIONABLE, bukan sekadar "data naik/turun".
+2. Prioritas: "tinggi" jika dampak > 15%, "sedang" jika 5-15%, "rendah" jika < 5%.
+3. Sertakan ANGKA SPESIFIK dari data.
+4. Kategori HARUS salah satu dari daftar di atas.
+5. Output HANYA JSON valid, tanpa penjelasan tambahan.
+"""
+
+    try:
+        response = client.models.generate_content(
+            model=MODEL_NAME,
+            contents=prompt,
+            config=types.GenerateContentConfig(
+                temperature=0.3,
+                response_mime_type="application/json",
+            ),
+        )
+        text = (response.text or "").strip()
+        
+        # Bersihkan code fence jika ada
+        if text.startswith("```"):
+            text = text.strip("`")
+            if text.lower().startswith("json"):
+                text = text[4:].lstrip()
+        start = text.find("{")
+        end = text.rfind("}")
+        if start >= 0 and end > start:
+            text = text[start:end + 1]
+
+        parsed = _json.loads(text)
+        temuan_list = parsed.get("temuan", [])
+        
+        if not isinstance(temuan_list, list) or len(temuan_list) == 0:
+            raise ValueError("AI tidak mengembalikan list temuan")
+        
+        # Validasi & normalisasi setiap temuan
+        cleaned = []
+        for t in temuan_list:
+            if not isinstance(t, dict):
+                continue
+            
+            kategori = _coerce_to_string(t.get("kategori"), "strategic").lower()
+            if kategori not in KATEGORI_KE_PIC:
+                kategori = "strategic"
+            
+            prioritas = _coerce_to_string(t.get("prioritas"), "sedang").lower()
+            if prioritas not in ("tinggi", "sedang", "rendah"):
+                prioritas = "sedang"
+            
+            # Normalisasi data_pendukung
+            dp = t.get("data_pendukung", {})
+            if not isinstance(dp, dict):
+                dp = {}
+            
+            cleaned.append({
+                "judul": _coerce_to_string(t.get("judul"), "Temuan tanpa judul"),
+                "deskripsi": _coerce_to_string(t.get("deskripsi"), "-"),
+                "kategori": kategori,
+                "prioritas": prioritas,
+                "data_pendukung": dp,
+                "dampak": _coerce_to_string(t.get("dampak"), ""),
+                "rekomendasi": _coerce_to_string(t.get("rekomendasi"), ""),
+            })
+        
+        if not cleaned:
+            raise ValueError("Tidak ada temuan valid setelah normalisasi")
+        
+        logger.info(f"Analisis temuan berhasil: {len(cleaned)} temuan di-generate.")
+        return cleaned
+
+    except Exception as e:
+        logger.error(f"Error pada analyze_temuan: {e}", exc_info=True)
+        return build_fallback_temuan()
