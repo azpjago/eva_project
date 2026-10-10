@@ -1039,7 +1039,7 @@ def analyze_temuan(data_tahun: list, force_refresh: bool = False) -> list:
 
     # === FALLBACK: analisis rule-based ===
     def build_fallback_temuan():
-        """Fallback jika AI gagal — pakai rule sederhana."""
+        """Fallback: analisis rule-based dengan data snake_case dari backend."""
         temuan_list = []
         
         if len(data_tahun) < 2:
@@ -1053,42 +1053,45 @@ def analyze_temuan(data_tahun: list, force_refresh: bool = False) -> list:
                 "rekomendasi": "Lengkapi data tahun sebelumnya di Kalkulator EVA.",
             }]
         
-        # Ambil tahun awal & akhir
         first, last = data_tahun[0], data_tahun[-1]
-        tahun_str = f"{first['tahun']}-{last['tahun']}"
         
         def pct_change(a, b):
-            if a == 0: return 0
+            if a == 0:
+                return 100.0 if b > 0 else 0.0
             return ((b - a) / a) * 100
         
-        # Cek beberapa metrik kunci
+        # Metrik kunci yang diperiksa (snake_case)
         metrics = [
-            ("nilaiTambah", "Nilai Tambah", "productivity", "produktivitas"),
+            ("nilai_tambah", "Nilai Tambah", "productivity", "produktivitas"),
             ("penjualan", "Penjualan", "sales_revenue", "penjualan"),
-            ("biayaTenagaKerja", "Biaya Tenaga Kerja", "labor_cost", "biaya tenaga kerja"),
-            ("totalInvestasi", "Total Investasi", "finance_cost", "investasi"),
-            ("labaBersih", "Laba Bersih", "profit", "profitabilitas"),
+            ("biaya_tenaga_kerja", "Biaya Tenaga Kerja", "labor_cost", "biaya tenaga kerja"),
+            ("bahan_digunakan", "Bahan Digunakan", "material_cost", "bahan"),
+            ("overhead_produksi", "Overhead Produksi", "overhead_cost", "overhead"),
+            ("biaya_administrasi", "Biaya Administrasi", "admin_cost", "biaya administrasi"),
+            ("total_investasi", "Total Investasi", "finance_cost", "investasi"),
+            ("laba_bersih", "Laba Bersih", "profit", "profitabilitas"),
         ]
         
         for key, label, kategori, kata in metrics:
-            awal = first.get(key, 0)
-            akhir = last.get(key, 0)
+            awal = first.get(key, 0) or 0
+            akhir = last.get(key, 0) or 0
             if awal == 0 and akhir == 0:
                 continue
             
             change = pct_change(awal, akhir)
             
-            # Deteksi tren signifikan
             if abs(change) > 10:
                 if change < 0:
+                    # Skip kalau nilai awalnya kecil (< 1000) — bukan temuan signifikan
+                    if awal < 1000:
+                        continue
                     prioritas = "tinggi" if abs(change) > 20 else "sedang"
                     temuan_list.append({
                         "judul": f"Penurunan {label} sebesar {abs(change):.1f}%",
                         "deskripsi": (
                             f"{label} mengalami penurunan dari {awal:,.0f} ({first['tahun']}) "
                             f"menjadi {akhir:,.0f} ({last['tahun']}). "
-                            f"Penurunan sebesar {abs(change):.1f}% ini perlu evaluasi untuk "
-                            f"mengetahui penyebab dan tindakan perbaikan yang tepat."
+                            f"Penurunan sebesar {abs(change):.1f}% ini perlu evaluasi mendalam."
                         ),
                         "kategori": kategori,
                         "prioritas": prioritas,
@@ -1105,12 +1108,14 @@ def analyze_temuan(data_tahun: list, force_refresh: bool = False) -> list:
                         ),
                     })
                 else:
+                    # NAIK — hanya tampilkan kalau signifikan (>15%)
+                    if abs(change) < 15:
+                        continue
                     temuan_list.append({
                         "judul": f"Peningkatan {label} sebesar {change:.1f}%",
                         "deskripsi": (
                             f"{label} menunjukkan tren positif dengan kenaikan {change:.1f}% "
-                            f"dari {awal:,.0f} ({first['tahun']}) menjadi {akhir:,.0f} ({last['tahun']}). "
-                            f"Pertahankan dan dokumentasikan strategi yang berhasil."
+                            f"dari {awal:,.0f} ({first['tahun']}) menjadi {akhir:,.0f} ({last['tahun']})."
                         ),
                         "kategori": kategori,
                         "prioritas": "rendah",
@@ -1123,11 +1128,10 @@ def analyze_temuan(data_tahun: list, force_refresh: bool = False) -> list:
                         "rekomendasi": (
                             f"1. Dokumentasikan praktik terbaik sebagai SOP.\n"
                             f"2. Tetapkan target progresif untuk tahun berikutnya.\n"
-                            f"3. Bagikan strategi ke divisi lain yang relevan."
+                            f"3. Bagikan strategi ke divisi lain."
                         ),
                     })
         
-        # Jika tidak ada temuan signifikan
         if not temuan_list:
             temuan_list.append({
                 "judul": "Kinerja relatif stabil",
@@ -1161,19 +1165,18 @@ def analyze_temuan(data_tahun: list, force_refresh: bool = False) -> list:
         data_ringkas.append({
             "tahun": d.get("tahun"),
             "penjualan": round(d.get("penjualan", 0)),
-            "nilai_tambah": round(d.get("nilaiTambah", 0)),
-            "biaya_tenaga_kerja": round(d.get("biayaTenagaKerja", 0)),
-            "bahan_digunakan": round(d.get("bahanDigunakan", 0)),
+            "nilai_tambah": round(d.get("nilai_tambah", 0)),
+            "biaya_tenaga_kerja": round(d.get("biaya_tenaga_kerja", 0)),
+            "bahan_digunakan": round(d.get("bahan_digunakan", 0)),
             "overhead_produksi": round(d.get("overhead_produksi", 0)),
             "biaya_administrasi": round(d.get("biaya_administrasi", 0)),
             "penyusutan": round(d.get("penyusutan", 0)),
             "pajak": round(d.get("pajak", 0)),
             "bunga_pinjaman": round(d.get("bunga_pinjaman", 0)),
-            "total_investasi": round(d.get("totalInvestasi", 0)),
-            "laba_bersih": round(d.get("labaBersih", 0)),
-            "jumlah_tenaga_kerja": round(d.get("jumlahTenagaKerja", 0)),
-            "total_jam_kerja": round(d.get("totalJamKerja", 0)),
-            "bahan_baku": round(d.get("bahanBaku", 0)),
+            "total_investasi": round(d.get("total_investasi", 0)),
+            "laba_bersih": round(d.get("laba_bersih", 0)),
+            "jumlah_tenaga_kerja": round(d.get("jumlah_tenaga_kerja", 0)),
+            "total_jam_kerja": round(d.get("total_jam_kerja", 0)),
         })
     
     # Daftar kategori yang tersedia
