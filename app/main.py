@@ -6,6 +6,12 @@ from fastapi.security import OAuth2PasswordBearer
 from fastapi.staticfiles import StaticFiles
 from sqlalchemy.orm import Session
 from pathlib import Path
+from app.models import PIC, Temuan, TemuanHistory
+from app.schemas import (
+    PICCreate, PICUpdate, PICResponse,
+)
+from app.pic_template import PIC_TEMPLATE
+import json as _json
 
 from app.ai_service import chat_reply, generate_recommendation_narrative, ratio_dialog_reply
 from app.database import Base, engine, get_db
@@ -440,3 +446,172 @@ def clear_rasio_dialog(
     ).delete()
     db.commit()
     return {"message": "Riwayat dialog dihapus"}
+
+# ============================================================
+# ENDPOINT PIC (Person In Charge) — Hierarkis
+# ============================================================
+
+def _seed_pic_template(db: Session, user_id: int):
+    """Generate struktur organisasi default untuk user."""
+    created_ids = []
+    
+    for idx, (nama_jabatan, departemen, level, parent_idx, kategori, urutan) in enumerate(PIC_TEMPLATE):
+        parent_id = None
+        if parent_idx is not None and parent_idx < len(created_ids):
+            parent_id = created_ids[parent_idx]
+        
+        pic = PIC(
+            user_id=user_id,
+            parent_id=parent_id,
+            level=level,
+            urutan=urutan,
+            nama_jabatan=nama_jabatan,
+            departemen=departemen,
+            kategori_tanggung_jawab=_json.dumps(kategori),
+            is_active=True,
+            is_template=True,
+        )
+        db.add(pic)
+        db.flush()  # untuk dapat id
+        created_ids.append(pic.id)
+    
+    db.commit()
+    return created_ids
+
+
+@app.get("/api/pic", response_model=list[PICResponse])
+def list_pic(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """Ambil semua PIC user. Auto-seed jika belum ada."""
+    existing = db.query(PIC).filter(PIC.user_id == current_user.id).count()
+    
+    # Auto-seed jika user belum punya PIC
+    if existing == 0:
+        _seed_pic_template(db, current_user.id)
+    
+    pics = (
+        db.query(PIC)
+        .filter(PIC.user_id == current_user.id)
+        .order_by(PIC.level.asc(), PIC.urutan.asc(), PIC.id.asc())
+        .all()
+    )
+    return pics
+
+
+@app.post("/api/pic", response_model=PICResponse)
+def create_pic(
+    data: PICCreate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """Tambah posisi PIC baru."""
+    pic = PIC(
+        user_id=current_user.id,
+        parent_id=data.parent_id,
+        level=data.level or 1,
+        urutan=data.urutan or 0,
+        nama_jabatan=data.nama_jabatan,
+        departemen=data.departemen,
+        nama_orang=data.nama_orang,
+        email=data.email,
+        telepon=data.telepon,
+        foto_base64=data.foto_base64,
+        kategori_tanggung_jawab=_json.dumps(data.kategori_tanggung_jawab or []),
+        is_active=True,
+        is_template=False,
+    )
+    db.add(pic)
+    db.commit()
+    db.refresh(pic)
+    return pic
+
+
+@app.put("/api/pic/{pic_id}", response_model=PICResponse)
+def update_pic(
+    pic_id: int,
+    data: PICUpdate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """Update data PIC."""
+    pic = db.query(PIC).filter(
+        PIC.id == pic_id,
+        PIC.user_id == current_user.id,
+    ).first()
+    if not pic:
+        raise HTTPException(status_code=404, detail="PIC tidak ditemukan")
+    
+    update_data = data.dict(exclude_unset=True)
+    
+    # Handle kategori_tanggung_jawab → JSON string
+    if "kategori_tanggung_jawab" in update_data:
+        update_data["kategori_tanggung_jawab"] = _json.dumps(
+            update_data["kategori_tanggung_jawab"] or []
+        )
+    
+    for key, value in update_data.items():
+        setattr(pic, key, value)
+    
+    # Tandai sudah bukan template lagi
+    pic.is_template = False
+    
+    db.commit()
+    db.refresh(pic)
+    return pic
+
+
+@app.delete("/api/pic/{pic_id}")
+def delete_pic(
+    pic_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """Hapus PIC. Anak-anaknya akan ikut terhapus (cascade manual)."""
+    pic = db.query(PIC).filter(
+        PIC.id == pic_id,
+        PIC.user_id == current_user.id,
+    ).first()
+    if not pic:
+        raise HTTPException(status_code=404, detail="PIC tidak ditemukan")
+    
+    # Kumpulkan semua descendant (BFS)
+    to_delete = [pic.id]
+    queue = [pic.id]
+    while queue:
+        parent = queue.pop(0)
+        children = db.query(PIC).filter(
+            PIC.parent_id == parent,
+            PIC.user_id == current_user.id,
+        ).all()
+        for c in children:
+            to_delete.append(c.id)
+            queue.append(c.id)
+    
+    db.query(PIC).filter(PIC.id.in_(to_delete)).delete(synchronize_session=False)
+    db.commit()
+    return {"message": f"{len(to_delete)} PIC dihapus", "deleted_ids": to_delete}
+
+
+@app.post("/api/pic/reset-template")
+def reset_pic_template(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """Hapus semua PIC user lalu generate ulang dari template default."""
+    db.query(PIC).filter(PIC.user_id == current_user.id).delete()
+    db.commit()
+    
+    created_ids = _seed_pic_template(db, current_user.id)
+    return {
+        "message": f"Template berhasil di-reset. {len(created_ids)} posisi dibuat.",
+        "total": len(created_ids),
+    }
+
+
+@app.get("/api/pic/categories")
+def list_categories(current_user: User = Depends(get_current_user)):
+    """Ambil daftar kategori standar untuk UI dropdown."""
+    from app.pic_template import STANDARD_CATEGORIES
+    return {"categories": STANDARD_CATEGORIES}
