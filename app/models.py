@@ -76,6 +76,7 @@ class Temuan(Base):
     data_pendukung = Column(Text, default="{}")       # JSON string
     dampak = Column(Text, nullable=True)
     rekomendasi = Column(Text, nullable=True)
+    recommended_methods = Column(Text, default="[]") 
     pic_id = Column(Integer, ForeignKey("pic.id"), nullable=True, index=True)
     status = Column(String(20), default="open")
     deadline = Column(DateTime, nullable=True)
