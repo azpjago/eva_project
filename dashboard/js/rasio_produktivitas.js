@@ -685,7 +685,7 @@ function showRasioDetail(ratioId) {
                     <!-- Saran Metode Peningkatan Produktivitas -->
                     <div>
                         <h4 class="text-sm font-bold text-white mb-2 flex items-center gap-2">
-                            <i class="fa-solid fa-toolbox text-cyan-400"></i> Saran Metode Peningkatan Produktivitas
+                            <i class="fa-solid fa-toolbox text-cyan-400"></i> Saran Menggunakan Alat, Teknik dan Metode (ATM)
                         </h4>
                         <div class="space-y-2">
                             ${renderMethods(a.recommended_methods)}

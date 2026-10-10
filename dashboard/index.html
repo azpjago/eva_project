@@ -84,8 +84,17 @@
             <div id="view-ringkasan" class="space-y-6 fade-in">
                 <div class="bg-white rounded-2xl p-6 border border-slate-200 relative overflow-hidden shadow-sm">
                     <div class="absolute -right-20 -top-20 w-64 h-64 bg-teal-500/10 rounded-full blur-3xl"></div>
-                    <h1 class="text-2xl font-bold text-slate-900 mb-2 relative z-10">Ringkasan Analisis EVA</h1>
-                    <p class="text-slate-500 text-sm relative z-10">Visualisasi data dari hasil perhitungan Kalkulator EVA Anda akan tampil secara otomatis di bawah ini.</p>
+                    <div class="absolute right-8 top-1/2 -translate-y-1/2 hidden md:flex items-end gap-1.5 h-20 opacity-80 pointer-events-none">
+                        <div class="w-2.5 bg-teal-300 rounded-t animate-bar" style="height: 40%; animation-delay: 0.1s;"></div>
+                        <div class="w-2.5 bg-teal-400 rounded-t animate-bar" style="height: 70%; animation-delay: 0.2s;"></div>
+                        <div class="w-2.5 bg-teal-500 rounded-t animate-bar" style="height: 55%; animation-delay: 0.3s;"></div>
+                        <div class="w-2.5 bg-teal-600 rounded-t animate-bar" style="height: 90%; animation-delay: 0.4s;"></div>
+                        <div class="w-2.5 bg-blue-500 rounded-t animate-bar" style="height: 75%; animation-delay: 0.5s;"></div>
+                    </div>
+                    <div class="relative z-10 md:pr-48">
+                        <h1 class="text-2xl font-bold text-slate-900 mb-2">Ringkasan Analisis EVA</h1>
+                        <p class="text-slate-500 text-sm max-w-lg">Visualisasi data dari hasil perhitungan Kalkulator EVA Anda akan tampil secara otomatis di bawah ini.</p>
+                    </div>
                 </div>
                 <div id="ringkasan-content"></div>
             </div>
@@ -94,8 +103,21 @@
             <div id="view-input-data" class="hidden space-y-6 fade-in">
                 <div class="bg-white rounded-2xl p-6 border border-slate-200 relative overflow-hidden shadow-sm">
                     <div class="absolute -right-20 -top-20 w-64 h-64 bg-teal-500/10 rounded-full blur-3xl"></div>
-                    <h1 class="text-2xl font-bold text-slate-900 mb-2 relative z-10">Input Data Nilai Tambah</h1>
-                    <p class="text-slate-500 text-sm relative z-10">Input data laporan keuangan per tahun. Jangan lupa tekan Simpan Analisis jika sudah selesai.</p>
+                    <div class="absolute right-8 top-1/2 -translate-y-1/2 hidden md:grid grid-cols-3 gap-2 opacity-80 pointer-events-none">
+                        <div class="w-2.5 h-2.5 rounded-full bg-teal-400 animate-dot" style="animation-delay: 0s;"></div>
+                        <div class="w-2.5 h-2.5 rounded-full bg-teal-500 animate-dot" style="animation-delay: 0.15s;"></div>
+                        <div class="w-2.5 h-2.5 rounded-full bg-blue-500 animate-dot" style="animation-delay: 0.3s;"></div>
+                        <div class="w-2.5 h-2.5 rounded-full bg-teal-500 animate-dot" style="animation-delay: 0.45s;"></div>
+                        <div class="w-2.5 h-2.5 rounded-full bg-blue-500 animate-dot" style="animation-delay: 0.6s;"></div>
+                        <div class="w-2.5 h-2.5 rounded-full bg-teal-400 animate-dot" style="animation-delay: 0.75s;"></div>
+                        <div class="w-2.5 h-2.5 rounded-full bg-blue-500 animate-dot" style="animation-delay: 0.9s;"></div>
+                        <div class="w-2.5 h-2.5 rounded-full bg-teal-500 animate-dot" style="animation-delay: 1.05s;"></div>
+                        <div class="w-2.5 h-2.5 rounded-full bg-teal-400 animate-dot" style="animation-delay: 1.2s;"></div>
+                    </div>
+                    <div class="relative z-10 md:pr-48">
+                        <h1 class="text-2xl font-bold text-slate-900 mb-2">Input Data Nilai Tambah</h1>
+                        <p class="text-slate-500 text-sm max-w-lg">Input data laporan keuangan per tahun. Jangan lupa tekan Simpan Analisis jika sudah selesai.</p>
+                    </div>
                 </div>
 
                 <div id="yearTabs" class="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
@@ -189,8 +211,21 @@
             <div id="view-grafik-eva" class="hidden space-y-6 fade-in">
                 <div class="bg-white rounded-2xl p-6 border border-slate-200 relative overflow-hidden shadow-sm">
                     <div class="absolute -right-20 -top-20 w-64 h-64 bg-teal-500/10 rounded-full blur-3xl"></div>
-                    <h1 class="text-2xl font-bold text-slate-900 mb-2 relative z-10">📊 Grafik EVA</h1>
-                    <p class="text-slate-500 text-sm relative z-10">Visualisasi data analisis Nilai Tambah dan produktivitas perusahaan.</p>
+                    <svg class="absolute right-8 top-1/2 -translate-y-1/2 h-20 w-36 hidden md:block opacity-80 pointer-events-none" 
+                         viewBox="0 0 200 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <polyline points="10,80 50,60 90,70 130,35 170,45 195,15" 
+                                  stroke="#14b8a6" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"
+                                  stroke-dasharray="400" stroke-dashoffset="400">
+                            <animate attributeName="stroke-dashoffset" from="400" to="0" dur="2s" fill="freeze" begin="0.3s"/>
+                        </polyline>
+                        <circle cx="195" cy="15" r="5" fill="#0d9488" opacity="0">
+                            <animate attributeName="opacity" from="0" to="1" dur="0.3s" fill="freeze" begin="2.3s"/>
+                        </circle>
+                    </svg>
+                    <div class="relative z-10 md:pr-48">
+                        <h1 class="text-2xl font-bold text-slate-900 mb-2">Grafik EVA</h1>
+                        <p class="text-slate-500 text-sm max-w-lg">Visualisasi data analisis Nilai Tambah dan produktivitas perusahaan.</p>
+                    </div>
                 </div>
 
                 <div class="bg-white rounded-2xl p-4 border border-slate-200 shadow-sm">
@@ -219,8 +254,24 @@
             <div id="view-rasio-produktivitas" class="hidden space-y-6 fade-in">
                 <div class="bg-white rounded-2xl p-6 border border-slate-200 relative overflow-hidden shadow-sm">
                     <div class="absolute -right-20 -top-20 w-64 h-64 bg-teal-500/10 rounded-full blur-3xl"></div>
-                    <h1 class="text-2xl font-bold text-slate-900 mb-2 relative z-10">📊 Rasio Produktivitas</h1>
-                    <p class="text-slate-500 text-sm relative z-10">Analisis rasio produktivitas tenaga kerja, modal, profitabilitas, dan pendukung.</p>
+                    <svg class="absolute right-10 top-1/2 -translate-y-1/2 hidden md:block opacity-80 pointer-events-none" 
+                         width="100" height="100" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                        <circle cx="50" cy="50" r="40" stroke="#e2e8f0" stroke-width="8" fill="none"/>
+                        <circle cx="50" cy="50" r="40" stroke="#14b8a6" stroke-width="8" fill="none"
+                                stroke-dasharray="251" stroke-dashoffset="251" stroke-linecap="round"
+                                transform="rotate(-90 50 50)">
+                            <animate attributeName="stroke-dashoffset" from="251" to="75" dur="1.5s" fill="freeze" begin="0.3s"/>
+                        </circle>
+                        <circle cx="50" cy="50" r="40" stroke="#2563eb" stroke-width="8" fill="none"
+                                stroke-dasharray="251" stroke-dashoffset="251" stroke-linecap="round"
+                                transform="rotate(-90 50 50)" opacity="0.5">
+                            <animate attributeName="stroke-dashoffset" from="251" to="100" dur="1.5s" fill="freeze" begin="0.8s"/>
+                        </circle>
+                    </svg>
+                    <div class="relative z-10 md:pr-48">
+                        <h1 class="text-2xl font-bold text-slate-900 mb-2">Rasio Produktivitas</h1>
+                        <p class="text-slate-500 text-sm max-w-lg">Analisis rasio produktivitas tenaga kerja, modal, profitabilitas, dan pendukung.</p>
+                    </div>
                 </div>
 
                 <div class="bg-white rounded-2xl p-4 border border-slate-200 shadow-sm">
@@ -253,8 +304,21 @@
             <div id="view-nilai-tambah" class="hidden space-y-6 fade-in">
                 <div class="bg-white rounded-2xl p-6 border border-slate-200 relative overflow-hidden shadow-sm">
                     <div class="absolute -right-20 -top-20 w-64 h-64 bg-teal-500/10 rounded-full blur-3xl"></div>
-                    <h1 class="text-2xl font-bold text-slate-900 mb-2 relative z-10">🥧 Nilai Tambah</h1>
-                    <p class="text-slate-500 text-sm relative z-10">Rincian perhitungan nilai tambah & proporsi komponennya per tahun.</p>
+                    <svg class="absolute right-10 top-1/2 -translate-y-1/2 hidden md:block opacity-80 pointer-events-none" 
+                         width="100" height="100" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                        <g>
+                            <circle cx="50" cy="50" r="35" stroke="#14b8a6" stroke-width="10" fill="none" stroke-dasharray="80 220"/>
+                            <circle cx="50" cy="50" r="35" stroke="#0d9488" stroke-width="10" fill="none" stroke-dasharray="60 220" stroke-dashoffset="-80"/>
+                            <circle cx="50" cy="50" r="35" stroke="#2563eb" stroke-width="10" fill="none" stroke-dasharray="50 220" stroke-dashoffset="-140"/>
+                            <circle cx="50" cy="50" r="35" stroke="#f59e0b" stroke-width="10" fill="none" stroke-dasharray="40 220" stroke-dashoffset="-190"/>
+                            <circle cx="50" cy="50" r="35" stroke="#e2e8f0" stroke-width="10" fill="none" stroke-dasharray="21 220" stroke-dashoffset="-230"/>
+                            <animateTransform attributeName="transform" type="rotate" from="0 50 50" to="360 50 50" dur="20s" repeatCount="indefinite"/>
+                        </g>
+                    </svg>
+                    <div class="relative z-10 md:pr-48">
+                        <h1 class="text-2xl font-bold text-slate-900 mb-2">Nilai Tambah</h1>
+                        <p class="text-slate-500 text-sm max-w-lg">Rincian perhitungan nilai tambah & proporsi komponennya per tahun.</p>
+                    </div>
                 </div>
 
                 <div class="bg-white rounded-2xl p-4 border border-slate-200 shadow-sm flex flex-wrap items-center gap-4">
