@@ -263,9 +263,24 @@ class TemuanResponse(BaseModel):
     created_at: datetime
     updated_at: datetime
 
+    @field_validator('data_pendukung', mode='before')
+    @classmethod
+    def parse_data_pendukung(cls, v):
+        """Parse JSON string → dict. Handle kalau sudah dict."""
+        if v is None:
+            return {}
+        if isinstance(v, dict):
+            return v
+        if isinstance(v, str):
+            try:
+                parsed = _json.loads(v)
+                return parsed if isinstance(parsed, dict) else {}
+            except (ValueError, TypeError):
+                return {}
+        return {}
+
     class Config:
         from_attributes = True
-
 
 class TemuanHistoryResponse(BaseModel):
     id: int
