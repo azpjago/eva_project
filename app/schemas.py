@@ -235,6 +235,7 @@ class TemuanUpdate(BaseModel):
     prioritas: Optional[str] = None
     dampak: Optional[str] = None
     rekomendasi: Optional[str] = None
+    recommended_methods: Optional[list] = None
     pic_id: Optional[int] = None
     status: Optional[str] = None
     deadline: Optional[datetime] = None
