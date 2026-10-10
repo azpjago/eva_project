@@ -150,6 +150,167 @@ PRODUCTIVITY_METHODS = {
     ],
 }
 
+
+# ===== DETAIL SETIAP METODE (GLOBAL) =====
+METHOD_DETAILS = {
+    "5S/5R": {
+        "full_name": "5S/5R (Ringkas, Rapi, Resik, Rawat, Rajin)",
+        "alasan": "Menata lingkungan kerja agar lebih efisien dan mengurangi waktu pencarian alat/bahan.",
+        "penerapan": "Bentuk tim 5S per area kerja, lakukan audit mingguan, beri reward ke tim terbaik.",
+    },
+    "Kaizen": {
+        "full_name": "Kaizen (Continuous Improvement)",
+        "alasan": "Cocok untuk perbaikan bertahap berkelanjutan tanpa investasi besar.",
+        "penerapan": "Bentuk gugus kendali mutu (QCC) — tim kecil bertemu mingguan untuk usulkan perbaikan.",
+    },
+    "PDCA": {
+        "full_name": "PDCA (Plan-Do-Check-Act)",
+        "alasan": "Siklus perbaikan sistematis untuk memastikan setiap perubahan terukur.",
+        "penerapan": "Terapkan siklus PDCA per kuartal dengan target spesifik & evaluasi berkala.",
+    },
+    "TQM": {
+        "full_name": "TQM (Total Quality Management)",
+        "alasan": "Melibatkan seluruh organisasi untuk peningkatan kualitas menyeluruh.",
+        "penerapan": "Bangun budaya kualitas melalui pelatihan, SOP, dan komitmen manajemen puncak.",
+    },
+    "TQC": {
+        "full_name": "TQC (Total Quality Control)",
+        "alasan": "Kontrol kualitas menyeluruh di setiap tahap produksi.",
+        "penerapan": "Terapkan inspeksi di setiap stasiun kerja dengan standar kualitas jelas.",
+    },
+    "Poka-Yoke": {
+        "full_name": "Poka-Yoke (Error Proofing)",
+        "alasan": "Mencegah kesalahan sejak awal, mengurangi rework.",
+        "penerapan": "Identifikasi titik rawan kesalahan, pasang sensor/checklist pencegahan.",
+    },
+    "Kanban System": {
+        "full_name": "Kanban System",
+        "alasan": "Mengontrol aliran material/produksi agar sesuai permintaan.",
+        "penerapan": "Pasang papan Kanban visual, batasi WIP per stasiun, lakukan review harian.",
+    },
+    "Fishbone Diagram": {
+        "full_name": "Fishbone Diagram (Ishikawa)",
+        "alasan": "Menganalisis akar penyebab masalah secara sistematis (Man, Method, Machine, Material, Measurement, Environment).",
+        "penerapan": "Adakan sesi brainstorming lintas divisi untuk memetakan akar masalah.",
+    },
+    "5W+1H": {
+        "full_name": "5W+1H (What, Why, Where, When, Who, How)",
+        "alasan": "Kerangka investigasi masalah yang menyeluruh.",
+        "penerapan": "Gunakan untuk analisis insiden/penurunan kinerja sebelum menentukan solusi.",
+    },
+    "Pareto Diagram": {
+        "full_name": "Pareto Diagram (80/20 Rule)",
+        "alasan": "Fokus pada 20% penyebab yang menimbulkan 80% masalah.",
+        "penerapan": "Kumpulkan data frekuensi masalah, urutkan, tangani penyebab utama lebih dulu.",
+    },
+    "SWOT": {
+        "full_name": "SWOT Analysis",
+        "alasan": "Menilai posisi internal & eksternal perusahaan untuk strategi tepat.",
+        "penerapan": "Adakan workshop strategis tahunan dengan manajemen & stakeholder kunci.",
+    },
+    "FMEA": {
+        "full_name": "FMEA (Failure Mode and Effects Analysis)",
+        "alasan": "Mengidentifikasi potensi kegagalan sebelum terjadi.",
+        "penerapan": "Buat tabel FMEA per proses kritis, hitung RPN, prioritaskan mitigasi.",
+    },
+    "Check Sheet": {
+        "full_name": "Check Sheet",
+        "alasan": "Mencatat data secara sistematis untuk analisis lebih lanjut.",
+        "penerapan": "Buat form checklist sederhana untuk pengumpulan data harian.",
+    },
+    "Flowchart": {
+        "full_name": "Flowchart / Flow Process Chart",
+        "alasan": "Memvisualisasikan alur proses untuk identifikasi inefisiensi.",
+        "penerapan": "Petakan alur kerja saat ini (as-is), tandai langkah non-value-added.",
+    },
+    "Control Chart": {
+        "full_name": "Control Chart",
+        "alasan": "Memantau stabilitas proses dari waktu ke waktu.",
+        "penerapan": "Plot data kinerja harian pada chart kontrol, tandai outlier untuk investigasi.",
+    },
+    "SPC": {
+        "full_name": "SPC (Statistical Process Control)",
+        "alasan": "Mengontrol kualitas berbasis data statistik.",
+        "penerapan": "Terapkan batas kontrol UCL/LCL di proses produksi kritis.",
+    },
+    "OEE": {
+        "full_name": "OEE (Overall Equipment Effectiveness)",
+        "alasan": "Mengukur efektivitas peralatan/mesin secara menyeluruh.",
+        "penerapan": "Ukur Availability × Performance × Quality tiap shift, target ≥85%.",
+    },
+    "Work Sampling": {
+        "full_name": "Work Sampling",
+        "alasan": "Mengetahui proporsi waktu kerja produktif vs non-produktif.",
+        "penerapan": "Lakukan observasi acak 30-50 kali per minggu selama 2 minggu.",
+    },
+    "Time Study": {
+        "full_name": "Time Study",
+        "alasan": "Mengukur waktu standar setiap aktivitas untuk baseline perbaikan.",
+        "penerapan": "Ukur waktu setiap elemen tugas dengan stopwatch, tetapkan waktu baku.",
+    },
+    "Histogram": {
+        "full_name": "Histogram",
+        "alasan": "Memvisualisasikan distribusi data untuk memahami variasi.",
+        "penerapan": "Plot data produksi/kinerja, identifikasi pola & outlier.",
+    },
+    "Lean Manufacturing": {
+        "full_name": "Lean Manufacturing",
+        "alasan": "Menghilangkan 7 waste (overproduction, waiting, transport, over-processing, inventory, motion, defects).",
+        "penerapan": "Petakan value stream, identifikasi waste, terapkan perbaikan berkelanjutan.",
+    },
+    "VSM": {
+        "full_name": "VSM (Value Stream Mapping)",
+        "alasan": "Memetakan aliran nilai dari bahan mentah sampai produk jadi.",
+        "penerapan": "Buat peta current state & future state, targetkan lead time reduction.",
+    },
+    "JIT": {
+        "full_name": "JIT (Just In Time)",
+        "alasan": "Mengurangi inventori dengan produksi sesuai permintaan.",
+        "penerapan": "Selaraskan jadwal produksi dengan order, bangun hubungan erat dengan supplier.",
+    },
+    "SMED": {
+        "full_name": "SMED (Single-Minute Exchange of Die)",
+        "alasan": "Mempercepat waktu setup/ganti alat agar lebih fleksibel.",
+        "penerapan": "Pisahkan setup internal & eksternal, targetkan <10 menit per changeover.",
+    },
+    "Line Balancing": {
+        "full_name": "Line Balancing",
+        "alasan": "Menyeimbangkan beban kerja antar stasiun untuk hilangkan bottleneck.",
+        "penerapan": "Hitung takt time, redistribusi tugas antar operator, evaluasi mingguan.",
+    },
+    "Process Mapping": {
+        "full_name": "Process Mapping",
+        "alasan": "Dokumentasi proses bisnis yang detail untuk identifikasi inefisiensi.",
+        "penerapan": "Petakan proses end-to-end, tandai langkah yang bisa diotomasi/dihilangkan.",
+    },
+    "TPM": {
+        "full_name": "TPM (Total Productive Maintenance)",
+        "alasan": "Melibatkan semua operator dalam perawatan mesin untuk hindari downtime.",
+        "penerapan": "Terapkan autonomous maintenance, jadwal perawatan preventif, ukur OEE.",
+    },
+    "Balanced Scorecard": {
+        "full_name": "Balanced Scorecard (BSC)",
+        "alasan": "Mengukur kinerja dari 4 perspektif: finansial, pelanggan, proses, pembelajaran.",
+        "penerapan": "Susun KPI per perspektif, review kuartalan dengan manajemen puncak.",
+    },
+    "MRP": {
+        "full_name": "MRP (Material Requirements Planning)",
+        "alasan": "Merencanakan kebutuhan bahan baku sesuai jadwal produksi.",
+        "penerapan": "Bangun sistem MRP terintegrasi dengan jadwal produksi & stok.",
+    },
+    "EOQ": {
+        "full_name": "EOQ (Economic Order Quantity)",
+        "alasan": "Menghitung jumlah pemesanan optimal untuk minimalkan biaya pesan & simpan.",
+        "penerapan": "Hitung EOQ per item, negosiasi harga dengan supplier untuk volume optimal.",
+    },
+    "Six Sigma": {
+        "full_name": "Six Sigma",
+        "alasan": "Mengurangi cacat hingga 3.4 per juta peluang (DMAIC).",
+        "penerapan": "Bentuk tim Black Belt/Green Belt, terapkan DMAIC untuk masalah kritis.",
+    },
+}
+
+
 def analyze_ratio_trend(data_tahun: list, ratios: list) -> dict:
     """
     Menganalisis SEMUA rasio produktivitas sekaligus menggunakan EVA Agent.
@@ -369,9 +530,7 @@ ATURAN PENTING:
                 status = "positif"
             item["status"] = status
 
-            # ============================================================
-            # ⬇️⬇️⬇️ KODE BARU: NORMALISASI recommended_methods ⬇️⬇️⬇️
-            # ============================================================
+            # ----- NORMALISASI recommended_methods -----
             methods = item.get("recommended_methods")
             if not isinstance(methods, list):
                 methods = []
@@ -395,14 +554,10 @@ ATURAN PENTING:
                 for fb_m in fb_methods:
                     if len(cleaned_methods) >= 3:
                         break
-                    # Hindari duplikat
                     if not any(x["method"] == fb_m["method"] for x in cleaned_methods):
                         cleaned_methods.append(fb_m)
 
             item["recommended_methods"] = cleaned_methods[:3]
-            # ============================================================
-            # ⬆️⬆️⬆️ SAMPAI SINI ⬆️⬆️⬆️
-            # ============================================================
 
         # Isi default untuk ratio yang mungkin tidak ada di response AI
         fallback = build_fallback()
@@ -416,6 +571,7 @@ ATURAN PENTING:
     except Exception as e:
         logger.error(f"Error pada analyze_ratio_trend: {e}", exc_info=True)
         return build_fallback()
+
 
 def _analyze_severity(values: list, growth_rates: list) -> dict:
     """
@@ -456,6 +612,7 @@ def _analyze_severity(values: list, growth_rates: list) -> dict:
         "gap_to_max": round(((max_val - last) / max_val * 100), 2) if max_val > 0 else 0,
     }
 
+
 def _ensure_min_5_suggestions(recs: list, trend: str) -> list:
     """Pastikan minimal 5 saran. Jika kurang, tambahkan saran generik yang relevan."""
     generic_pool = {
@@ -488,6 +645,7 @@ def _ensure_min_5_suggestions(recs: list, trend: str) -> list:
             recs.append(pool[i])
         i += 1
     return recs[:5] if len(recs) >= 5 else recs
+
 
 def _build_smart_recommendations(ratio_id: str, trend: str, values: list, growth_rates: list) -> list:
     """
@@ -664,6 +822,7 @@ def _build_smart_recommendations(ratio_id: str, trend: str, values: list, growth
             "🎯 **Aksi Benchmarking**: Bandingkan dengan rata-rata industri — identifikasi area gap untuk ditingkatkan.",
         ], "stabil")
 
+
 def _build_fallback_methods(ratio_id: str, trend: str) -> list:
     """
     Fallback: pilih metode peningkatan produktivitas jika AI gagal.
@@ -742,170 +901,11 @@ def _build_fallback_methods(ratio_id: str, trend: str) -> list:
         },
     }
 
-    # Detail setiap metode
-    method_details = {
-        "5S/5R": {
-            "full_name": "5S/5R (Ringkas, Rapi, Resik, Rawat, Rajin)",
-            "alasan": "Menata lingkungan kerja agar lebih efisien dan mengurangi waktu pencarian alat/bahan.",
-            "penerapan": "Bentuk tim 5S per area kerja, lakukan audit mingguan, beri reward ke tim terbaik.",
-        },
-        "Kaizen": {
-            "full_name": "Kaizen (Continuous Improvement)",
-            "alasan": "Cocok untuk perbaikan bertahap berkelanjutan tanpa investasi besar.",
-            "penerapan": "Bentuk gugus kendali mutu (QCC) — tim kecil bertemu mingguan untuk usulkan perbaikan.",
-        },
-        "PDCA": {
-            "full_name": "PDCA (Plan-Do-Check-Act)",
-            "alasan": "Siklus perbaikan sistematis untuk memastikan setiap perubahan terukur.",
-            "penerapan": "Terapkan siklus PDCA per kuartal dengan target spesifik & evaluasi berkala.",
-        },
-        "TQM": {
-            "full_name": "TQM (Total Quality Management)",
-            "alasan": "Melibatkan seluruh organisasi untuk peningkatan kualitas menyeluruh.",
-            "penerapan": "Bangun budaya kualitas melalui pelatihan, SOP, dan komitmen manajemen puncak.",
-        },
-        "TQC": {
-            "full_name": "TQC (Total Quality Control)",
-            "alasan": "Kontrol kualitas menyeluruh di setiap tahap produksi.",
-            "penerapan": "Terapkan inspeksi di setiap stasiun kerja dengan standar kualitas jelas.",
-        },
-        "Poka-Yoke": {
-            "full_name": "Poka-Yoke (Error Proofing)",
-            "alasan": "Mencegah kesalahan sejak awal, mengurangi rework.",
-            "penerapan": "Identifikasi titik rawan kesalahan, pasang sensor/checklist pencegahan.",
-        },
-        "Kanban System": {
-            "full_name": "Kanban System",
-            "alasan": "Mengontrol aliran material/produksi agar sesuai permintaan.",
-            "penerapan": "Pasang papan Kanban visual, batasi WIP per stasiun, lakukan review harian.",
-        },
-        "Fishbone Diagram": {
-            "full_name": "Fishbone Diagram (Ishikawa)",
-            "alasan": "Menganalisis akar penyebab masalah secara sistematis (Man, Method, Machine, Material, Measurement, Environment).",
-            "penerapan": "Adakan sesi brainstorming lintas divisi untuk memetakan akar masalah.",
-        },
-        "5W+1H": {
-            "full_name": "5W+1H (What, Why, Where, When, Who, How)",
-            "alasan": "Kerangka investigasi masalah yang menyeluruh.",
-            "penerapan": "Gunakan untuk analisis insiden/penurunan kinerja sebelum menentukan solusi.",
-        },
-        "Pareto Diagram": {
-            "full_name": "Pareto Diagram (80/20 Rule)",
-            "alasan": "Fokus pada 20% penyebab yang menimbulkan 80% masalah.",
-            "penerapan": "Kumpulkan data frekuensi masalah, urutkan, tangani penyebab utama lebih dulu.",
-        },
-        "SWOT": {
-            "full_name": "SWOT Analysis",
-            "alasan": "Menilai posisi internal & eksternal perusahaan untuk strategi tepat.",
-            "penerapan": "Adakan workshop strategis tahunan dengan manajemen & stakeholder kunci.",
-        },
-        "FMEA": {
-            "full_name": "FMEA (Failure Mode and Effects Analysis)",
-            "alasan": "Mengidentifikasi potensi kegagalan sebelum terjadi.",
-            "penerapan": "Buat tabel FMEA per proses kritis, hitung RPN, prioritaskan mitigasi.",
-        },
-        "Check Sheet": {
-            "full_name": "Check Sheet",
-            "alasan": "Mencatat data secara sistematis untuk analisis lebih lanjut.",
-            "penerapan": "Buat form checklist sederhana untuk pengumpulan data harian.",
-        },
-        "Flowchart": {
-            "full_name": "Flowchart / Flow Process Chart",
-            "alasan": "Memvisualisasikan alur proses untuk identifikasi inefisiensi.",
-            "penerapan": "Petakan alur kerja saat ini (as-is), tandai langkah non-value-added.",
-        },
-        "Control Chart": {
-            "full_name": "Control Chart",
-            "alasan": "Memantau stabilitas proses dari waktu ke waktu.",
-            "penerapan": "Plot data kinerja harian pada chart kontrol, tandai outlier untuk investigasi.",
-        },
-        "SPC": {
-            "full_name": "SPC (Statistical Process Control)",
-            "alasan": "Mengontrol kualitas berbasis data statistik.",
-            "penerapan": "Terapkan batas kontrol UCL/LCL di proses produksi kritis.",
-        },
-        "OEE": {
-            "full_name": "OEE (Overall Equipment Effectiveness)",
-            "alasan": "Mengukur efektivitas peralatan/mesin secara menyeluruh.",
-            "penerapan": "Ukur Availability × Performance × Quality tiap shift, target ≥85%.",
-        },
-        "Work Sampling": {
-            "full_name": "Work Sampling",
-            "alasan": "Mengetahui proporsi waktu kerja produktif vs non-produktif.",
-            "penerapan": "Lakukan observasi acak 30-50 kali per minggu selama 2 minggu.",
-        },
-        "Time Study": {
-            "full_name": "Time Study",
-            "alasan": "Mengukur waktu standar setiap aktivitas untuk baseline perbaikan.",
-            "penerapan": "Ukur waktu setiap elemen tugas dengan stopwatch, tetapkan waktu baku.",
-        },
-        "Histogram": {
-            "full_name": "Histogram",
-            "alasan": "Memvisualisasikan distribusi data untuk memahami variasi.",
-            "penerapan": "Plot data produksi/kinerja, identifikasi pola & outlier.",
-        },
-        "Lean Manufacturing": {
-            "full_name": "Lean Manufacturing",
-            "alasan": "Menghilangkan 7 waste (overproduction, waiting, transport, over-processing, inventory, motion, defects).",
-            "penerapan": "Petakan value stream, identifikasi waste, terapkan perbaikan berkelanjutan.",
-        },
-        "VSM": {
-            "full_name": "VSM (Value Stream Mapping)",
-            "alasan": "Memetakan aliran nilai dari bahan mentah sampai produk jadi.",
-            "penerapan": "Buat peta current state & future state, targetkan lead time reduction.",
-        },
-        "JIT": {
-            "full_name": "JIT (Just In Time)",
-            "alasan": "Mengurangi inventori dengan produksi sesuai permintaan.",
-            "penerapan": "Selaraskan jadwal produksi dengan order, bangun hubungan erat dengan supplier.",
-        },
-        "SMED": {
-            "full_name": "SMED (Single-Minute Exchange of Die)",
-            "alasan": "Mempercepat waktu setup/ganti alat agar lebih fleksibel.",
-            "penerapan": "Pisahkan setup internal & eksternal, targetkan <10 menit per changeover.",
-        },
-        "Line Balancing": {
-            "full_name": "Line Balancing",
-            "alasan": "Menyeimbangkan beban kerja antar stasiun untuk hilangkan bottleneck.",
-            "penerapan": "Hitung takt time, redistribusi tugas antar operator, evaluasi mingguan.",
-        },
-        "Process Mapping": {
-            "full_name": "Process Mapping",
-            "alasan": "Dokumentasi proses bisnis yang detail untuk identifikasi inefisiensi.",
-            "penerapan": "Petakan proses end-to-end, tandai langkah yang bisa diotomasi/dihilangkan.",
-        },
-        "TPM": {
-            "full_name": "TPM (Total Productive Maintenance)",
-            "alasan": "Melibatkan semua operator dalam perawatan mesin untuk hindari downtime.",
-            "penerapan": "Terapkan autonomous maintenance, jadwal perawatan preventif, ukur OEE.",
-        },
-        "Balanced Scorecard": {
-            "full_name": "Balanced Scorecard (BSC)",
-            "alasan": "Mengukur kinerja dari 4 perspektif: finansial, pelanggan, proses, pembelajaran.",
-            "penerapan": "Susun KPI per perspektif, review kuartalan dengan manajemen puncak.",
-        },
-        "MRP": {
-            "full_name": "MRP (Material Requirements Planning)",
-            "alasan": "Merencanakan kebutuhan bahan baku sesuai jadwal produksi.",
-            "penerapan": "Bangun sistem MRP terintegrasi dengan jadwal produksi & stok.",
-        },
-        "EOQ": {
-            "full_name": "EOQ (Economic Order Quantity)",
-            "alasan": "Menghitung jumlah pemesanan optimal untuk minimalkan biaya pesan & simpan.",
-            "penerapan": "Hitung EOQ per item, negosiasi harga dengan supplier untuk volume optimal.",
-        },
-        "Six Sigma": {
-            "full_name": "Six Sigma",
-            "alasan": "Mengurangi cacat hingga 3.4 per juta peluang (DMAIC).",
-            "penerapan": "Bentuk tim Black Belt/Green Belt, terapkan DMAIC untuk masalah kritis.",
-        },
-    }
-
     entry = method_map.get(ratio_id, {}).get(trend, ["Kaizen", "PDCA", "5S/5R"])
 
     result = []
     for m in entry:
-        detail = method_details.get(m, {})
+        detail = METHOD_DETAILS.get(m, {})
         result.append({
             "method": m,
             "full_name": detail.get("full_name", m),
@@ -913,6 +913,7 @@ def _build_fallback_methods(ratio_id: str, trend: str) -> list:
             "penerapan": detail.get("penerapan", "Terapkan sesuai konteks operasional perusahaan."),
         })
     return result
+
 
 def ratio_dialog_reply(
     message: str,
@@ -988,6 +989,7 @@ PANDUAN MENJAWAB:
         logger.error(f"Error pada ratio_dialog_reply: {e}", exc_info=True)
         return f"Maaf, koneksi ke EVA terganggu: {str(e)[:100]}"
 
+
 # ============================================================
 # FUNGSI AI: ANALISIS TEMUAN PRODUKTIVITAS
 # ============================================================
@@ -1012,28 +1014,75 @@ KATEGORI_KE_PIC = {
 }
 
 
+# ===== MAPPING KATEGORI TEMUAN → 3 METODE ATM DEFAULT =====
+KATEGORI_TO_METHODS = {
+    "sales_revenue": ["Balanced Scorecard", "Kaizen", "PDCA"],
+    "labor_cost": ["Work Sampling", "Time Study", "Line Balancing"],
+    "material_cost": ["EOQ", "MRP", "Pareto Diagram"],
+    "overhead_cost": ["TPM", "OEE", "Lean Manufacturing"],
+    "finance_cost": ["SWOT", "Balanced Scorecard", "VSM"],
+    "admin_cost": ["5S/5R", "Process Mapping", "PDCA"],
+    "tax": ["Check Sheet", "SPC", "Control Chart"],
+    "profit": ["VSM", "Kaizen", "Balanced Scorecard"],
+    "productivity": ["Kaizen", "Time Study", "5S/5R"],
+    "quality": ["Six Sigma", "SPC", "Poka-Yoke"],
+    "strategic": ["Balanced Scorecard", "SWOT", "PDCA"],
+    "compliance": ["Check Sheet", "FMEA", "5W+1H"],
+    "supply_chain": ["MRP", "EOQ", "Kanban System"],
+    "maintenance": ["TPM", "OEE", "FMEA"],
+    "it_support": ["PDCA", "Flowchart", "Kaizen"],
+}
+
+
+def _normalize_methods(methods, kategori: str) -> list:
+    """Normalisasi field recommended_methods dari AI."""
+    cleaned = []
+    if isinstance(methods, list):
+        for m in methods:
+            if not isinstance(m, dict):
+                continue
+            method_name = _coerce_to_string(m.get("method"), "").strip()
+            if not method_name:
+                continue
+            cleaned.append({
+                "method": method_name,
+                "full_name": _coerce_to_string(m.get("full_name"), method_name),
+                "alasan": _coerce_to_string(m.get("alasan"), "-"),
+                "penerapan": _coerce_to_string(m.get("penerapan"), "-"),
+            })
+
+    # Kalau AI kasih < 3 metode → lengkapi dari fallback
+    if len(cleaned) < 3:
+        fb = _build_methods_from_kategori(kategori)
+        for m in fb:
+            if len(cleaned) >= 3:
+                break
+            if not any(x["method"] == m["method"] for x in cleaned):
+                cleaned.append(m)
+
+    return cleaned[:3]
+
+
+def _build_methods_from_kategori(kategori: str) -> list:
+    """Fallback: generate 3 metode ATM berdasarkan kategori temuan."""
+    # Ambil list metode dari mapping
+    entry = KATEGORI_TO_METHODS.get(kategori, ["Kaizen", "PDCA", "5S/5R"])
+    result = []
+    for method_name in entry:
+        detail = METHOD_DETAILS.get(method_name, {})
+        result.append({
+            "method": method_name,
+            "full_name": detail.get("full_name", method_name),
+            "alasan": detail.get("alasan", "Metode ini relevan dengan temuan."),
+            "penerapan": detail.get("penerapan", "Terapkan sesuai konteks operasional."),
+        })
+    return result
+
+
 def analyze_temuan(data_tahun: list, force_refresh: bool = False) -> list:
     """
     Menganalisis seluruh data kalkulator EVA dan menghasilkan daftar temuan.
-    
-    Args:
-        data_tahun: list dict per tahun:
-            [{"tahun": "2020", "penjualan": ..., "nilaiTambah": ..., ...}, ...]
-        force_refresh: bool (untuk logging saja, cache ditangani frontend)
-    
-    Returns:
-        list of dict: [
-            {
-                "judul": "...",
-                "deskripsi": "...",
-                "kategori": "labor_cost",
-                "prioritas": "tinggi|sedang|rendah",
-                "data_pendukung": {"tahun": [...], "nilai": [...]},
-                "dampak": "...",
-                "rekomendasi": "..."
-            },
-            ...
-        ]
+    Setiap temuan dilengkapi rekomendasi ATM (Alat, Teknik, Metode).
     """
     import json as _json
 
@@ -1051,6 +1100,7 @@ def analyze_temuan(data_tahun: list, force_refresh: bool = False) -> list:
                 "data_pendukung": {"info": "minimal 2 tahun data"},
                 "dampak": "Analisis temuan tidak dapat dilakukan secara komprehensif.",
                 "rekomendasi": "Lengkapi data tahun sebelumnya di Kalkulator EVA.",
+                "recommended_methods": _build_methods_from_kategori("strategic"),
             }]
         
         first, last = data_tahun[0], data_tahun[-1]
@@ -1106,6 +1156,7 @@ def analyze_temuan(data_tahun: list, force_refresh: bool = False) -> list:
                             f"2. Bandingkan dengan benchmark industri.\n"
                             f"3. Susun action plan pemulihan dalam 30-60 hari."
                         ),
+                        "recommended_methods": _build_methods_from_kategori(kategori),
                     })
                 else:
                     # NAIK — hanya tampilkan kalau signifikan (>15%)
@@ -1130,6 +1181,7 @@ def analyze_temuan(data_tahun: list, force_refresh: bool = False) -> list:
                             f"2. Tetapkan target progresif untuk tahun berikutnya.\n"
                             f"3. Bagikan strategi ke divisi lain."
                         ),
+                        "recommended_methods": _build_methods_from_kategori(kategori),
                     })
         
         if not temuan_list:
@@ -1148,6 +1200,7 @@ def analyze_temuan(data_tahun: list, force_refresh: bool = False) -> list:
                     "2. Lakukan benchmarking eksternal.\n"
                     "3. Adopsi program continuous improvement."
                 ),
+                "recommended_methods": _build_methods_from_kategori("strategic"),
             })
         
         return temuan_list
@@ -1159,7 +1212,7 @@ def analyze_temuan(data_tahun: list, force_refresh: bool = False) -> list:
         logger.warning(f"AI client tidak tersedia, pakai fallback: {e}")
         return build_fallback_temuan()
 
-    # Batasi data untuk hemat token
+    # Susun data ringkas untuk AI
     data_ringkas = []
     for d in data_tahun:
         data_ringkas.append({
@@ -1181,6 +1234,14 @@ def analyze_temuan(data_tahun: list, force_refresh: bool = False) -> list:
     
     # Daftar kategori yang tersedia
     kategori_list = "\n".join([f"- {k}" for k in KATEGORI_KE_PIC.keys()])
+    
+    # Daftar metode ATM yang tersedia
+    methods_list = []
+    for category, items in PRODUCTIVITY_METHODS.items():
+        methods_list.append(f"\n### {category}:")
+        for m in items:
+            methods_list.append(f"- {m}")
+    methods_text = "\n".join(methods_list)
 
     prompt = f"""Anda adalah auditor produktivitas senior Kementerian Ketenagakerjaan RI.
 
@@ -1193,6 +1254,9 @@ Temukan minimal 3 dan maksimal 7 temuan paling signifikan.
 
 KATEGORI YANG TERSEDIA (pilih yang paling cocok):
 {kategori_list}
+
+DAFTAR METODE ATM (ALAT, TEKNIK, METODE) YANG TERSEDIA:
+{methods_text}
 
 FORMAT OUTPUT (JSON VALID tanpa markdown):
 {{
@@ -1208,7 +1272,14 @@ FORMAT OUTPUT (JSON VALID tanpa markdown):
         "nilai": [100, 120, 90]
       }},
       "dampak": "1-2 kalimat dampak bisnis konkret",
-      "rekomendasi": "3 poin rekomendasi aksi dengan langkah konkret dan terukur"
+      "recommended_methods": [
+        {{
+          "method": "Nama Singkat Metode (mis: Kaizen)",
+          "full_name": "Nama Lengkap Metode",
+          "alasan": "1-2 kalimat mengapa metode ini cocok untuk temuan ini",
+          "penerapan": "1-2 kalimat langkah penerapan konkret"
+        }}
+      ]
     }}
   ]
 }}
@@ -1218,7 +1289,10 @@ ATURAN PENTING:
 2. Prioritas: "tinggi" jika dampak > 15%, "sedang" jika 5-15%, "rendah" jika < 5%.
 3. Sertakan ANGKA SPESIFIK dari data.
 4. Kategori HARUS salah satu dari daftar di atas.
-5. Output HANYA JSON valid, tanpa penjelasan tambahan.
+5. Field "recommended_methods" HARUS ARRAY of OBJECT dengan TEPAT 3 metode.
+6. Setiap metode HARUS dari daftar ATM yang tersedia di atas (jangan mengarang metode baru).
+7. Setiap "alasan" dan "penerapan" harus KONTEKSTUAL dengan temuan ini.
+8. Output HANYA JSON valid, tanpa penjelasan tambahan.
 """
 
     try:
@@ -1275,6 +1349,9 @@ ATURAN PENTING:
                 "data_pendukung": dp,
                 "dampak": _coerce_to_string(t.get("dampak"), ""),
                 "rekomendasi": _coerce_to_string(t.get("rekomendasi"), ""),
+                "recommended_methods": _normalize_methods(
+                    t.get("recommended_methods"), kategori
+                ),
             })
         
         if not cleaned:

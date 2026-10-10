@@ -1058,13 +1058,18 @@ def analyze_temuan_endpoint(
             Temuan.status != "resolved",
         ).first()
         
+        # Serialize recommended_methods → JSON string
+        methods_json = _json.dumps(t.get("recommended_methods", []))
+        data_pendukung_json = _json.dumps(t.get("data_pendukung", {}))
+        
         if existing:
             existing.deskripsi = t["deskripsi"]
             existing.kategori = t["kategori"]
             existing.prioritas = t["prioritas"]
-            existing.data_pendukung = _json.dumps(t.get("data_pendukung", {}))
+            existing.data_pendukung = data_pendukung_json
             existing.dampak = t.get("dampak")
             existing.rekomendasi = t.get("rekomendasi")
+            existing.recommended_methods = methods_json
             temuan_updated += 1
         else:
             new_temuan = Temuan(
@@ -1074,9 +1079,10 @@ def analyze_temuan_endpoint(
                 deskripsi=t["deskripsi"],
                 kategori=t["kategori"],
                 prioritas=t["prioritas"],
-                data_pendukung=_json.dumps(t.get("data_pendukung", {})),
+                data_pendukung=data_pendukung_json,
                 dampak=t.get("dampak"),
                 rekomendasi=t.get("rekomendasi"),
+                recommended_methods=methods_json,
                 status="open",
             )
             db.add(new_temuan)
