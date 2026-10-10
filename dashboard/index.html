@@ -34,12 +34,615 @@
     </script>
 
     <!-- Navbar -->
-    <nav class="bg-white border-b border-slate-200 px-6 py-4 flex justify-between items-center sticky top-0 z-50 shadow-sm">
+    <nav class="bg-white border-b border-slate-200 px-6 py-1.5 flex justify-between items-center sticky top-0 z-50 shadow-sm">
         <div class="flex items-center gap-3">
             <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-teal-500 to-blue-600 flex items-center justify-center text-white shadow-lg shadow-teal-500/20">
                 <i class="fa-solid fa-chart-line text-lg"></i>
             </div>
             <span class="font-extrabold text-xl text-slate-900 tracking-tight">EVA<span class="text-teal-500">I</span></span>
+        </div>
+
+        <!-- Ilustrasi tim proyek + grafik produktivitas beranimasi (tampil di layar >= lg) -->
+        <div class="hidden lg:flex flex-1 justify-center px-6">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 6 980 162" class="h-[76px] w-auto" role="img" aria-label="Ilustrasi delapan pekerja industri berhelm proyek berdiskusi di depan grafik produktivitas dan mesin industri yang bergerak naik">
+              <style>
+                .evai-a{animation-timing-function:ease-in-out;animation-iteration-count:infinite}
+                .evai-box{transform-box:fill-box;transform-origin:50% 100%}
+                .evai-c,.evai-eye{transform-box:fill-box;transform-origin:50% 50%}
+                .evai-loop{animation-name:evaiLoop;animation-duration:7s}
+                .evai-b0{animation-name:evaiBar0;animation-duration:7s;animation-timing-function:cubic-bezier(.2,.8,.3,1)}
+                .evai-b1{animation-name:evaiBar1;animation-duration:7s;animation-timing-function:cubic-bezier(.2,.8,.3,1)}
+                .evai-b2{animation-name:evaiBar2;animation-duration:7s;animation-timing-function:cubic-bezier(.2,.8,.3,1)}
+                .evai-b3{animation-name:evaiBar3;animation-duration:7s;animation-timing-function:cubic-bezier(.2,.8,.3,1)}
+                .evai-b4{animation-name:evaiBar4;animation-duration:7s;animation-timing-function:cubic-bezier(.2,.8,.3,1)}
+                .evai-line{animation-name:evaiLine;animation-duration:7s}
+                .evai-d0{animation-name:evaiDot0;animation-duration:7s;animation-timing-function:ease-out}
+                .evai-d1{animation-name:evaiDot1;animation-duration:7s;animation-timing-function:ease-out}
+                .evai-d2{animation-name:evaiDot2;animation-duration:7s;animation-timing-function:ease-out}
+                .evai-d3{animation-name:evaiDot3;animation-duration:7s;animation-timing-function:ease-out}
+                .evai-arrow{animation-name:evaiArrow;animation-duration:7s;animation-timing-function:ease-out}
+                .evai-gear{animation-name:evaiSpin;animation-duration:14s;animation-timing-function:linear}
+                .evai-bob{animation-name:evaiBob}
+                .evai-point{animation-name:evaiPoint}
+                .evai-wave{animation-name:evaiWave}
+                .evai-think{animation-name:evaiThink}
+                .evai-read{animation-name:evaiRead}
+                .evai-nod{animation-name:evaiNod}
+                .evai-eye{animation-name:evaiBlink;animation-duration:4.5s}
+                .evai-tab{animation-name:evaiTab;animation-duration:1.8s}
+                .evai-say{animation-duration:16s;animation-timing-function:ease-out}
+                .evai-s0{animation-name:evaiSay0}
+                .evai-s1{animation-name:evaiSay1}
+                .evai-s2{animation-name:evaiSay2}
+                .evai-s3{animation-name:evaiSay3}
+                .evai-s4{animation-name:evaiSay4}
+                @media (prefers-reduced-motion:reduce){.evai-a{animation:none!important}}
+                @keyframes evaiLoop{0%{opacity:0}3%{opacity:1}88%{opacity:1}96%{opacity:0}100%{opacity:0}}
+                @keyframes evaiBar0{0%,6%{transform:scaleY(0)}17%,100%{transform:scaleY(1)}}
+                @keyframes evaiBar1{0%,12%{transform:scaleY(0)}23%,100%{transform:scaleY(1)}}
+                @keyframes evaiBar2{0%,18%{transform:scaleY(0)}29%,100%{transform:scaleY(1)}}
+                @keyframes evaiBar3{0%,24%{transform:scaleY(0)}35%,100%{transform:scaleY(1)}}
+                @keyframes evaiBar4{0%,30%{transform:scaleY(0)}41%,100%{transform:scaleY(1)}}
+                @keyframes evaiLine{0%,38%{stroke-dashoffset:100}64%,100%{stroke-dashoffset:0}}
+                @keyframes evaiDot0{0%,42%{transform:scale(0)}46%,100%{transform:scale(1)}}
+                @keyframes evaiDot1{0%,48%{transform:scale(0)}52%,100%{transform:scale(1)}}
+                @keyframes evaiDot2{0%,54%{transform:scale(0)}58%,100%{transform:scale(1)}}
+                @keyframes evaiDot3{0%,60%{transform:scale(0)}64%,100%{transform:scale(1)}}
+                @keyframes evaiArrow{0%,62%{opacity:0;transform:scale(.4)}67%,100%{opacity:1;transform:scale(1)}}
+                @keyframes evaiSpin{to{transform:rotate(360deg)}}
+                @keyframes evaiBob{0%,100%{transform:translateY(0)}50%{transform:translateY(-1.4px)}}
+                @keyframes evaiPoint{0%,100%{transform:rotate(-7deg)}50%{transform:rotate(8deg)}}
+                @keyframes evaiWave{0%,100%{transform:rotate(-10deg)}50%{transform:rotate(11deg)}}
+                @keyframes evaiThink{0%,100%{transform:rotate(-5deg)}50%{transform:rotate(6deg)}}
+                @keyframes evaiRead{0%,100%{transform:translateY(0)}50%{transform:translateY(-1.6px)}}
+                @keyframes evaiNod{0%,100%{transform:rotate(-2.5deg)}50%{transform:rotate(3deg)}}
+                @keyframes evaiBlink{0%,92%,100%{transform:scaleY(1)}96%{transform:scaleY(.1)}}
+                @keyframes evaiTab{0%,100%{transform:scaleY(1)}50%{transform:scaleY(.45)}}
+                @keyframes evaiSay0{0%,4%{opacity:0;transform:scale(.3)}7%,17%{opacity:1;transform:scale(1)}20%,100%{opacity:0;transform:scale(.3)}}
+                @keyframes evaiSay2{0%,22%{opacity:0;transform:scale(.3)}25%,35%{opacity:1;transform:scale(1)}38%,100%{opacity:0;transform:scale(.3)}}
+                @keyframes evaiSay4{0%,40%{opacity:0;transform:scale(.3)}43%,53%{opacity:1;transform:scale(1)}56%,100%{opacity:0;transform:scale(.3)}}
+                @keyframes evaiSay1{0%,58%{opacity:0;transform:scale(.3)}61%,71%{opacity:1;transform:scale(1)}74%,100%{opacity:0;transform:scale(.3)}}
+                @keyframes evaiSay3{0%,76%{opacity:0;transform:scale(.3)}79%,89%{opacity:1;transform:scale(1)}92%,100%{opacity:0;transform:scale(.3)}}
+              </style>
+              <ellipse cx="320.0" cy="96" rx="314.0" ry="76" fill="#F0FDFA"/>
+              <ellipse cx="720" cy="96" rx="314" ry="76" fill="#F0FDFA"/>
+              <g fill="#fff">
+                <rect x="180" y="10" width="46" height="12" rx="6" fill="#fff"/>
+                <rect x="192" y="5" width="26" height="12" rx="6" fill="#fff"/>
+              </g>
+              <g fill="#fff">
+                <rect x="700" y="10" width="46" height="12" rx="6" fill="#fff"/>
+                <rect x="712" y="5" width="26" height="12" rx="6" fill="#fff"/>
+              </g>
+              <g transform="translate(290 26)">
+                <g class="evai-a evai-c evai-gear">
+                  <circle r="10" fill="none" stroke="#5EEAD4" stroke-width="5" stroke-dasharray="3.9 3.9"/>
+                  <circle cx="0" cy="0" r="8" fill="#2DD4BF"/>
+                  <circle cx="0" cy="0" r="3.5" fill="#F0FDFA"/>
+                </g>
+              </g>
+              <circle cx="132" cy="24" r="2.5" fill="#5EEAD4"/>
+              <circle cx="236" cy="16" r="2" fill="#99F6E4"/>
+              <circle cx="560" cy="22" r="2.5" fill="#5EEAD4"/>
+              <circle cx="626" cy="60" r="2" fill="#5EEAD4"/>
+              <circle cx="18" cy="40" r="2" fill="#99F6E4"/>
+              <circle cx="668" cy="22" r="2.5" fill="#5EEAD4"/>
+              <circle cx="746" cy="14" r="2" fill="#99F6E4"/>
+              <circle cx="838" cy="20" r="2.5" fill="#5EEAD4"/>
+              <circle cx="944" cy="38" r="2" fill="#99F6E4"/>
+              <circle cx="602" cy="56" r="2" fill="#99F6E4"/>
+              <rect x="0" y="160" width="640" height="5" rx="2.5" fill="#99F6E4"/>
+              <rect x="638" y="160" width="342" height="5" rx="2.5" fill="#99F6E4"/>
+              <g>
+                <rect x="98" y="42" width="13" height="50" fill="#2DD4BF"/>
+                <rect x="96" y="38" width="17" height="6" rx="2" fill="#0F766E"/>
+                <circle cx="106" cy="28" r="6" fill="#CCFBF1"/>
+                <circle cx="114" cy="18" r="5" fill="#F0FDFA"/>
+                <rect x="16" y="90" width="108" height="70" fill="#99F6E4"/>
+                <path d="M16 90V66L43 90V66L70 90V66L97 90V66L124 90Z" fill="#5EEAD4"/>
+                <g>
+                  <rect x="26" y="102" width="15" height="13" rx="2" fill="#F0FDFA"/>
+                  <rect x="48" y="102" width="15" height="13" rx="2" fill="#F0FDFA"/>
+                  <rect x="70" y="102" width="15" height="13" rx="2" fill="#F0FDFA"/>
+                  <rect x="92" y="102" width="15" height="13" rx="2" fill="#F0FDFA"/>
+                </g>
+                <rect x="52" y="128" width="32" height="32" fill="#0D9488"/>
+                <g stroke="#5EEAD4" stroke-width="2">
+                  <path d="M52 136H84M52 144H84M52 152H84"/>
+                </g>
+              </g>
+              <g>
+                <circle cx="142" cy="152" r="8" fill="#2DD4BF"/>
+                <circle cx="151" cy="155" r="6" fill="#14B8A6"/>
+                <circle cx="134" cy="155" r="5" fill="#14B8A6"/>
+                <rect x="612" y="140" width="20" height="20" rx="2" fill="#99F6E4" stroke="#5EEAD4" stroke-width="1.5"/>
+                <path d="M612 140L632 160M632 140L612 160" stroke="#5EEAD4" stroke-width="1.2"/>
+                <rect x="616" y="124" width="14" height="14" rx="2" fill="#CCFBF1" stroke="#5EEAD4" stroke-width="1.5"/>
+              </g>
+              <g transform="translate(160 0)">
+                <rect x="16" y="104" width="6" height="56" fill="#5EEAD4"/>
+                <rect x="86" y="104" width="6" height="56" fill="#5EEAD4"/>
+                <rect x="0" y="24" width="108" height="82" rx="7" fill="#fff" stroke="#5EEAD4" stroke-width="2.5"/>
+                <path d="M8 100H100" stroke="#CCFBF1" stroke-width="2"/>
+                <g class="evai-a evai-loop">
+                  <rect class="evai-a evai-box evai-b0" x="12" y="84" width="12" height="16" rx="2" fill="#99F6E4"/>
+                  <rect class="evai-a evai-box evai-b1" x="31" y="76" width="12" height="24" rx="2" fill="#5EEAD4"/>
+                  <rect class="evai-a evai-box evai-b2" x="50" y="68" width="12" height="32" rx="2" fill="#2DD4BF"/>
+                  <rect class="evai-a evai-box evai-b3" x="69" y="58" width="12" height="42" rx="2" fill="#14B8A6"/>
+                  <rect class="evai-a evai-box evai-b4" x="88" y="46" width="12" height="54" rx="2" fill="#0F766E"/>
+                  <polyline class="evai-a evai-line" pathLength="100" stroke-dasharray="100" points="18,74 37,66 56,58 75,48 94,36" fill="none" stroke="#134E4A" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                  <circle class="evai-a evai-c evai-d0" cx="18" cy="74" r="2.6" fill="#134E4A"/>
+                  <circle class="evai-a evai-c evai-d1" cx="37" cy="66" r="2.6" fill="#134E4A"/>
+                  <circle class="evai-a evai-c evai-d2" cx="56" cy="58" r="2.6" fill="#134E4A"/>
+                  <circle class="evai-a evai-c evai-d3" cx="75" cy="48" r="2.6" fill="#134E4A"/>
+                  <polygon class="evai-a evai-c evai-arrow" points="101,31 90,33 97,41" fill="#134E4A"/>
+                </g>
+              </g>
+              <g transform="translate(316 0)">
+                <ellipse cx="0" cy="161" rx="24" ry="3" fill="#99F6E4"/>
+                <rect x="-13" y="124" width="11" height="32" rx="3" fill="#134E4A"/>
+                <rect x="2" y="124" width="11" height="32" rx="3" fill="#134E4A"/>
+                <rect x="-16" y="154" width="15" height="6" rx="2.5" fill="#0F172A"/>
+                <rect x="1" y="154" width="15" height="6" rx="2.5" fill="#0F172A"/>
+                <g class="evai-a evai-bob" style="animation-duration:2.8s;animation-delay:-0s">
+                  <g transform="translate(-13 90)">
+                    <g class="evai-a evai-point" style="animation-duration:2.2s;animation-delay:-0.3s">
+                      <path d="M0 0 L-13 10 L-17 -10" fill="none" stroke="#CCFBF1" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+                      <circle cx="-17" cy="-13" r="4.8" fill="#F5CBA7"/>
+                    </g>
+                  </g>
+                  <rect x="-16" y="82" width="32" height="44" rx="8" fill="#14B8A6"/>
+                  <rect x="-16" y="99" width="32" height="4" fill="#F0FDFA"/>
+                  <rect x="-16" y="111" width="32" height="4" fill="#F0FDFA"/>
+                  <rect x="-16" y="122" width="32" height="5" fill="#134E4A"/>
+                  <rect x="-4" y="82" width="8" height="42" fill="#0D9488" opacity=".5"/>
+                  <g transform="translate(13 90)">
+                    <path d="M0 0 L5 16 L3 31" fill="none" stroke="#CCFBF1" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+                    <circle cx="3" cy="34" r="4.8" fill="#F5CBA7"/>
+                  </g>
+                  <g transform="translate(0 80)">
+                    <g class="evai-a evai-nod" style="animation-duration:3.6s;animation-delay:-0s">
+                      <rect x="-4" y="-6" width="8" height="9" rx="2" fill="#E3AF86"/>
+                      <circle cx="0" cy="-13" r="11.5" fill="#F5CBA7"/>
+                      <g fill="#1E293B">
+                        <circle class="evai-a evai-eye" cx="-4" cy="-10" r="1.3" style="animation-delay:-0.0s"/>
+                        <circle class="evai-a evai-eye" cx="5" cy="-10" r="1.3" style="animation-delay:-0.0s"/>
+                      </g>
+                      <path d="M-3 -5Q0.5 -2 4 -5" fill="none" stroke="#9A4F2E" stroke-width="1.4" stroke-linecap="round"/>
+                      <path d="M-14 -16A14 14 0 0 1 14 -16Z" fill="#0F766E"/>
+                      <rect x="-3" y="-31" width="6" height="15" rx="2" fill="#14B8A6"/>
+                      <rect x="-18" y="-18" width="36" height="5" rx="2.5" fill="#115E59"/>
+                    </g>
+                  </g>
+                </g>
+              </g>
+              <g transform="translate(382 0)">
+                <ellipse cx="0" cy="161" rx="24" ry="3" fill="#99F6E4"/>
+                <rect x="-13" y="124" width="11" height="32" rx="3" fill="#115E59"/>
+                <rect x="2" y="124" width="11" height="32" rx="3" fill="#115E59"/>
+                <rect x="-16" y="154" width="15" height="6" rx="2.5" fill="#0F172A"/>
+                <rect x="1" y="154" width="15" height="6" rx="2.5" fill="#0F172A"/>
+                <g class="evai-a evai-bob" style="animation-duration:3.2s;animation-delay:-0.9s">
+                  <rect x="-16" y="82" width="32" height="44" rx="8" fill="#14B8A6"/>
+                  <rect x="-16" y="99" width="32" height="4" fill="#F0FDFA"/>
+                  <rect x="-16" y="111" width="32" height="4" fill="#F0FDFA"/>
+                  <rect x="-16" y="122" width="32" height="5" fill="#134E4A"/>
+                  <rect x="-4" y="82" width="8" height="42" fill="#0D9488" opacity=".5"/>
+                  <g class="evai-a evai-read" style="animation-duration:3s;animation-delay:-0.8s">
+                    <path d="M-13 90 L-19 104" fill="none" stroke="#CCFBF1" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M13 90 L19 104" fill="none" stroke="#CCFBF1" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+                    <rect x="-18" y="100" width="36" height="25" rx="2" fill="#0F766E" stroke="#CCFBF1" stroke-width="1.6"/>
+                    <g stroke="#fff" stroke-opacity=".35" stroke-width=".8">
+                      <path d="M-18 108H18M-18 116H18M-6 100V125M6 100V125"/>
+                    </g>
+                    <g fill="none" stroke="#fff" stroke-width="1.4" stroke-linejoin="round">
+                      <rect x="-14" y="103" width="11" height="8" fill="none"/>
+                      <path d="M1 105H13M1 110H9M-14 118H13"/>
+                    </g>
+                    <circle cx="-17" cy="104" r="4.8" fill="#E0AC84"/>
+                    <circle cx="17" cy="104" r="4.8" fill="#E0AC84"/>
+                  </g>
+                  <g transform="translate(0 80)">
+                    <g class="evai-a evai-nod" style="animation-duration:4.2s;animation-delay:-1.3s">
+                      <rect x="-4" y="-6" width="8" height="9" rx="2" fill="#C98E65"/>
+                      <circle cx="0" cy="-13" r="11.5" fill="#E0AC84"/>
+                      <g fill="#1E293B">
+                        <circle class="evai-a evai-eye" cx="-4" cy="-10" r="1.3" style="animation-delay:-0.9s"/>
+                        <circle class="evai-a evai-eye" cx="5" cy="-10" r="1.3" style="animation-delay:-0.9s"/>
+                      </g>
+                      <path d="M-3 -5Q0.5 -2 4 -5" fill="none" stroke="#9A4F2E" stroke-width="1.4" stroke-linecap="round"/>
+                      <path d="M-14 -16A14 14 0 0 1 14 -16Z" fill="#0D9488"/>
+                      <rect x="-3" y="-31" width="6" height="15" rx="2" fill="#2DD4BF"/>
+                      <rect x="-18" y="-18" width="36" height="5" rx="2.5" fill="#115E59"/>
+                    </g>
+                  </g>
+                </g>
+              </g>
+              <g transform="translate(448 0)">
+                <ellipse cx="0" cy="161" rx="24" ry="3" fill="#99F6E4"/>
+                <rect x="-13" y="124" width="11" height="32" rx="3" fill="#134E4A"/>
+                <rect x="2" y="124" width="11" height="32" rx="3" fill="#134E4A"/>
+                <rect x="-16" y="154" width="15" height="6" rx="2.5" fill="#0F172A"/>
+                <rect x="1" y="154" width="15" height="6" rx="2.5" fill="#0F172A"/>
+                <g class="evai-a evai-bob" style="animation-duration:3.0s;animation-delay:-1.7s">
+                  <rect x="-16" y="82" width="32" height="44" rx="8" fill="#0F766E"/>
+                  <rect x="-16" y="99" width="32" height="4" fill="#F0FDFA"/>
+                  <rect x="-16" y="111" width="32" height="4" fill="#F0FDFA"/>
+                  <rect x="-16" y="122" width="32" height="5" fill="#134E4A"/>
+                  <rect x="-4" y="82" width="8" height="42" fill="#0D9488" opacity=".5"/>
+                  <path d="M-13 90 L-25 104 L-14 116" fill="none" stroke="#CCFBF1" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+                  <circle cx="-13" cy="117" r="4.8" fill="#C68B63"/>
+                  <g transform="translate(0 80)">
+                    <g class="evai-a evai-nod" style="animation-duration:3.2s;animation-delay:-0.6s">
+                      <rect x="-4" y="-6" width="8" height="9" rx="2" fill="#AE724B"/>
+                      <circle cx="0" cy="-13" r="11.5" fill="#C68B63"/>
+                      <g fill="#1E293B">
+                        <circle class="evai-a evai-eye" cx="-4" cy="-10" r="1.3" style="animation-delay:-1.8s"/>
+                        <circle class="evai-a evai-eye" cx="5" cy="-10" r="1.3" style="animation-delay:-1.8s"/>
+                      </g>
+                      <path d="M-3 -5Q0.5 -2 4 -5" fill="none" stroke="#9A4F2E" stroke-width="1.4" stroke-linecap="round"/>
+                      <path d="M-14 -16A14 14 0 0 1 14 -16Z" fill="#F0FDFA" stroke="#5EEAD4" stroke-width="0.9"/>
+                      <rect x="-3" y="-31" width="6" height="15" rx="2" fill="#CCFBF1"/>
+                      <rect x="-18" y="-18" width="36" height="5" rx="2.5" fill="#99F6E4" stroke="#5EEAD4" stroke-width="0.9"/>
+                    </g>
+                  </g>
+                  <g transform="translate(13 90)">
+                    <g class="evai-a evai-think" style="animation-duration:2.8s;animation-delay:-0.5s">
+                      <path d="M0 0 L12 10 L-4 -3" fill="none" stroke="#CCFBF1" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+                      <circle cx="-5" cy="-8" r="4.8" fill="#C68B63"/>
+                    </g>
+                  </g>
+                </g>
+              </g>
+              <g transform="translate(514 0)">
+                <ellipse cx="0" cy="161" rx="24" ry="3" fill="#99F6E4"/>
+                <rect x="-13" y="124" width="11" height="32" rx="3" fill="#134E4A"/>
+                <rect x="2" y="124" width="11" height="32" rx="3" fill="#134E4A"/>
+                <rect x="-16" y="154" width="15" height="6" rx="2.5" fill="#0F172A"/>
+                <rect x="1" y="154" width="15" height="6" rx="2.5" fill="#0F172A"/>
+                <g class="evai-a evai-bob" style="animation-duration:2.6s;animation-delay:-0.4s">
+                  <rect x="-16" y="82" width="32" height="44" rx="8" fill="#14B8A6"/>
+                  <rect x="-16" y="99" width="32" height="4" fill="#F0FDFA"/>
+                  <rect x="-16" y="111" width="32" height="4" fill="#F0FDFA"/>
+                  <rect x="-16" y="122" width="32" height="5" fill="#134E4A"/>
+                  <rect x="-4" y="82" width="8" height="42" fill="#0D9488" opacity=".5"/>
+                  <g transform="translate(-13 90)">
+                    <path d="M0 0 L-5 16 L-3 31" fill="none" stroke="#CCFBF1" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+                    <circle cx="-3" cy="34" r="4.8" fill="#8D5A3B"/>
+                  </g>
+                  <g transform="translate(13 90)">
+                    <g class="evai-a evai-wave" style="animation-duration:1.7s;animation-delay:-0.2s">
+                      <path d="M0 0 L13 8 L17 -6" fill="none" stroke="#CCFBF1" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+                      <g transform="rotate(18 17 -12)">
+                        <rect x="13.5" y="-30" width="7" height="32" rx="3.5" fill="#F0FDFA" stroke="#5EEAD4" stroke-width="1.2"/>
+                        <ellipse cx="17" cy="-28" rx="3" ry="1.6" fill="#99F6E4"/>
+                        <rect x="13.5" y="-20" width="7" height="2.2" fill="#14B8A6"/>
+                      </g>
+                      <circle cx="17" cy="-9" r="4.8" fill="#8D5A3B"/>
+                    </g>
+                  </g>
+                  <g transform="translate(0 80)">
+                    <g class="evai-a evai-nod" style="animation-duration:3.9s;animation-delay:-2.2s">
+                      <rect x="-4" y="-6" width="8" height="9" rx="2" fill="#744528"/>
+                      <circle cx="0" cy="-13" r="11.5" fill="#8D5A3B"/>
+                      <g fill="#1E293B">
+                        <circle class="evai-a evai-eye" cx="-4" cy="-10" r="1.3" style="animation-delay:-2.7s"/>
+                        <circle class="evai-a evai-eye" cx="5" cy="-10" r="1.3" style="animation-delay:-2.7s"/>
+                      </g>
+                      <path d="M-3 -5Q0.5 -2 4 -5" fill="none" stroke="#9A4F2E" stroke-width="1.4" stroke-linecap="round"/>
+                      <path d="M-14 -16A14 14 0 0 1 14 -16Z" fill="#14B8A6"/>
+                      <rect x="-3" y="-31" width="6" height="15" rx="2" fill="#5EEAD4"/>
+                      <rect x="-18" y="-18" width="36" height="5" rx="2.5" fill="#0F766E"/>
+                    </g>
+                  </g>
+                </g>
+              </g>
+              <g transform="translate(580 0)">
+                <ellipse cx="0" cy="161" rx="24" ry="3" fill="#99F6E4"/>
+                <rect x="-13" y="124" width="11" height="32" rx="3" fill="#115E59"/>
+                <rect x="2" y="124" width="11" height="32" rx="3" fill="#115E59"/>
+                <rect x="-16" y="154" width="15" height="6" rx="2.5" fill="#0F172A"/>
+                <rect x="1" y="154" width="15" height="6" rx="2.5" fill="#0F172A"/>
+                <g class="evai-a evai-bob" style="animation-duration:3.4s;animation-delay:-2.1s">
+                  <rect x="-16" y="82" width="32" height="44" rx="8" fill="#0D9488"/>
+                  <rect x="-16" y="99" width="32" height="4" fill="#F0FDFA"/>
+                  <rect x="-16" y="111" width="32" height="4" fill="#F0FDFA"/>
+                  <rect x="-16" y="122" width="32" height="5" fill="#134E4A"/>
+                  <rect x="-4" y="82" width="8" height="42" fill="#0D9488" opacity=".5"/>
+                  <g class="evai-a evai-read" style="animation-duration:3s;animation-delay:-1.6s">
+                    <path d="M-13 90 L-19 104" fill="none" stroke="#CCFBF1" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M13 90 L19 104" fill="none" stroke="#CCFBF1" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+                    <rect x="-15" y="101" width="30" height="22" rx="3" fill="#134E4A" stroke="#5EEAD4" stroke-width="1.4"/>
+                    <rect x="-12" y="104" width="24" height="16" rx="1.5" fill="#F0FDFA"/>
+                    <rect class="evai-a evai-box evai-tab" style="animation-delay:-0.0s" x="-9" y="113" width="4" height="5" fill="#2DD4BF"/>
+                    <rect class="evai-a evai-box evai-tab" style="animation-delay:-0.5s" x="-3" y="110" width="4" height="8" fill="#2DD4BF"/>
+                    <rect class="evai-a evai-box evai-tab" style="animation-delay:-1.0s" x="3" y="107" width="4" height="11" fill="#0D9488"/>
+                    <circle cx="-17" cy="104" r="4.8" fill="#F1C27D"/>
+                    <circle cx="17" cy="104" r="4.8" fill="#F1C27D"/>
+                  </g>
+                  <g transform="translate(0 80)">
+                    <g class="evai-a evai-nod" style="animation-duration:4.5s;animation-delay:-1.1s">
+                      <rect x="-12.5" y="-20" width="25" height="26" rx="9" fill="#3F2A1D"/>
+                      <rect x="-4" y="-6" width="8" height="9" rx="2" fill="#D9A85F"/>
+                      <circle cx="0" cy="-13" r="11.5" fill="#F1C27D"/>
+                      <g fill="#1E293B">
+                        <circle class="evai-a evai-eye" cx="-4" cy="-10" r="1.3" style="animation-delay:-3.6s"/>
+                        <circle class="evai-a evai-eye" cx="5" cy="-10" r="1.3" style="animation-delay:-3.6s"/>
+                      </g>
+                      <path d="M-3 -5Q0.5 -2 4 -5" fill="none" stroke="#9A4F2E" stroke-width="1.4" stroke-linecap="round"/>
+                      <path d="M-11 -14Q0 -24 11 -14" fill="none" stroke="#3F2A1D" stroke-width="3"/>
+                      <path d="M-14 -16A14 14 0 0 1 14 -16Z" fill="#115E59"/>
+                      <rect x="-3" y="-31" width="6" height="15" rx="2" fill="#0D9488"/>
+                      <rect x="-18" y="-18" width="36" height="5" rx="2.5" fill="#134E4A"/>
+                    </g>
+                  </g>
+                </g>
+              </g>
+
+              <!-- ============ PEKERJA 6 : Teknisi bawa kunci pas ============ -->
+              <g transform="translate(646 0)">
+                <ellipse cx="0" cy="161" rx="24" ry="3" fill="#99F6E4"/>
+                <rect x="-13" y="124" width="11" height="32" rx="3" fill="#134E4A"/>
+                <rect x="2" y="124" width="11" height="32" rx="3" fill="#134E4A"/>
+                <rect x="-16" y="154" width="15" height="6" rx="2.5" fill="#0F172A"/>
+                <rect x="1" y="154" width="15" height="6" rx="2.5" fill="#0F172A"/>
+                <g class="evai-a evai-bob" style="animation-duration:2.9s;animation-delay:-1.2s">
+                  <rect x="-16" y="82" width="32" height="44" rx="8" fill="#0F766E"/>
+                  <rect x="-16" y="99" width="32" height="4" fill="#F0FDFA"/>
+                  <rect x="-16" y="111" width="32" height="4" fill="#F0FDFA"/>
+                  <rect x="-16" y="122" width="32" height="5" fill="#134E4A"/>
+                  <rect x="-4" y="82" width="8" height="42" fill="#0D9488" opacity=".5"/>
+                  <g transform="translate(13 90)">
+                    <path d="M0 0 L6 16 L4 31" fill="none" stroke="#CCFBF1" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+                    <circle cx="4" cy="34" r="4.8" fill="#E3AF86"/>
+                  </g>
+                  <g transform="translate(-13 90)">
+                    <g class="evai-a evai-point" style="animation-duration:3.4s;animation-delay:-1.2s">
+                      <path d="M0 0 L-12 4 L-18 -10" fill="none" stroke="#CCFBF1" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+                      <g transform="rotate(-25 -18 -14)">
+                        <rect x="-20" y="-24" width="4" height="16" rx="1" fill="#64748B"/>
+                        <path d="M-22 -26 L-14 -26 L-18 -22 Z" fill="#94A3B8"/>
+                        <circle cx="-18" cy="-24" r="2.5" fill="none" stroke="#475569" stroke-width="1"/>
+                      </g>
+                      <circle cx="-18" cy="-13" r="4.8" fill="#E3AF86"/>
+                    </g>
+                  </g>
+                  <g transform="translate(0 80)">
+                    <g class="evai-a evai-nod" style="animation-duration:3.6s;animation-delay:-1.2s">
+                      <rect x="-4" y="-6" width="8" height="9" rx="2" fill="#C98E65"/>
+                      <circle cx="0" cy="-13" r="11.5" fill="#E3AF86"/>
+                      <g fill="#1E293B">
+                        <circle class="evai-a evai-eye" cx="-4" cy="-10" r="1.3" style="animation-delay:-1.2s"/>
+                        <circle class="evai-a evai-eye" cx="5" cy="-10" r="1.3" style="animation-delay:-1.2s"/>
+                      </g>
+                      <path d="M-3 -5Q0.5 -2 4 -5" fill="none" stroke="#9A4F2E" stroke-width="1.4" stroke-linecap="round"/>
+                      <path d="M-14 -16A14 14 0 0 1 14 -16Z" fill="#0D9488"/>
+                      <rect x="-3" y="-31" width="6" height="15" rx="2" fill="#2DD4BF"/>
+                      <rect x="-18" y="-18" width="36" height="5" rx="2.5" fill="#115E59"/>
+                    </g>
+                  </g>
+                </g>
+              </g>
+
+              <!-- ============ PEKERJA 7 : Supervisor tangan di pinggang ============ -->
+              <g transform="translate(712 0)">
+                <ellipse cx="0" cy="161" rx="24" ry="3" fill="#99F6E4"/>
+                <rect x="-13" y="124" width="11" height="32" rx="3" fill="#115E59"/>
+                <rect x="2" y="124" width="11" height="32" rx="3" fill="#115E59"/>
+                <rect x="-16" y="154" width="15" height="6" rx="2.5" fill="#0F172A"/>
+                <rect x="1" y="154" width="15" height="6" rx="2.5" fill="#0F172A"/>
+                <g class="evai-a evai-bob" style="animation-duration:3.1s;animation-delay:-0.7s">
+                  <rect x="-16" y="82" width="32" height="44" rx="8" fill="#14B8A6"/>
+                  <rect x="-16" y="99" width="32" height="4" fill="#F0FDFA"/>
+                  <rect x="-16" y="111" width="32" height="4" fill="#F0FDFA"/>
+                  <rect x="-16" y="122" width="32" height="5" fill="#134E4A"/>
+                  <rect x="-4" y="82" width="8" height="42" fill="#0D9488" opacity=".5"/>
+                  <path d="M-13 90 L-20 104 L-14 118" fill="none" stroke="#CCFBF1" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+                  <circle cx="-14" cy="120" r="4.8" fill="#8D5A3B"/>
+                  <path d="M13 90 L20 104 L14 118" fill="none" stroke="#CCFBF1" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+                  <circle cx="14" cy="120" r="4.8" fill="#8D5A3B"/>
+                  <g transform="translate(0 80)">
+                    <g class="evai-a evai-nod" style="animation-duration:4.0s;animation-delay:-0.7s">
+                      <rect x="-4" y="-6" width="8" height="9" rx="2" fill="#744528"/>
+                      <circle cx="0" cy="-13" r="11.5" fill="#8D5A3B"/>
+                      <g fill="#1E293B">
+                        <circle class="evai-a evai-eye" cx="-4" cy="-10" r="1.3" style="animation-delay:-0.7s"/>
+                        <circle class="evai-a evai-eye" cx="5" cy="-10" r="1.3" style="animation-delay:-0.7s"/>
+                      </g>
+                      <path d="M-3 -5Q0.5 -2 4 -5" fill="none" stroke="#9A4F2E" stroke-width="1.4" stroke-linecap="round"/>
+                      <path d="M-14 -16A14 14 0 0 1 14 -16Z" fill="#14B8A6"/>
+                      <rect x="-3" y="-31" width="6" height="15" rx="2" fill="#5EEAD4"/>
+                      <rect x="-18" y="-18" width="36" height="5" rx="2.5" fill="#0F766E"/>
+                    </g>
+                  </g>
+                </g>
+              </g>
+
+              <!-- ============ PEKERJA 8 : Operator bawa mug kopi ============ -->
+              <g transform="translate(778 0)">
+                <ellipse cx="0" cy="161" rx="24" ry="3" fill="#99F6E4"/>
+                <rect x="-13" y="124" width="11" height="32" rx="3" fill="#134E4A"/>
+                <rect x="2" y="124" width="11" height="32" rx="3" fill="#134E4A"/>
+                <rect x="-16" y="154" width="15" height="6" rx="2.5" fill="#0F172A"/>
+                <rect x="1" y="154" width="15" height="6" rx="2.5" fill="#0F172A"/>
+                <g class="evai-a evai-bob" style="animation-duration:2.7s;animation-delay:-1.8s">
+                  <rect x="-16" y="82" width="32" height="44" rx="8" fill="#0D9488"/>
+                  <rect x="-16" y="99" width="32" height="4" fill="#F0FDFA"/>
+                  <rect x="-16" y="111" width="32" height="4" fill="#F0FDFA"/>
+                  <rect x="-16" y="122" width="32" height="5" fill="#134E4A"/>
+                  <rect x="-4" y="82" width="8" height="42" fill="#0D9488" opacity=".5"/>
+                  <g transform="translate(-13 90)">
+                    <path d="M0 0 L-8 14 L-4 24" fill="none" stroke="#CCFBF1" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+                    <g class="evai-a evai-point" style="animation-duration:3.3s;animation-delay:-1.8s">
+                      <path d="M-9 20 L-6 32 L0 32 L3 20 Z" fill="#F0FDFA" stroke="#5EEAD4" stroke-width="1"/>
+                      <path d="M-8 20 L3 20 L2 18 L-7 18 Z" fill="#14B8A6"/>
+                      <path d="M-5 20 Q-3 17 -1 20" fill="none" stroke="#5EEAD4" stroke-width=".8" opacity=".5"/>
+                      <path d="M-6 17 Q-4 14 -5 11" fill="none" stroke="#99F6E4" stroke-width=".9" opacity=".6"/>
+                      <path d="M-1 17 Q1 13 -1 10" fill="none" stroke="#99F6E4" stroke-width=".9" opacity=".6"/>
+                    </g>
+                    <circle cx="-4" cy="22" r="4.8" fill="#F1C27D"/>
+                  </g>
+                  <g transform="translate(13 90)">
+                    <path d="M0 0 L5 16 L3 31" fill="none" stroke="#CCFBF1" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+                    <circle cx="3" cy="34" r="4.8" fill="#F1C27D"/>
+                  </g>
+                  <g transform="translate(0 80)">
+                    <g class="evai-a evai-nod" style="animation-duration:3.7s;animation-delay:-1.8s">
+                      <rect x="-12.5" y="-20" width="25" height="26" rx="9" fill="#3F2A1D"/>
+                      <rect x="-4" y="-6" width="8" height="9" rx="2" fill="#D9A85F"/>
+                      <circle cx="0" cy="-13" r="11.5" fill="#F1C27D"/>
+                      <g fill="#1E293B">
+                        <circle class="evai-a evai-eye" cx="-4" cy="-10" r="1.3" style="animation-delay:-1.8s"/>
+                        <circle class="evai-a evai-eye" cx="5" cy="-10" r="1.3" style="animation-delay:-1.8s"/>
+                      </g>
+                      <path d="M-3 -5Q0.5 -2 4 -5" fill="none" stroke="#9A4F2E" stroke-width="1.4" stroke-linecap="round"/>
+                      <path d="M-11 -14Q0 -24 11 -14" fill="none" stroke="#3F2A1D" stroke-width="3"/>
+                      <path d="M-14 -16A14 14 0 0 1 14 -16Z" fill="#0F766E"/>
+                      <rect x="-3" y="-31" width="6" height="15" rx="2" fill="#14B8A6"/>
+                      <rect x="-18" y="-18" width="36" height="5" rx="2.5" fill="#115E59"/>
+                    </g>
+                  </g>
+                </g>
+              </g>
+
+              <!-- ============ MESIN INDUSTRI (kanan) ============ -->
+              <g transform="translate(880 0)">
+                <ellipse cx="0" cy="161" rx="70" ry="3" fill="#99F6E4"/>
+
+                <!-- Cerobong asap -->
+                <rect x="36" y="60" width="10" height="22" fill="#0D9488"/>
+                <rect x="33" y="56" width="16" height="6" rx="1.5" fill="#115E59"/>
+                <circle cx="41" cy="50" r="3" fill="#99F6E4" opacity=".7">
+                  <animate attributeName="cy" values="50;30;10" dur="4.5s" repeatCount="indefinite"/>
+                  <animate attributeName="r" values="2;4;6" dur="4.5s" repeatCount="indefinite"/>
+                  <animate attributeName="opacity" values=".7;.35;0" dur="4.5s" repeatCount="indefinite"/>
+                </circle>
+
+                <!-- Badan utama -->
+                <rect x="-60" y="82" width="120" height="70" rx="6" fill="#CCFBF1" stroke="#5EEAD4" stroke-width="2"/>
+
+                <!-- Strip atas mesin -->
+                <rect x="-56" y="86" width="112" height="12" rx="2" fill="#14B8A6"/>
+
+                <!-- LED indikator -->
+                <circle cx="-48" cy="92" r="2" fill="#FBBF24">
+                  <animate attributeName="opacity" values="1;.3;1" dur="1.2s" repeatCount="indefinite"/>
+                </circle>
+                <circle cx="-40" cy="92" r="2" fill="#5EEAD4">
+                  <animate attributeName="opacity" values=".3;1;.3" dur="1.5s" repeatCount="indefinite"/>
+                </circle>
+                <circle cx="-32" cy="92" r="2" fill="#F87171">
+                  <animate attributeName="opacity" values=".5;1;.5" dur=".9s" repeatCount="indefinite"/>
+                </circle>
+
+                <!-- Layar kontrol dengan bar bergerak -->
+                <rect x="-52" y="104" width="56" height="30" rx="2" fill="#0F766E" stroke="#5EEAD4" stroke-width="1.5"/>
+                <rect x="-49" y="107" width="50" height="24" rx="1" fill="#134E4A"/>
+                <rect x="-45" y="124" width="4" height="5" fill="#2DD4BF">
+                  <animate attributeName="height" values="5;12;5" dur="1.8s" repeatCount="indefinite"/>
+                  <animate attributeName="y" values="124;117;124" dur="1.8s" repeatCount="indefinite"/>
+                </rect>
+                <rect x="-39" y="120" width="4" height="9" fill="#2DD4BF">
+                  <animate attributeName="height" values="9;4;9" dur="1.8s" repeatCount="indefinite"/>
+                  <animate attributeName="y" values="120;125;120" dur="1.8s" repeatCount="indefinite"/>
+                </rect>
+                <rect x="-33" y="116" width="4" height="13" fill="#5EEAD4">
+                  <animate attributeName="height" values="13;7;13" dur="1.8s" repeatCount="indefinite"/>
+                  <animate attributeName="y" values="116;122;116" dur="1.8s" repeatCount="indefinite"/>
+                </rect>
+                <rect x="-27" y="118" width="4" height="11" fill="#5EEAD4">
+                  <animate attributeName="height" values="11;5;11" dur="1.8s" repeatCount="indefinite"/>
+                  <animate attributeName="y" values="118;124;118" dur="1.8s" repeatCount="indefinite"/>
+                </rect>
+                <rect x="-21" y="114" width="4" height="15" fill="#2DD4BF">
+                  <animate attributeName="height" values="15;9;15" dur="1.8s" repeatCount="indefinite"/>
+                  <animate attributeName="y" values="114;120;114" dur="1.8s" repeatCount="indefinite"/>
+                </rect>
+                <rect x="-15" y="118" width="4" height="11" fill="#5EEAD4">
+                  <animate attributeName="height" values="11;15;11" dur="1.8s" repeatCount="indefinite"/>
+                  <animate attributeName="y" values="118;114;118" dur="1.8s" repeatCount="indefinite"/>
+                </rect>
+
+                <!-- Gauge analog dengan jarum bergerak -->
+                <g transform="translate(28 100)">
+                  <circle r="9" fill="#F0FDFA" stroke="#0D9488" stroke-width="1.8"/>
+                  <circle r="5" fill="none" stroke="#99F6E4" stroke-width="1"/>
+                  <line x1="0" y1="0" x2="4" y2="-3" stroke="#0F766E" stroke-width="1.3" stroke-linecap="round">
+                    <animateTransform attributeName="transform" type="rotate"
+                                      values="0 0 0;35 0 0;-25 0 0;0 0 0"
+                                      dur="5s" repeatCount="indefinite"/>
+                  </line>
+                </g>
+
+                <!-- Gear berputar -->
+                <g transform="translate(28 128)">
+                  <g class="evai-a evai-gear">
+                    <circle r="11" fill="none" stroke="#0D9488" stroke-width="5" stroke-dasharray="4.3 4.3"/>
+                    <circle r="8" fill="#14B8A6"/>
+                    <circle r="3.5" fill="#F0FDFA"/>
+                  </g>
+                </g>
+
+                <!-- Kaki mesin -->
+                <rect x="-55" y="152" width="8" height="8" fill="#115E59"/>
+                <rect x="47" y="152" width="8" height="8" fill="#115E59"/>
+              </g>
+
+              <g transform="translate(316 44)">
+                <g class="evai-a evai-say evai-s0">
+                  <rect x="-14" y="-24" width="28" height="18" rx="8" fill="#fff" stroke="#5EEAD4" stroke-width="1.5"/>
+                  <polygon points="-4,-6 4,-6 0,0" fill="#fff" stroke="#5EEAD4" stroke-width="1.5" stroke-linejoin="round"/>
+                  <rect x="-3.5" y="-8" width="7" height="3" fill="#fff"/>
+                  <g>
+                    <rect x="-6" y="-12" width="3" height="5" fill="#14B8A6"/>
+                    <rect x="-1.5" y="-15" width="3" height="8" fill="#14B8A6"/>
+                    <rect x="3" y="-18" width="3" height="11" fill="#0D9488"/>
+                  </g>
+                </g>
+              </g>
+              <g transform="translate(448 44)">
+                <g class="evai-a evai-say evai-s2">
+                  <rect x="-14" y="-24" width="28" height="18" rx="8" fill="#fff" stroke="#5EEAD4" stroke-width="1.5"/>
+                  <polygon points="-4,-6 4,-6 0,0" fill="#fff" stroke="#5EEAD4" stroke-width="1.5" stroke-linejoin="round"/>
+                  <rect x="-3.5" y="-8" width="7" height="3" fill="#fff"/>
+                  <path d="M-5 -15L-1.5 -11.5L5.5 -19" fill="none" stroke="#0D9488" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+                </g>
+              </g>
+              <g transform="translate(580 44)">
+                <g class="evai-a evai-say evai-s4">
+                  <rect x="-14" y="-24" width="28" height="18" rx="8" fill="#fff" stroke="#5EEAD4" stroke-width="1.5"/>
+                  <polygon points="-4,-6 4,-6 0,0" fill="#fff" stroke="#5EEAD4" stroke-width="1.5" stroke-linejoin="round"/>
+                  <rect x="-3.5" y="-8" width="7" height="3" fill="#fff"/>
+                  <g>
+                    <polyline points="-6,-10 -1,-15 2,-12 7,-19" fill="none" stroke="#0D9488" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M3 -19.5H7.5V-15" fill="none" stroke="#0D9488" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  </g>
+                </g>
+              </g>
+              <g transform="translate(382 44)">
+                <g class="evai-a evai-say evai-s1">
+                  <rect x="-14" y="-24" width="28" height="18" rx="8" fill="#fff" stroke="#5EEAD4" stroke-width="1.5"/>
+                  <polygon points="-4,-6 4,-6 0,0" fill="#fff" stroke="#5EEAD4" stroke-width="1.5" stroke-linejoin="round"/>
+                  <rect x="-3.5" y="-8" width="7" height="3" fill="#fff"/>
+                  <g>
+                    <circle cx="-6" cy="-15" r="1.8" fill="#14B8A6"/>
+                    <circle cx="0" cy="-15" r="1.8" fill="#14B8A6"/>
+                    <circle cx="6" cy="-15" r="1.8" fill="#14B8A6"/>
+                  </g>
+                </g>
+              </g>
+              <g transform="translate(514 44)">
+                <g class="evai-a evai-say evai-s3">
+                  <rect x="-14" y="-24" width="28" height="18" rx="8" fill="#fff" stroke="#5EEAD4" stroke-width="1.5"/>
+                  <polygon points="-4,-6 4,-6 0,0" fill="#fff" stroke="#5EEAD4" stroke-width="1.5" stroke-linejoin="round"/>
+                  <rect x="-3.5" y="-8" width="7" height="3" fill="#fff"/>
+                  <g>
+                    <circle cx="0" cy="-16" r="4.2" fill="#2DD4BF"/>
+                    <rect x="-2" y="-12" width="4" height="3" rx="1" fill="#0F766E"/>
+                  </g>
+                </g>
+              </g>
+            </svg>
         </div>
 
         <div class="flex items-center gap-6">
@@ -92,7 +695,7 @@
                         <div class="w-2.5 bg-blue-500 rounded-t animate-bar" style="height: 75%; animation-delay: 0.5s;"></div>
                     </div>
                     <div class="relative z-10 md:pr-48">
-                        <h1 class="text-2xl font-bold text-slate-900 mb-2">Ringkasan Analisis EVA</h1>
+                        <h1 class="text-2xl font-bold text-slate-900 mb-2">Analisis EVA (Economic Value Added)</h1>
                         <p class="text-slate-500 text-sm max-w-lg">Visualisasi data dari hasil perhitungan Kalkulator EVA Anda akan tampil secara otomatis di bawah ini.</p>
                     </div>
                 </div>
