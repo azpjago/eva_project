@@ -1,4 +1,7 @@
 import jwt
+import logging
+from datetime import datetime
+logger = logging.getLogger(__name__)
 from fastapi import Depends, FastAPI, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
@@ -40,6 +43,188 @@ from app.schemas import (
     AnalyzeTemuanRequest,
 )
 from app.security import create_access_token, hash_password, verify_password, SECRET_KEY, ALGORITHM
+
+# ============================================================
+# MAPPING INDEX FIELD DI RAW_DATA
+# Berdasarkan urutan input type=number di generateYearPanelHTML
+# (dashboard/js/input-data.js)
+# ============================================================
+RAW_IDX = {
+    # Penjualan (5 field: 0-4)
+    "penjualan": 0,
+    "unit_terjual": 1,
+    "harga_rata": 2,
+    "pertumbuhan_penjualan": 3,
+    "penjualan_sebelumnya": 4,
+    # Biaya Tenaga Kerja (3 field: 5-7)
+    "upah_gaji": 5,
+    "dana_pensiun": 6,
+    "tunjangan_tk": 7,
+    # Bahan Digunakan (4 field: 8-11)
+    "barang_jasa_dibeli": 8,
+    "barang_digunakan": 9,
+    "bahan_baku": 10,
+    "bahan_pengemas": 11,
+    # Overhead Produksi (8 field: 12-19)
+    "overhead_subkontrak": 12,
+    "overhead_sewa": 13,
+    "overhead_air_listrik": 14,
+    "overhead_asuransi": 15,
+    "overhead_transport": 16,
+    "overhead_pemeliharaan": 17,
+    "overhead_suplai_gudang": 18,
+    "overhead_lain": 19,
+    # Bunga (2 field: 20-21)
+    "bunga_pendek": 20,
+    "bunga_panjang": 21,
+    # Biaya Administrasi (15 field: 22-36)
+    "admin_sewa": 22,
+    "admin_air_listrik": 23,
+    "admin_telepon": 24,
+    "admin_percetakan": 25,
+    "admin_kendaraan": 26,
+    "admin_advertising": 27,
+    "admin_hiburan": 28,
+    "admin_majalah": 29,
+    "admin_jamuan": 30,
+    "admin_perbaikan": 31,
+    "admin_bank": 32,
+    "admin_akuntan": 33,
+    "admin_hukum": 34,
+    "admin_komisi": 35,
+    "admin_umum": 36,
+    # Penyusutan (2 field: 37-38)
+    "penyusutan_gedung": 37,
+    "penyusutan_mesin": 38,
+    # Pajak (3 field: 39-41)
+    "pajak_penghasilan": 39,
+    "pajak_kekayaan": 40,
+    "pajak_upah": 41,
+    # Aktiva (8 field: 42-49)
+    "kas_bank": 42,
+    "persediaan": 43,
+    "piutang_dagang": 44,
+    "piutang_lain": 45,
+    "tanah": 46,
+    "gedung": 47,
+    "mesin_peralatan": 48,
+    "aktiva_lain": 49,
+    # Investasi & Produktivitas (5 field: 50-54)
+    "total_investasi": 50,
+    "jumlah_tenaga_kerja": 51,
+    "jumlah_jam_kerja": 52,
+    "jumlah_jam_lembur": 53,
+    "total_jam_kerja": 54,
+    # Bonus (1 field: 55) — opsional
+    "bonus_persen": 55,
+}
+
+
+def _extract_eva_data(raw_data: str, nilai_tambah: float) -> dict:
+    """
+    Ekstrak data EVA dari raw_data (JSON array) berdasarkan mapping index akurat.
+    Menghasilkan dict lengkap semua komponen untuk analisis AI.
+    """
+    try:
+        raw = _json.loads(raw_data) if raw_data else []
+    except (ValueError, TypeError):
+        raw = []
+    
+    if not isinstance(raw, list):
+        raw = []
+    
+    def get(key, default=0.0):
+        idx = RAW_IDX.get(key, -1)
+        if idx < 0 or idx >= len(raw):
+            return default
+        try:
+            v = raw[idx]
+            if v == "" or v is None:
+                return default
+            return float(v)
+        except (ValueError, TypeError):
+            return default
+    
+    # ===== Hitung total per kategori =====
+    penjualan = get("penjualan")
+    
+    biaya_tenaga_kerja = (
+        get("upah_gaji") + get("dana_pensiun") + get("tunjangan_tk")
+    )
+    
+    bahan_digunakan = (
+        get("barang_jasa_dibeli") + get("barang_digunakan") +
+        get("bahan_baku") + get("bahan_pengemas")
+    )
+    
+    overhead_produksi = (
+        get("overhead_subkontrak") + get("overhead_sewa") +
+        get("overhead_air_listrik") + get("overhead_asuransi") +
+        get("overhead_transport") + get("overhead_pemeliharaan") +
+        get("overhead_suplai_gudang") + get("overhead_lain")
+    )
+    
+    biaya_administrasi = (
+        get("admin_sewa") + get("admin_air_listrik") +
+        get("admin_telepon") + get("admin_percetakan") +
+        get("admin_kendaraan") + get("admin_advertising") +
+        get("admin_hiburan") + get("admin_majalah") +
+        get("admin_jamuan") + get("admin_perbaikan") +
+        get("admin_bank") + get("admin_akuntan") +
+        get("admin_hukum") + get("admin_komisi") +
+        get("admin_umum")
+    )
+    
+    penyusutan = get("penyusutan_gedung") + get("penyusutan_mesin")
+    
+    pajak = (
+        get("pajak_penghasilan") + get("pajak_kekayaan") + get("pajak_upah")
+    )
+    
+    bunga_pinjaman = get("bunga_pendek") + get("bunga_panjang")
+    
+    total_aktiva = (
+        get("kas_bank") + get("persediaan") +
+        get("piutang_dagang") + get("piutang_lain") +
+        get("tanah") + get("gedung") +
+        get("mesin_peralatan") + get("aktiva_lain")
+    )
+    
+    # ===== Hitung Laba (sesuai calculateProfits di frontend) =====
+    laba_kotor = penjualan - bahan_digunakan
+    
+    laba_operasi = penjualan - (
+        biaya_tenaga_kerja + bahan_digunakan + overhead_produksi +
+        biaya_administrasi + penyusutan
+    )
+    
+    laba_bersih = laba_operasi - (bunga_pinjaman + pajak)
+    
+    # Total investasi: pakai input user jika ada, fallback ke total aktiva
+    total_investasi_input = get("total_investasi")
+    total_investasi = total_investasi_input if total_investasi_input > 0 else total_aktiva
+    
+    return {
+        "penjualan": penjualan,
+        "biaya_tenaga_kerja": biaya_tenaga_kerja,
+        "bahan_digunakan": bahan_digunakan,
+        "overhead_produksi": overhead_produksi,
+        "biaya_administrasi": biaya_administrasi,
+        "penyusutan": penyusutan,
+        "pajak": pajak,
+        "bunga_pinjaman": bunga_pinjaman,
+        "total_aktiva": total_aktiva,
+        "nilai_tambah": nilai_tambah,
+        "laba_kotor": laba_kotor,
+        "laba_operasi": laba_operasi,
+        "laba_bersih": laba_bersih,
+        "total_investasi": total_investasi,
+        "jumlah_tenaga_kerja": get("jumlah_tenaga_kerja"),
+        "total_jam_kerja": get("total_jam_kerja"),
+        "jumlah_jam_kerja": get("jumlah_jam_kerja"),
+        "jumlah_jam_lembur": get("jumlah_jam_lembur"),
+        "bahan_baku": get("bahan_baku"),
+    }
 
 app = FastAPI(
     title="EVA Analysis & Recommendation API",
@@ -811,7 +996,7 @@ def analyze_temuan_endpoint(
 ):
     """
     Analisis semua data EVA user, hasilkan temuan, dan simpan ke database.
-    Jika ada temuan baru, simpan. Jika judul sama & belum resolved, update.
+    Menggunakan ekstraksi data akurat berdasarkan RAW_IDX mapping.
     """
     # Ambil semua record EVA user
     records = db.query(EvaRecord).filter(EvaRecord.user_id == current_user.id).all()
@@ -837,63 +1022,36 @@ def analyze_temuan_endpoint(
     # Sort by tahun
     records.sort(key=lambda r: r.year_title)
     
-    # Susun data untuk AI
+    # ===== EKSTRAKSI AKURAT dengan RAW_IDX =====
     data_tahun = []
     for r in records:
-        # Parse raw_data (list nilai input)
-        try:
-            raw = _json.loads(r.raw_data) if r.raw_data else []
-        except:
-            raw = []
-        
-        # Ambil nilai dari raw_data berdasarkan index field di form
-        # Index sesuai urutan input di generateYearPanelHTML:
-        # 0=Total Penjualan, 1=Jumlah Unit, 2=Harga Jual, 3=Pertumbuhan, 4=Penjualan Periode Sebelumnya,
-        # 5-7=Biaya Tenaga Kerja, 8-11=Bahan Digunakan, 12-19=Overhead, 20-21=Bunga, 22-36=Biaya Admin,
-        # 37-38=Penyusutan, 39-41=Pajak, 42-49=Aktiva, ... (index bisa beda)
-        # Untuk aman, kita pakai nilai_tambah yang sudah tersimpan
-        
-        nilai_tambah = r.nilai_tambah or 0
-        
-        # Estimasi kasar nilai-nilai lain dari raw_data (jika index konsisten)
-        def safe_get(idx, default=0):
-            try:
-                return float(raw[idx]) if idx < len(raw) and raw[idx] else default
-            except (ValueError, TypeError):
-                return default
-        
-        data_tahun.append({
-            "tahun": r.year_title,
-            "penjualan": safe_get(0),
-            "biayaTenagaKerja": safe_get(5) + safe_get(6) + safe_get(7),
-            "bahanDigunakan": safe_get(8) + safe_get(9) + safe_get(10) + safe_get(11),
-            "overhead_produksi": sum(safe_get(i) for i in range(12, 20)),
-            "biaya_administrasi": sum(safe_get(i) for i in range(22, 37)),
-            "penyusutan": safe_get(37) + safe_get(38),
-            "pajak": safe_get(39) + safe_get(40) + safe_get(41),
-            "bunga_pinjaman": safe_get(20) + safe_get(21),
-            "nilaiTambah": nilai_tambah,
-            "totalInvestasi": safe_get(50),  # estimasi
-            "labaBersih": nilai_tambah - safe_get(5) - safe_get(37) - safe_get(39) - safe_get(20),
-            "jumlahTenagaKerja": safe_get(48),
-            "totalJamKerja": safe_get(52),
-            "bahanBaku": safe_get(10),
-        })
+        d = _extract_eva_data(r.raw_data, r.nilai_tambah or 0)
+        d["tahun"] = r.year_title
+        data_tahun.append(d)
     
-    # Panggil AI
+    # Log untuk debugging
+    logger.info(f"📊 Data untuk analisis temuan ({len(data_tahun)} tahun):")
+    for d in data_tahun:
+        logger.info(
+            f"   {d['tahun']}: Penjualan=Rp{d['penjualan']:,.0f} | "
+            f"NT=Rp{d['nilai_tambah']:,.0f} | "
+            f"Laba Bersih=Rp{d['laba_bersih']:,.0f} | "
+            f"Investasi=Rp{d['total_investasi']:,.0f}"
+        )
+    
+    # ===== Panggil AI =====
     try:
         temuan_list = analyze_temuan(data_tahun, force_refresh=req.force_refresh)
     except Exception as e:
         logger.error(f"Error analyze_temuan: {e}", exc_info=True)
-        raise HTTPException(status_code=502, detail=f"AI service error: {str(e)}")
+        raise HTTPException(status_code=502, detail=f"EVA service error: {str(e)}")
     
-    # Simpan ke database
+    # ===== Simpan ke database =====
     tahun_str = f"{data_tahun[0]['tahun']}-{data_tahun[-1]['tahun']}" if len(data_tahun) > 1 else data_tahun[0]['tahun']
     temuan_baru = 0
     temuan_updated = 0
     
     for t in temuan_list:
-        # Cek apakah sudah ada temuan dengan judul sama & belum resolved
         existing = db.query(Temuan).filter(
             Temuan.user_id == current_user.id,
             Temuan.judul == t["judul"],
@@ -901,7 +1059,6 @@ def analyze_temuan_endpoint(
         ).first()
         
         if existing:
-            # Update
             existing.deskripsi = t["deskripsi"]
             existing.kategori = t["kategori"]
             existing.prioritas = t["prioritas"]
@@ -910,7 +1067,6 @@ def analyze_temuan_endpoint(
             existing.rekomendasi = t.get("rekomendasi")
             temuan_updated += 1
         else:
-            # Buat baru
             new_temuan = Temuan(
                 user_id=current_user.id,
                 tahun=tahun_str,
